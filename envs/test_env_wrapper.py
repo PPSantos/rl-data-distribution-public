@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from parameterized import parameterized
 
-from debugq.envs import env_wrapper
+from envs import env_wrapper
 from rlutil.envs.tabular_cy import tabular_env
 
 class TestEpsGreedyWrapper(unittest.TestCase):

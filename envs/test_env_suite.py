@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from parameterized import parameterized
 
-from debugq.envs import env_suite
+from envs import env_suite
 
 class TestAllEnvs(unittest.TestCase):
 

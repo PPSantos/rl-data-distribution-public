@@ -23,7 +23,7 @@ def discover_extensions(root_dir):
                 #print(pkg, name)
 
 extensions = list(discover_extensions('rlutil'))
-extensions.extend(list(discover_extensions('debugq')))
+extensions.extend(list(discover_extensions('envs')))
 
 setup(
     ext_modules=cythonize(extensions)

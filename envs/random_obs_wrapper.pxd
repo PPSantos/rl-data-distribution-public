@@ -1,4 +1,4 @@
-from debugq.envs cimport env_wrapper
+from envs cimport env_wrapper
 
 cdef class RandomObsWrapper(env_wrapper.TabularEnvWrapper):
     cdef _observations

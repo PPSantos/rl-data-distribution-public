@@ -2,7 +2,7 @@
 import numpy as np
 import gym.spaces
 
-from debugq.envs cimport env_wrapper
+from envs cimport env_wrapper
 from rlutil.envs.tabular_cy cimport tabular_env
 
 cdef class RandomObsWrapper(env_wrapper.TabularEnvWrapper):

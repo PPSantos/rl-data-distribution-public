@@ -4,7 +4,7 @@ six
 scipy
 Cython
 seaborn
-pytorch
+torch
 torchvision
 gym
 path.py

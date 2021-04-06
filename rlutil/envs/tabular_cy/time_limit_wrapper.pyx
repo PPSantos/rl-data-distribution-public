@@ -1,6 +1,6 @@
 # distutils: language=c++
 
-from debugq.envs cimport env_wrapper
+from envs cimport env_wrapper
 from rlutil.envs.tabular_cy cimport tabular_env
 
 cdef class TimeLimitWrapper(env_wrapper.TabularEnvWrapper):

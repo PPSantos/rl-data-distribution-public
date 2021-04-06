@@ -1,7 +1,7 @@
 import numpy as np
 import itertools
 import random
-from debugq.envs import random_obs_wrapper, time_limit_wrapper, env_wrapper
+from envs import random_obs_wrapper, time_limit_wrapper, env_wrapper
 from rlutil.envs.tabular_cy import tabular_env
 from rlutil.envs.gridcraft import grid_env_cy
 from rlutil.envs.gridcraft import grid_spec_cy
