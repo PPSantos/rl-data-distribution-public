@@ -5,8 +5,8 @@ from algos import q_learning, value_iteration
 from envs import env_suite
 
 # Env. arguments:
-size_x = 5
-size_y = 5
+size_x = 8
+size_y = 8
 seed = 9
 
 # General arguments.
