@@ -3,8 +3,8 @@ import numpy as np
 
 from envs import env_suite
 
-SIZE_X = 15
-SIZE_Y = 15
+SIZE_X = 16
+SIZE_Y = 16
 
 GAMMA = 0.95
 EPSILON = 0.05
