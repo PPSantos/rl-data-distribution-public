@@ -15,7 +15,8 @@ def random_grid_env(size_x, size_y, dim_obs=32, time_limit=50, wall_ratio=0.1, s
     seed=None, absorb=False, tabular=False):
     total_size = size_x * size_y
     locations = list(itertools.product(range(size_x), range(size_y)))
-    start_loc = (int(size_x/2), int(size_y/2))
+    #start_loc = (int(size_x/2), int(size_y/2))
+    start_loc = (0, int(size_y)-1) # start at bottom left.
     locations.remove(start_loc)
 
     with math_utils.np_seed(seed):
