@@ -39,14 +39,19 @@ def random_grid_env(size_x, size_y, dim_obs=32, time_limit=50, wall_ratio=0.1, s
             env = grid_env_cy.DistanceRewardGridEnv(gs, reward_loc[0], reward_loc[1], start_loc[0], start_loc[1])
         else:
             env = grid_env_cy.GridEnv(gs)
-        env = env_wrapper.StochasticActionWrapper(env, eps=0.05)
+
+        # Something is wrong here. It seems that while the transition_matrix variable is being
+        # modified, the simulation is actually not taking this into consideration.
+        # env = env_wrapper.StochasticActionWrapper(env, eps=0.05) 
 
         if absorb:
             env = env_wrapper.AbsorbingStateWrapper(env)
+
         if tabular:
             env = wrap_time(env, time_limit=time_limit)
         else:
             env = wrap_obs_time(env, time_limit=time_limit, one_hot_obs=one_hot_obs, dim_obs=dim_obs, smooth_obs=smooth_obs)
+
     return env
 
 def wrap_obs_time(env, dim_obs=32, time_limit=50, smooth_obs=False, one_hot_obs=False):

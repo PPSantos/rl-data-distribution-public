@@ -5,21 +5,23 @@ from algos import q_learning, value_iteration
 from envs import env_suite
 
 # Env. arguments:
-size_x = 8
-size_y = 8
-seed = 25
+size_x = 5
+size_y = 5
+seed = 9
 
 # General arguments.
-algo = 'val_iter'
-gamma = 0.95
-num_episodes = 50000
+algo = 'q_learning'
+gamma = 0.9
+num_episodes = 100_000
 
 # Value iteration arguments.
 val_iter_epsilon = 0.05
 
 # Q-learning arguments.
-alpha = 0.1
-expl_eps = 0.2
+alpha = 0.05
+expl_eps_init = 0.9
+expl_eps_final = 0.01
+expl_eps_episodes = 95_000
 
 
 def xy_to_idx(key, width, height):
@@ -44,13 +46,15 @@ if __name__ == "__main__":
     print('Transition matrix shape:', env.transition_matrix().shape)
     print('Initial state distribution:', env.initial_state_distribution)
     print('Env render:')
+    env.reset()
     env.render()
     print('\n')
 
     if algo == 'val_iter':
         agent = value_iteration.ValueIteration(env, gamma, val_iter_epsilon)
     elif algo == 'q_learning':
-        agent = q_learning.QLearning(env, alpha, gamma, expl_eps)
+        agent = q_learning.QLearning(env, alpha, gamma,
+                                    expl_eps_init, expl_eps_final, expl_eps_episodes)
     else:
         raise ValueError("Unknown algorithm.")
 
