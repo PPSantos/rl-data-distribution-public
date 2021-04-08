@@ -20,8 +20,8 @@ from algos import dqn_acme
 
 
 def _make_network(env_spec : dm_env,
-                  torso_layers : Sequence[int] = [5],
-                  head_layers  : Sequence[int] = [5]):
+                  torso_layers : Sequence[int] = [10],
+                  head_layers  : Sequence[int] = [10]):
     network = snt.Sequential([
         # Torso MLP.
         snt.nets.MLP(torso_layers, activate_final=True),
