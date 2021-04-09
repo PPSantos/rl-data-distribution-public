@@ -1,20 +1,25 @@
 import sys
 import os
 import json
+import time
 import numpy as np
 import pathlib
 from datetime import datetime
+import multiprocessing as mp
 
-
+from rlutil.json_utils import NumpyEncoder
 from algos import value_iteration, q_learning, dqn
 from envs import env_suite
+
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 
 args = {
 
     # General arguments.
-    'algo': 'val_iter',
+    'num_runs': 6,
+    'num_processors': 2,
+    'algo': 'q_learning',
     'num_episodes': 10_000,
     'gamma': 0.9,
 
@@ -25,7 +30,7 @@ args = {
         'dim_obs': 8,
         'time_limit': 50,
         'wall_ratio': 0.0,
-        'tabular': False,
+        'tabular': True,
         'seed': 421,
     },
 
@@ -61,32 +66,25 @@ args = {
 
 }
 
-def xy_to_idx(key, width, height):
+""" def xy_to_idx(key, width, height):
     shape = np.array(key).shape
     if len(shape) == 1:
         return key[0] + key[1]*width
     elif len(shape) == 2:
         return key[:,0] + key[:,1]*width
     else:
-        raise NotImplementedError()
+        raise NotImplementedError() """
 
 def create_exp_name(args):
     return str(args['env_args']['size_x']) + '_' + str(args['env_args']['size_y']) + \
         '_' + args['algo'] + '_' + str(datetime.today().strftime('%Y-%m-%d-%H-%M-%S'))
 
-def store_args(path, args):
-    f = open(path + "/args.json", "w")
-    json.dump(args, f)
-    f.close()
 
+def train_run(run_args):
 
-if __name__ == "__main__":
-    
-    # Setup experiment data folder.
-    exp_name = create_exp_name(args)
-    exp_path = DATA_FOLDER_PATH + exp_name
-    os.makedirs(exp_path, exist_ok=True)
-    store_args(exp_path, args)
+    time_delay, args = run_args[0], run_args[1]
+
+    time.sleep(time_delay)
 
     # Load environment.
     env = env_suite.random_grid_env(**args['env_args'], smooth_obs=False, one_hot_obs=True,
@@ -100,6 +98,7 @@ if __name__ == "__main__":
     env.render()
     print('\n')
 
+    # Instantiate algorithm.
     if args['algo'] == 'val_iter':
         args['val_iter_args']['gamma'] = args['gamma']
         agent = value_iteration.ValueIteration(env, **args['val_iter_args'])
@@ -113,9 +112,38 @@ if __name__ == "__main__":
         raise ValueError("Unknown algorithm.")
 
     # Train agent.
-    Q_vals, max_Q_vals, policy = agent.train(num_episodes=args['num_episodes'])
+    train_data = agent.train(num_episodes=args['num_episodes'])
 
-    #print('\nQ-vals:', Q_vals)
+    return train_data
+
+
+if __name__ == "__main__":
+    
+    # Setup experiment data folder.
+    exp_name = create_exp_name(args)
+    print('Experiment ID:', exp_name)
+    exp_path = DATA_FOLDER_PATH + exp_name
+    os.makedirs(exp_path, exist_ok=True)
+    f = open(exp_path + "/args.json", "w")
+    json.dump(args, f)
+    f.close()
+
+    if args['num_processors'] > mp.cpu_count():
+        args['num_processors'] = mp.cpu_count()
+        print(f"Downgraded the number of processors to {args['num_processors']}.")
+
+    with mp.Pool(processes=args['num_processors']) as pool:
+        train_data = pool.map(train_run, [(2*t, args) for t in range(args['num_runs'])])
+        pool.close()
+        pool.join()
+
+    # Store train log data.
+    f = open(exp_path + "/train_data.json", "w")
+    dumped = json.dumps(train_data, cls=NumpyEncoder)
+    json.dump(dumped, f)
+    f.close()
+
+    """ #print('\nQ-vals:', Q_vals)
     print('Max Q-vals:', max_Q_vals)
     print('Policy:', policy)
     env.render()
@@ -139,3 +167,4 @@ if __name__ == "__main__":
             sys.stdout.write("{:.1f} ".format(max_Q_vals[xy_to_idx((w,h),size_x, size_y)]))
         sys.stdout.write('\n')
     sys.stdout.write('\n')
+ """

@@ -26,7 +26,10 @@ class QLearning(object):
     def train(self, num_episodes):
 
         Q = np.zeros((self.env.num_states, self.env.num_actions))
-        # counts = np.zeros((self.env.num_states))
+
+        epsilon_values = []
+        episode_rewards = []
+        states_counts = np.zeros((self.env.num_states))
 
         for episode in tqdm(range(num_episodes)):
 
@@ -37,9 +40,8 @@ class QLearning(object):
             epsilon = self.expl_eps_init + fraction * (self.expl_eps_final - self.expl_eps_init)
 
             done = False
+            episode_cumulative_reward = 0
             while not done:
-
-                # counts[s_t] += 1
 
                 # Pick action.
                 a_t = choice_eps_greedy(Q[s_t], epsilon)
@@ -51,9 +53,14 @@ class QLearning(object):
                 Q[s_t][a_t] += self.alpha * \
                     (r_t1 + self.gamma * np.max(Q[s_t1,:]) - Q[s_t][a_t])
 
+                # Log data.
+                episode_cumulative_reward += r_t1
+                states_counts[s_t] += 1
+
                 s_t = s_t1
 
-        # print(counts)
+            epsilon_values.append(epsilon)
+            episode_rewards.append(episode_cumulative_reward)
 
         # Calculate policy.
         policy = {}
@@ -62,8 +69,12 @@ class QLearning(object):
             policy[state] = np.argmax(Q[state])
             max_Q_vals[state] = np.max(Q[state])
 
-        self.Q = Q
-        self.max_Q_vals = max_Q_vals
-        self.policy = policy
+        data = {}
+        data['episode_rewards'] = episode_rewards
+        data['epsilon_values'] = epsilon_values
+        data['states_counts'] = states_counts
+        data['Q_vals'] = Q
+        data['max_Q_vals'] = max_Q_vals
+        data['policy'] = policy
 
-        return Q, max_Q_vals, policy
+        return data
