@@ -1,6 +1,7 @@
 # deps
 .venv/
 data/
+analysis/plots
 
 # cython
 *.c
