@@ -36,9 +36,9 @@ class ValueIteration(object):
             policy[state] = np.argmax(Q_vals[state])
             max_Q_vals[state] = np.max(Q_vals[state])
 
+        data = {}
+        data['Q_vals'] = Q_vals
+        data['max_Q_vals'] = max_Q_vals
+        data['policy'] = policy
 
-        self.Q_vals = Q_vals
-        self.max_Q_vals = max_Q_vals
-        self.policy = policy
-
-        return Q_vals, max_Q_vals, policy
+        return data

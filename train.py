@@ -17,9 +17,9 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 args = {
 
     # General arguments.
-    'num_runs': 6,
-    'num_processors': 2,
-    'algo': 'q_learning',
+    'num_runs': 1,
+    'num_processors': 1,
+    'algo': 'val_iter',
     'num_episodes': 10_000,
     'gamma': 0.9,
 
@@ -92,12 +92,15 @@ def train_run(run_args):
     if args['algo'] == 'val_iter':
         args['val_iter_args']['gamma'] = args['gamma']
         agent = value_iteration.ValueIteration(env, **args['val_iter_args'])
+
     elif args['algo'] == 'q_learning':
         args['q_learning_args']['gamma'] = args['gamma']
         agent = q_learning.QLearning(env, **args['q_learning_args'])
+
     elif args['algo'] == 'dqn':
         args['dqn_args']['discount'] = args['gamma']
         agent = dqn.DQN(env, **args['dqn_args'])
+
     else:
         raise ValueError("Unknown algorithm.")
 
@@ -118,10 +121,12 @@ if __name__ == "__main__":
     json.dump(args, f)
     f.close()
 
+    # Adjust the number of processors if necessary.
     if args['num_processors'] > mp.cpu_count():
         args['num_processors'] = mp.cpu_count()
         print(f"Downgraded the number of processors to {args['num_processors']}.")
 
+    # Train agent(s).
     with mp.Pool(processes=args['num_processors']) as pool:
         train_data = pool.map(train_run, [(2*t, args) for t in range(args['num_runs'])])
         pool.close()
