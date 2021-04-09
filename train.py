@@ -66,19 +66,9 @@ args = {
 
 }
 
-""" def xy_to_idx(key, width, height):
-    shape = np.array(key).shape
-    if len(shape) == 1:
-        return key[0] + key[1]*width
-    elif len(shape) == 2:
-        return key[:,0] + key[:,1]*width
-    else:
-        raise NotImplementedError() """
-
 def create_exp_name(args):
     return str(args['env_args']['size_x']) + '_' + str(args['env_args']['size_y']) + \
         '_' + args['algo'] + '_' + str(datetime.today().strftime('%Y-%m-%d-%H-%M-%S'))
-
 
 def train_run(run_args):
 
@@ -142,29 +132,3 @@ if __name__ == "__main__":
     dumped = json.dumps(train_data, cls=NumpyEncoder)
     json.dump(dumped, f)
     f.close()
-
-    """ #print('\nQ-vals:', Q_vals)
-    print('Max Q-vals:', max_Q_vals)
-    print('Policy:', policy)
-    env.render()
-
-    # Plot policy.
-    print('Policy:')
-    size_x = args['env_args']['size_x']
-    size_y = args['env_args']['size_y']
-    sys.stdout.write('-'*(size_x+2)+'\n')
-    for h in range(size_y):
-        sys.stdout.write('|')
-        for w in range(size_x):
-            sys.stdout.write(str(policy[xy_to_idx((w,h), size_x, size_y)]))
-        sys.stdout.write('|\n')
-    sys.stdout.write('-' * (size_x + 2)+'\n')
-
-    # Plot max Q-values.
-    print('Max Q-vals:')
-    for h in range(size_y):
-        for w in range(size_x):
-            sys.stdout.write("{:.1f} ".format(max_Q_vals[xy_to_idx((w,h),size_x, size_y)]))
-        sys.stdout.write('\n')
-    sys.stdout.write('\n')
- """
