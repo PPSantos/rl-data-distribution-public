@@ -20,6 +20,23 @@ EXP_IDS = ['8_8_q_learning_2021-04-09-18-04-25']
 VAL_ITER_DATA = '8_8_val_iter_2021-04-09-18-08-36'
 
 
+def calculate_CI_bootstrap(x_hat, samples, num_resamples=20000):
+    """
+        Calculates 95 % interval using bootstrap.
+        REF: https://ocw.mit.edu/courses/mathematics/
+            18-05-introduction-to-probability-and-statistics-spring-2014/
+            readings/MIT18_05S14_Reading24.pdf
+    """
+    resampled = np.random.choice(samples,
+                                size=(len(samples), num_resamples),
+                                replace=True)
+    means = np.mean(resampled, axis=0)
+    diffs = means - x_hat
+    bounds = [x_hat - np.percentile(diffs, 5), x_hat - np.percentile(diffs, 95)]
+
+    return bounds
+
+
 if __name__ == "__main__":
 
     # Prepare plots output folder.
@@ -102,21 +119,25 @@ if __name__ == "__main__":
     plt.savefig('{0}/episode_epsilon.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
     plt.close()
 
+
     """
-        Q-values (summed-error).
+        Q-values plots.
     """
     if VAL_ITER_DATA:
 
+        # Prepare data to plot.
+        val_iter_Q_vals = np.array(val_iter_data['Q_vals'])
+        exp_Q_vals = {}
+        for exp_id in EXP_IDS:
+            exp_Q_vals[exp_id] = np.array(data[exp_id]['Q_vals'])
+
+        # Sum plot.
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-        val_iter_Q_vals = np.array(val_iter_data['Q_vals'])
-
         for exp_id in EXP_IDS:
 
-            exp_Q_vals = np.array(data[exp_id]['Q_vals'])
-
-            Y = np.sum(np.abs(val_iter_Q_vals - exp_Q_vals), axis=(1,2))
+            Y = np.sum(np.abs(val_iter_Q_vals - exp_Q_vals[exp_id]), axis=(1,2))
             X = np.linspace(1, len(Y), len(Y))
 
             plt.plot(X,Y,label=exp_id)
@@ -131,26 +152,28 @@ if __name__ == "__main__":
         plt.savefig('{0}/q_values_summed_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
         plt.close()
 
-    """
-        Q-values (mean + std errors).
-    """
-    if VAL_ITER_DATA:
-
+        # Mean + Std/CI plot.
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-        val_iter_Q_vals = np.array(val_iter_data['Q_vals'])
-
         for exp_id in EXP_IDS:
 
-            exp_Q_vals = np.array(data[exp_id]['Q_vals'])
-
-            Y = np.mean(np.abs(val_iter_Q_vals - exp_Q_vals), axis=(1,2))
-            Y_std = np.std(np.abs(val_iter_Q_vals - exp_Q_vals), axis=(1,2))
+            Q_abs_diffs = np.abs(val_iter_Q_vals - exp_Q_vals[exp_id])
+            Y = np.mean(Q_abs_diffs, axis=(1,2))
             X = np.linspace(1, len(Y), len(Y))
+            # Y_std = np.std(Q_abs_diffs, axis=(1,2))
+
+            # CI calculation.
+            Q_abs_diffs_flatten = Q_abs_diffs.reshape(len(Y), -1)
+            X_CI = np.arange(0, len(Y), 100)
+            CI_bootstrap = [calculate_CI_bootstrap(Y[x], Q_abs_diffs_flatten[x,:]) for x in X_CI]
+            CI_bootstrap = np.array(CI_bootstrap).T
+            CI_bootstrap = np.flip(CI_bootstrap, axis=0)
+            CI_lengths = np.abs(np.subtract(CI_bootstrap,Y[X_CI]))
 
             p = plt.plot(X,Y,label=exp_id)
-            plt.fill_between(X, Y-Y_std, Y+Y_std, color=p[0].get_color(), alpha=0.15)
+            plt.fill_between(X_CI, Y[X_CI]-CI_lengths[0], Y[X_CI]+CI_lengths[1], color=p[0].get_color(), alpha=0.15)
+            # plt.fill_between(X, Y-Y_std, Y+Y_std, color=p[0].get_color(), alpha=0.15)
 
         plt.xlabel('Episode')
         plt.ylabel('Q-values error')
@@ -160,6 +183,36 @@ if __name__ == "__main__":
 
         plt.savefig('{0}/q_values_mean_error.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
         plt.savefig('{0}/q_values_mean_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
+        plt.close()
+
+        # Distribution plot.
+        fig = plt.figure()
+        fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+        val_iter_Q_vals_flattened = val_iter_Q_vals.flatten()
+
+        for exp_id in EXP_IDS:
+
+            exp_Q_vals_flattened = exp_Q_vals[exp_id].reshape(exp_Q_vals[exp_id].shape[0], -1)
+
+            abs_diff = np.abs(val_iter_Q_vals_flattened - exp_Q_vals_flattened)
+            X = np.arange(0, len(abs_diff), 500)
+            abs_diff_list = abs_diff[X,:].tolist() # Sub-sample.
+            abs_diff_mean = np.mean(abs_diff[X,:], axis=1) # Sub-sample.
+
+            violin = plt.violinplot(abs_diff_list, positions=X,
+                                    showextrema=True, widths=350)
+
+            plt.scatter(X, abs_diff_mean, label=exp_id, s=12)
+
+        plt.xlabel('Episode')
+        plt.ylabel('Q-values error')
+        plt.title('Distribution of np.abs(val_iter_Q_vals - exp_Q_vals)')
+
+        plt.legend()
+
+        plt.savefig('{0}/q_values_violinplot_error.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
+        plt.savefig('{0}/q_values_violinplot_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
         plt.close()
 
     """ def xy_to_idx(key, width, height):
