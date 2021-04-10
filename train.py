@@ -19,7 +19,7 @@ args = {
     # General arguments.
     'num_runs': 1,
     'num_processors': 1,
-    'algo': 'val_iter',
+    'algo': 'dqn',
     'num_episodes': 10_000,
     'gamma': 0.9,
 
@@ -30,8 +30,10 @@ args = {
         'dim_obs': 8,
         'time_limit': 50,
         'wall_ratio': 0.0,
-        'tabular': True,
+        'tabular': False,
         'seed': 421,
+        'smooth_obs': True,
+        'one_hot_obs': False,
     },
 
     # Value iteration arguments.
@@ -99,7 +101,7 @@ def train_run(run_args):
 
     elif args['algo'] == 'dqn':
         args['dqn_args']['discount'] = args['gamma']
-        agent = dqn.DQN(env, **args['dqn_args'])
+        agent = dqn.DQN(env, args['dqn_args'])
 
     else:
         raise ValueError("Unknown algorithm.")

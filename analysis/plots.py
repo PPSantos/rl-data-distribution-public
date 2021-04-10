@@ -17,7 +17,9 @@ FIGURE_Y = 4.0
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
-EXP_IDS = ['8_8_q_learning_2021-04-09-18-04-25']
+EXP_IDS = [
+            '8_8_q_learning_2021-04-09-18-04-25',
+            '8_8_dqn_2021-04-10-16-37-20']
 VAL_ITER_DATA = '8_8_val_iter_2021-04-09-18-08-36'
 
 
@@ -102,9 +104,9 @@ if __name__ == "__main__":
         parsed_data['episode_rewards'] = r_concatenated
 
         # epsilon_values field.
-        e_concatenated = np.array([exp['epsilon_values'] for exp in exp_data])
-        e_concatenated = np.mean(e_concatenated, axis=0)
-        parsed_data['epsilon_values'] = e_concatenated
+        # e_concatenated = np.array([exp['epsilon_values'] for exp in exp_data])
+        # e_concatenated = np.mean(e_concatenated, axis=0)
+        # parsed_data['epsilon_values'] = e_concatenated
 
         # Q_vals field.
         q_concatenated = np.array([exp['Q_vals'] for exp in exp_data])
@@ -152,7 +154,7 @@ if __name__ == "__main__":
     """
         Epsilon.
     """
-    fig = plt.figure()
+    """ fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
     for exp_id in EXP_IDS:
@@ -166,7 +168,7 @@ if __name__ == "__main__":
 
     plt.savefig('{0}/episode_epsilon.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/episode_epsilon.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
-    plt.close()
+    plt.close() """
 
     """
         Plot policies.

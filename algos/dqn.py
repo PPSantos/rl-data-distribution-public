@@ -46,8 +46,6 @@ class DQN(object):
         self.env = wrap_env(env)
         env_spec = acme.make_environment_spec(self.env)
 
-        print('dqn env_spec:', env_spec)
-
         network = _make_network(env_spec)
 
         self.agent = dqn_acme.DQN(environment_spec=env_spec,
@@ -55,11 +53,16 @@ class DQN(object):
 
     def train(self, num_episodes):
 
+        states_counts = np.zeros((self.env.num_states))
+        episode_rewards = []
+        Q_vals = np.zeros((num_episodes, self.base_env.num_states, self.base_env.num_actions))
+
         for episode in tqdm(range(num_episodes)):
 
             timestep = self.env.reset()
             self.agent.observe_first(timestep)
 
+            episode_cumulative_reward = 0
             while not timestep.last():
 
                 action = self.agent.select_action(timestep.observation)
@@ -69,17 +72,33 @@ class DQN(object):
 
                 self.agent.update()
 
+                # Log data.
+                episode_cumulative_reward += timestep.reward
+                states_counts[self.base_env.get_state()] += 1
+
+            episode_rewards.append(episode_cumulative_reward)
+
+            # Store current Q-values.
+            for state in range(self.base_env.num_states):
+                obs = self.base_env.observation(state)
+                qvs = self.agent.get_Q_vals(obs)
+                Q_vals[episode,state,:] = qvs
+
         # Calculate policy.
-        Q = np.zeros((self.base_env.num_states, self.base_env.num_actions))
         policy = {}
         max_Q_vals = {}
         for state in range(self.base_env.num_states):
-
             obs = self.base_env.observation(state)
-            q_vals = self.agent.get_Q_vals(obs)
+            qvs = self.agent.get_Q_vals(obs)
+            policy[state] = np.argmax(qvs)
+            max_Q_vals[state] = np.max(qvs)
 
-            Q[state,:] = q_vals
-            policy[state] = np.argmax(q_vals)
-            max_Q_vals[state] = np.max(q_vals)
+        data = {}
+        data['episode_rewards'] = episode_rewards
+        data['epsilon_values'] = None
+        data['states_counts'] = states_counts
+        data['Q_vals'] = Q_vals
+        data['max_Q_vals'] = max_Q_vals
+        data['policy'] = policy
 
-        return Q, max_Q_vals, policy
+        return data
