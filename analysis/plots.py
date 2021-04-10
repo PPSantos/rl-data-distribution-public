@@ -177,7 +177,7 @@ if __name__ == "__main__":
 
     for exp_id in EXP_IDS:
         for i, policy in enumerate(data[exp_id]['policies']):
-            print(f'{VAL_ITER_DATA} policy (run {i}):')
+            print(f'{exp_id} policy (run {i}):')
             print_policy(policy, (args['env_args']['size_x'], args['env_args']['size_y']))
 
     """
@@ -190,7 +190,7 @@ if __name__ == "__main__":
 
     for exp_id in EXP_IDS:
         for i, qs in enumerate(data[exp_id]['max_Q_vals']):
-            print(f'{VAL_ITER_DATA} max Q-values (run {i}):')
+            print(f'{exp_id} max Q-values (run {i}):')
             plot_Q_vals(qs, (args['env_args']['size_x'], args['env_args']['size_y']))
 
     """
@@ -258,7 +258,7 @@ if __name__ == "__main__":
             CI_bootstrap = np.flip(CI_bootstrap, axis=0)
             CI_lengths = np.abs(np.subtract(CI_bootstrap,Y[X_CI]))
 
-            p = plt.plot(X, Y, '--', label=exp_id + '_maxQ')
+            p = plt.plot(X, Y, label=exp_id + '_maxQ')
             plt.fill_between(X_CI, Y[X_CI]-CI_lengths[0], Y[X_CI]+CI_lengths[1], color=p[0].get_color(), alpha=0.15)
 
         plt.xlabel('Episode')
@@ -330,3 +330,4 @@ if __name__ == "__main__":
         plt.savefig('{0}/q_values_violinplot_maxQ_error.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
         plt.savefig('{0}/q_values_violinplot_maxQ_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
         plt.close()
+
