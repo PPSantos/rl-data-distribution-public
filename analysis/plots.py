@@ -19,7 +19,8 @@ PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
 EXP_IDS = [
             '8_8_q_learning_2021-04-09-18-04-25',
-            '8_8_dqn_2021-04-10-16-37-20']
+            '8_8_dqn_2021-04-10-16-37-20',
+            '8_8_dqn_2021-04-10-17-26-17']
 VAL_ITER_DATA = '8_8_val_iter_2021-04-09-18-08-36'
 
 

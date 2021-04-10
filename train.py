@@ -79,8 +79,7 @@ def train_run(run_args):
     time.sleep(time_delay)
 
     # Load environment.
-    env = env_suite.random_grid_env(**args['env_args'], smooth_obs=False, one_hot_obs=True,
-                                    distance_reward=False, absorb=False)
+    env = env_suite.random_grid_env(**args['env_args'], distance_reward=False, absorb=False)
     print('Env num states:', env.num_states)
     print('Env num actions:', env.num_actions)
     print('Env transition matrix shape:', env.transition_matrix().shape)
