@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import numpy as np
 import pathlib
@@ -36,11 +37,39 @@ def calculate_CI_bootstrap(x_hat, samples, num_resamples=20000):
 
     return bounds
 
+def get_args_json_file(path):
+    with open(path + "/args.json", 'r') as f:
+        args = json.load(f)
+    f.close()
+    return args
+
+def xy_to_idx(key, width, height):
+    shape = np.array(key).shape
+    if len(shape) == 1:
+        return key[0] + key[1]*width
+    elif len(shape) == 2:
+        return key[:,0] + key[:,1]*width
+    else:
+        raise NotImplementedError()
+
+def print_policy(policy, sizes):
+    size_x, size_y = sizes[0], sizes[1]
+    sys.stdout.write('-'*(size_x+2)+'\n')
+    for h in range(size_y):
+        sys.stdout.write('|')
+        for w in range(size_x):
+            sys.stdout.write(str(policy[str(xy_to_idx((w,h), size_x, size_y))]))
+        sys.stdout.write('|\n')
+    sys.stdout.write('-' * (size_x + 2)+'\n')
+
 
 if __name__ == "__main__":
 
     # Prepare plots output folder.
     os.makedirs(PLOTS_FOLDER_PATH, exist_ok=True)
+
+    # Get args file.
+    args = get_args_json_file(DATA_FOLDER_PATH + EXP_IDS[0])
 
     # Load data.
     data = {}
@@ -119,6 +148,25 @@ if __name__ == "__main__":
     plt.savefig('{0}/episode_epsilon.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
     plt.close()
 
+    """
+        Plot policy.
+    """
+    if VAL_ITER_DATA:
+        print(f'{VAL_ITER_DATA} policy:')
+        sizes = (args['env_args']['size_x'], args['env_args']['size_y'])
+        print_policy(val_iter_data['policy'], sizes)
+
+    # TODO: print the other policies.
+
+    # TODO: print the max Q vals.
+
+    """ # Plot max Q-values.
+    print('Max Q-vals:')
+    for h in range(size_y):
+        for w in range(size_x):
+            sys.stdout.write("{:.1f} ".format(max_Q_vals[xy_to_idx((w,h),size_x, size_y)]))
+        sys.stdout.write('\n')
+    sys.stdout.write('\n') """
 
     """
         Q-values plots.
@@ -257,38 +305,3 @@ if __name__ == "__main__":
         plt.savefig('{0}/q_values_violinplot_maxQ_error.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
         plt.savefig('{0}/q_values_violinplot_maxQ_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
         plt.close()
-
-    """ def xy_to_idx(key, width, height):
-    shape = np.array(key).shape
-    if len(shape) == 1:
-        return key[0] + key[1]*width
-    elif len(shape) == 2:
-        return key[:,0] + key[:,1]*width
-    else:
-        raise NotImplementedError() """
-
-    """ #print('\nQ-vals:', Q_vals)
-        print('Max Q-vals:', max_Q_vals)
-        print('Policy:', policy)
-        env.render()
-
-        # Plot policy.
-        print('Policy:')
-        size_x = args['env_args']['size_x']
-        size_y = args['env_args']['size_y']
-        sys.stdout.write('-'*(size_x+2)+'\n')
-        for h in range(size_y):
-            sys.stdout.write('|')
-            for w in range(size_x):
-                sys.stdout.write(str(policy[xy_to_idx((w,h), size_x, size_y)]))
-            sys.stdout.write('|\n')
-        sys.stdout.write('-' * (size_x + 2)+'\n')
-
-        # Plot max Q-values.
-        print('Max Q-vals:')
-        for h in range(size_y):
-            for w in range(size_x):
-                sys.stdout.write("{:.1f} ".format(max_Q_vals[xy_to_idx((w,h),size_x, size_y)]))
-            sys.stdout.write('\n')
-        sys.stdout.write('\n')
-    """
