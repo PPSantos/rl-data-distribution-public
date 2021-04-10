@@ -122,15 +122,17 @@ if __name__ == "__main__":
             plt.plot(X,Y,label=exp_id)
 
         plt.xlabel('Episode')
-        plt.ylabel('Sum error')
-        plt.title('np.sum(np.abs(val_iter_Q_vals - exp_Q_vals), axis=(1,2))')
+        plt.ylabel('Q-values error')
+        plt.title('np.sum(np.abs(val_iter_Q_vals - exp_Q_vals))')
+
+        plt.legend()
 
         plt.savefig('{0}/q_values_summed_error.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
         plt.savefig('{0}/q_values_summed_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
         plt.close()
 
     """
-        Q-values (mean-error).
+        Q-values (mean + std errors).
     """
     if VAL_ITER_DATA:
 
@@ -144,13 +146,17 @@ if __name__ == "__main__":
             exp_Q_vals = np.array(data[exp_id]['Q_vals'])
 
             Y = np.mean(np.abs(val_iter_Q_vals - exp_Q_vals), axis=(1,2))
+            Y_std = np.std(np.abs(val_iter_Q_vals - exp_Q_vals), axis=(1,2))
             X = np.linspace(1, len(Y), len(Y))
 
-            plt.plot(X,Y,label=exp_id)
+            p = plt.plot(X,Y,label=exp_id)
+            plt.fill_between(X, Y-Y_std, Y+Y_std, color=p[0].get_color(), alpha=0.15)
 
         plt.xlabel('Episode')
-        plt.ylabel('Mean error')
-        plt.title('np.mean(np.abs(val_iter_Q_vals - exp_Q_vals), axis=(1,2))')
+        plt.ylabel('Q-values error')
+        plt.title('np.mean(np.abs(val_iter_Q_vals - exp_Q_vals))')
+
+        plt.legend()
 
         plt.savefig('{0}/q_values_mean_error.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
         plt.savefig('{0}/q_values_mean_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
