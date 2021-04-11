@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 plt.style.use('ggplot')
 
+import statsmodels.api as sm
+
 FIGURE_X = 6.0
 FIGURE_Y = 4.0
 
@@ -150,11 +152,15 @@ if __name__ == "__main__":
     for exp_id in EXP_IDS:
         Y = data[exp_id]['episode_rewards']
         X = np.linspace(1, len(Y), len(Y))
+        lowess = sm.nonparametric.lowess(Y, X, frac=0.10)
 
-        plt.plot(X,Y,label=exp_id)
+        p = plt.plot(X, lowess[:,1], label=exp_id,)
+        plt.plot(X, Y, color=p[0].get_color(), alpha=0.20)
 
     plt.xlabel('Episode')
     plt.ylabel('Reward')
+
+    plt.legend()
 
     plt.savefig('{0}/episode_rewards.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/episode_rewards.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
