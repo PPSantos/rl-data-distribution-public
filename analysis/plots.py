@@ -22,15 +22,22 @@ PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
 EXPS_DATA = [
             # {'id': '8_8_q_learning_2021-04-09-18-04-25', 'label': 'Q-learning'},
-            # {'id': '8_8_dqn_2021-04-10-16-37-20', 'label': 'DQN+1hot+500k'},
-            # {'id': '8_8_dqn_2021-04-10-17-26-17', 'label': 'DQN+smooth+500k'},
-            {'id': '8_8_dqn_2021-04-10-18-12-30', 'label': 'DQN+rand+500k'},
-            # {'id': '8_8_dqn_2021-04-10-19-21-50', 'label': 'DQN+rand+400k'},
-            {'id': '8_8_dqn_2021-04-10-21-04-23', 'label': 'DQN+rand+300k'},
-            {'id': '8_8_dqn_2021-04-10-21-40-43', 'label': 'DQN+rand+200k'},
-            {'id': '8_8_dqn_2021-04-10-22-21-22', 'label': 'DQN+rand+100k'},
-            {'id': '8_8_dqn_2021-04-10-23-53-24', 'label': 'DQN+rand+50k'},
-            {'id': '8_8_dqn_2021-04-11-00-23-21', 'label': 'DQN+rand+10k'},
+
+            #{'id': '8_8_dqn_2021-04-10-18-12-30', 'label': 'DQN+rand+500k'}, # 1 run.
+            # {'id': '8_8_dqn_2021-04-10-19-21-50', 'label': 'DQN+rand+400k'}, # 1 run.
+            #{'id': '8_8_dqn_2021-04-10-21-04-23', 'label': 'DQN+rand+300k'}, # 1 run.
+            #{'id': '8_8_dqn_2021-04-10-21-40-43', 'label': 'DQN+rand+200k'}, # 1 run.
+            #{'id': '8_8_dqn_2021-04-10-22-21-22', 'label': 'DQN+rand+100k'}, # 1 run.
+            #{'id': '8_8_dqn_2021-04-10-23-53-24', 'label': 'DQN+rand+50k'}, # 1 run.
+            #{'id': '8_8_dqn_2021-04-11-00-23-21', 'label': 'DQN+rand+10k'}, # 1 run.
+
+            {'id': '8_8_dqn_2021-04-11-11-16-35', 'label': 'DQN+1hot+500k'},
+            {'id': '8_8_dqn_2021-04-11-11-34-37', 'label': 'DQN+1hot+400k'},
+            {'id': '8_8_dqn_2021-04-11-11-52-38', 'label': 'DQN+1hot+300k'},
+            {'id': '8_8_dqn_2021-04-11-12-10-49', 'label': 'DQN+1hot+200k'},
+            {'id': '8_8_dqn_2021-04-11-12-28-48', 'label': 'DQN+1hot+100k'},
+            {'id': '8_8_dqn_2021-04-11-12-47-05', 'label': 'DQN+1hot+50k'},
+
             ]
 VAL_ITER_DATA = '8_8_val_iter_2021-04-09-18-08-36'
 
@@ -100,6 +107,7 @@ if __name__ == "__main__":
     data = {}
     for exp in EXPS_DATA:
 
+        print(f"Opening experiment {exp['id']}")
         # Open data.
         exp_path = DATA_FOLDER_PATH + exp['id']
         with open(exp_path + "/train_data.json", 'r') as f:
