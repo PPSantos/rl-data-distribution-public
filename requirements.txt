@@ -1,13 +1,11 @@
-tensorflow
 matplotlib
 six
 scipy
 Cython
 seaborn
-torch
-torchvision
 gym
 path.py
 plotly
 pandas
 parameterized
+tqdm
