@@ -14,7 +14,7 @@ from envs import env_suite
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 
-args = {
+DEFAULT_TRAIN_ARGS = {
 
     # General arguments.
     'num_runs': 1,
@@ -32,8 +32,8 @@ args = {
         'wall_ratio': 0.0,
         'tabular': False,
         'seed': 421,
-        'smooth_obs': True,
-        'one_hot_obs': False,
+        'smooth_obs': False,
+        'one_hot_obs': True,
     },
 
     # Value iteration arguments.
@@ -80,10 +80,10 @@ def train_run(run_args):
 
     # Load environment.
     env = env_suite.random_grid_env(**args['env_args'], distance_reward=False, absorb=False)
-    print('Env num states:', env.num_states)
-    print('Env num actions:', env.num_actions)
-    print('Env transition matrix shape:', env.transition_matrix().shape)
-    print('Env initial state distribution:', env.initial_state_distribution)
+    # print('Env num states:', env.num_states)
+    # print('Env num actions:', env.num_actions)
+    # print('Env transition matrix shape:', env.transition_matrix().shape)
+    # print('Env initial state distribution:', env.initial_state_distribution)
     print('Env render:')
     env.reset()
     env.render()
@@ -111,11 +111,19 @@ def train_run(run_args):
     return train_data
 
 
-if __name__ == "__main__":
-    
+def train(train_args=None):
+
+    # Setup train args.
+    if train_args is None:
+        args = DEFAULT_TRAIN_ARGS
+    else:
+        args = train_args
+
     # Setup experiment data folder.
     exp_name = create_exp_name(args)
-    print('Experiment ID:', exp_name)
+    print('\nExperiment ID:', exp_name)
+    print('train.py arguments:')
+    print(args)
     exp_path = DATA_FOLDER_PATH + exp_name
     os.makedirs(exp_path, exist_ok=True)
     f = open(exp_path + "/args.json", "w")
@@ -138,3 +146,6 @@ if __name__ == "__main__":
     dumped = json.dumps(train_data, cls=NumpyEncoder)
     json.dump(dumped, f)
     f.close()
+
+if __name__ == "__main__":
+    train() # Uses DEFAULT_TRAIN_ARGS.

@@ -18,9 +18,17 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
 EXP_IDS = [
-            '8_8_q_learning_2021-04-09-18-04-25',
-            '8_8_dqn_2021-04-10-16-37-20',
-            '8_8_dqn_2021-04-10-17-26-17']
+            #'8_8_q_learning_2021-04-09-18-04-25', # standard Q-learning
+            #'8_8_dqn_2021-04-10-16-37-20', # DQN + one hot
+            #'8_8_dqn_2021-04-10-17-26-17', # DQN + smooth_obs
+            '8_8_dqn_2021-04-10-18-12-30', # DQN + random_obs + replay_size=500_000
+            #'8_8_dqn_2021-04-10-19-21-50', # DQN + random_obs + replay_size=400_000
+            '8_8_dqn_2021-04-10-21-04-23', # DQN + random_obs + replay_size=300_000
+            #'8_8_dqn_2021-04-10-21-40-43', # DQN + random_obs + replay_size=200_000
+            '8_8_dqn_2021-04-10-22-21-22', # DQN + random_obs + replay_size=100_000
+            '8_8_dqn_2021-04-10-23-53-24', # DQN + random_obs + replay_size=50_000
+            '8_8_dqn_2021-04-11-00-23-21', # DQN + random_obs + replay_size=10_000
+            ] 
 VAL_ITER_DATA = '8_8_val_iter_2021-04-09-18-08-36'
 
 
