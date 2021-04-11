@@ -20,17 +20,17 @@ FIGURE_Y = 4.0
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
-EXP_IDS = [
-            #'8_8_q_learning_2021-04-09-18-04-25', # standard Q-learning
-            #'8_8_dqn_2021-04-10-16-37-20', # DQN + one hot
-            #'8_8_dqn_2021-04-10-17-26-17', # DQN + smooth_obs
-            '8_8_dqn_2021-04-10-18-12-30', # DQN + random_obs + replay_size=500_000
-            #'8_8_dqn_2021-04-10-19-21-50', # DQN + random_obs + replay_size=400_000
-            '8_8_dqn_2021-04-10-21-04-23', # DQN + random_obs + replay_size=300_000
-            '8_8_dqn_2021-04-10-21-40-43', # DQN + random_obs + replay_size=200_000
-            '8_8_dqn_2021-04-10-22-21-22', # DQN + random_obs + replay_size=100_000
-            '8_8_dqn_2021-04-10-23-53-24', # DQN + random_obs + replay_size=50_000
-            '8_8_dqn_2021-04-11-00-23-21', # DQN + random_obs + replay_size=10_000
+EXPS_DATA = [
+            # {'id': '8_8_q_learning_2021-04-09-18-04-25', 'label': 'Q-learning'},
+            # {'id': '8_8_dqn_2021-04-10-16-37-20', 'label': 'DQN+one_hot_obs+rep_size=500_000'},
+            # {'id': '8_8_dqn_2021-04-10-17-26-17', 'label': 'DQN+smooth_obs+rep_size=500_000'},
+            {'id': '8_8_dqn_2021-04-10-18-12-30', 'label': 'DQN+random_obs+rep_size=500_000'},
+            # {'id': '8_8_dqn_2021-04-10-19-21-50', 'label': 'DQN+random_obs+rep_size=400_000'},
+            {'id': '8_8_dqn_2021-04-10-21-04-23', 'label': 'DQN+random_obs+rep_size=300_000'},
+            {'id': '8_8_dqn_2021-04-10-21-40-43', 'label': 'DQN+random_obs+rep_size=200_000'},
+            {'id': '8_8_dqn_2021-04-10-22-21-22', 'label': 'DQN+random_obs+rep_size=100_000'},
+            {'id': '8_8_dqn_2021-04-10-23-53-24', 'label': 'DQN+random_obs+rep_size=50_000'},
+            {'id': '8_8_dqn_2021-04-11-00-23-21', 'label': 'DQN+random_obs+rep_size=10_000'},
             ] 
 VAL_ITER_DATA = '8_8_val_iter_2021-04-09-18-08-36'
 
@@ -94,14 +94,14 @@ if __name__ == "__main__":
 
     # Get args file.
     # (Assumes all experiments share the same arguments).
-    args = get_args_json_file(DATA_FOLDER_PATH + EXP_IDS[0])
+    args = get_args_json_file(DATA_FOLDER_PATH + EXPS_DATA[0]['id'])
 
     # Load and parse data.
     data = {}
-    for exp_name in EXP_IDS:
+    for exp in EXPS_DATA:
 
         # Open data.
-        exp_path = DATA_FOLDER_PATH + exp_name
+        exp_path = DATA_FOLDER_PATH + exp['id']
         with open(exp_path + "/train_data.json", 'r') as f:
             exp_data = json.load(f)
             exp_data = json.loads(exp_data)
@@ -133,7 +133,7 @@ if __name__ == "__main__":
         policies = np.array([exp['policy'] for exp in exp_data])
         parsed_data['policies'] = policies
 
-        data[exp_name] = parsed_data
+        data[exp['id']] = parsed_data
 
     if VAL_ITER_DATA:
         # Load optimal policy/Q-values.
@@ -150,13 +150,13 @@ if __name__ == "__main__":
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-    for exp_id in EXP_IDS:
-        Y = data[exp_id]['episode_rewards']
+    for exp in EXPS_DATA:
+        Y = data[exp['id']]['episode_rewards']
         X = np.linspace(1, len(Y), len(Y))
         lowess = sm.nonparametric.lowess(Y, X, frac=0.10)
 
         p = plt.plot(X, Y, alpha=0.20)
-        plt.plot(X, lowess[:,1], color=p[0].get_color(), label=exp_id, zorder=10)
+        plt.plot(X, lowess[:,1], color=p[0].get_color(), label=exp['id'], zorder=10)
 
     plt.xlabel('Episode')
     plt.ylabel('Reward')
@@ -173,11 +173,11 @@ if __name__ == "__main__":
     """ fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-    for exp_id in EXP_IDS:
-        Y = data[exp_id]['epsilon_values']
+    for exp in EXPS_DATA:
+        Y = data[exp['id']]['epsilon_values']
         X = np.linspace(1, len(Y), len(Y))
 
-        plt.plot(X,Y,label=exp_id)
+        plt.plot(X,Y,label=exp['id'])
 
     plt.xlabel('Episode')
     plt.ylabel('Epsilon')
@@ -193,9 +193,9 @@ if __name__ == "__main__":
         print(f'{VAL_ITER_DATA} policy:')
         print_policy(val_iter_data['policy'], (args['env_args']['size_x'], args['env_args']['size_y']))
 
-    for exp_id in EXP_IDS:
-        for i, policy in enumerate(data[exp_id]['policies']):
-            print(f'{exp_id} policy (run {i}):')
+    for exp in EXPS_DATA:
+        for i, policy in enumerate(data[exp['id']]['policies']):
+            print(f"{exp['label']} policy (run {i}):")
             print_policy(policy, (args['env_args']['size_x'], args['env_args']['size_y']))
 
     """
@@ -206,9 +206,9 @@ if __name__ == "__main__":
         print(f'{VAL_ITER_DATA} max Q-values:')
         plot_Q_vals(val_iter_data['max_Q_vals'], (args['env_args']['size_x'], args['env_args']['size_y']))
 
-    for exp_id in EXP_IDS:
-        for i, qs in enumerate(data[exp_id]['max_Q_vals']):
-            print(f'{exp_id} max Q-values (run {i}):')
+    for exp in EXPS_DATA:
+        for i, qs in enumerate(data[exp['id']]['max_Q_vals']):
+            print(f"{exp['label']} max Q-values (run {i}):")
             plot_Q_vals(qs, (args['env_args']['size_x'], args['env_args']['size_y']))
 
     """
@@ -219,19 +219,19 @@ if __name__ == "__main__":
         # Prepare data to plot.
         val_iter_Q_vals = np.array(val_iter_data['Q_vals'])
         exp_Q_vals = {}
-        for exp_id in EXP_IDS:
-            exp_Q_vals[exp_id] = np.array(data[exp_id]['Q_vals'])
+        for exp in EXPS_DATA:
+            exp_Q_vals[exp['id']] = np.array(data[exp['id']]['Q_vals'])
 
         # Sum plot.
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-        for exp_id in EXP_IDS:
+        for exp in EXPS_DATA:
 
-            Y = np.sum(np.abs(val_iter_Q_vals - exp_Q_vals[exp_id]), axis=(1,2))
+            Y = np.sum(np.abs(val_iter_Q_vals - exp_Q_vals[exp['id']]), axis=(1,2))
             X = np.linspace(1, len(Y), len(Y))
 
-            plt.plot(X, Y, label=exp_id)
+            plt.plot(X, Y, label=exp['label'])
 
         plt.xlabel('Episode')
         plt.ylabel('Q-values error')
@@ -246,14 +246,14 @@ if __name__ == "__main__":
         # Mean + std/CI plot.
         num_cols = 3
         y_axis_range = [0,6]
-        num_rows = math.ceil(len(EXP_IDS) / num_cols)
+        num_rows = math.ceil(len(EXPS_DATA) / num_cols)
         fig, axs = plt.subplots(num_rows, num_cols)
         fig.tight_layout()
         fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
-        for (ax, exp_id) in zip(axs.flat, EXP_IDS):
+        for (ax, exp) in zip(axs.flat, EXPS_DATA):
 
-            Q_abs_diffs = np.abs(val_iter_Q_vals - exp_Q_vals[exp_id])
+            Q_abs_diffs = np.abs(val_iter_Q_vals - exp_Q_vals[exp['id']])
             Y = np.mean(Q_abs_diffs, axis=(1,2))
             X = np.linspace(1, len(Y), len(Y))
             # Y_std = np.std(Q_abs_diffs, axis=(1,2))
@@ -270,7 +270,7 @@ if __name__ == "__main__":
             # ax.fill_between(X, Y-Y_std, Y+Y_std, color=p[0].get_color(), alpha=0.15)
 
             # Max Q-values.
-            Q_abs_diffs = np.abs(np.max(val_iter_Q_vals, axis=1) - np.max(exp_Q_vals[exp_id], axis=2))
+            Q_abs_diffs = np.abs(np.max(val_iter_Q_vals, axis=1) - np.max(exp_Q_vals[exp['id']], axis=2))
             Y = np.mean(Q_abs_diffs, axis=1)
             X = np.linspace(1, len(Y), len(Y))
             # CI calculation.
@@ -280,7 +280,7 @@ if __name__ == "__main__":
             CI_bootstrap = np.flip(CI_bootstrap, axis=0)
             CI_lengths = np.abs(np.subtract(CI_bootstrap,Y[X_CI]))
 
-            p = ax.plot(X, Y, label='max Q-vals')
+            p = ax.plot(X, Y, label='Max Q-vals')
             ax.fill_between(X_CI, Y[X_CI]-CI_lengths[0], Y[X_CI]+CI_lengths[1], color=p[0].get_color(), alpha=0.15)
 
             ax.legend()
@@ -288,9 +288,9 @@ if __name__ == "__main__":
             ax.set_ylabel('Q-values error')
             ax.set_xlabel('Episode')
 
-            ax.set_title(exp_id)
+            ax.set_title(exp['label'])
 
-        plt.title('mean(abs(val_iter_Q_vals - Q_vals))')
+        # plt.title('mean(abs(val_iter_Q_vals - Q_vals))')
 
         plt.legend()
 
@@ -304,9 +304,9 @@ if __name__ == "__main__":
 
         val_iter_Q_vals_flattened = val_iter_Q_vals.flatten()
 
-        for exp_id in EXP_IDS:
+        for exp in EXPS_DATA:
 
-            exp_Q_vals_flattened = exp_Q_vals[exp_id].reshape(exp_Q_vals[exp_id].shape[0], -1)
+            exp_Q_vals_flattened = exp_Q_vals[exp['id']].reshape(exp_Q_vals[exp['id']].shape[0], -1)
 
             abs_diff = np.abs(val_iter_Q_vals_flattened - exp_Q_vals_flattened)
             X = np.arange(0, len(abs_diff), 500)
@@ -316,7 +316,7 @@ if __name__ == "__main__":
             violin = plt.violinplot(abs_diff_list, positions=X,
                                     showextrema=True, widths=350)
 
-            plt.scatter(X, abs_diff_mean, label=exp_id, s=12)
+            plt.scatter(X, abs_diff_mean, label=exp['label'], s=12)
 
         plt.xlabel('Episode')
         plt.ylabel('Q-values error')
@@ -334,9 +334,9 @@ if __name__ == "__main__":
 
         val_iter_Q_vals_flattened = np.max(val_iter_Q_vals, axis=1)
 
-        for exp_id in EXP_IDS:
+        for exp in EXPS_DATA:
 
-            exp_Q_vals_flattened = np.max(exp_Q_vals[exp_id], axis=2)
+            exp_Q_vals_flattened = np.max(exp_Q_vals[exp['id']], axis=2)
 
             abs_diff = np.abs(val_iter_Q_vals_flattened - exp_Q_vals_flattened)
             X = np.arange(0, len(abs_diff), 500)
@@ -346,7 +346,7 @@ if __name__ == "__main__":
             violin = plt.violinplot(abs_diff_list, positions=X,
                                     showextrema=True, widths=350)
 
-            plt.scatter(X, abs_diff_mean, label=exp_id, s=12)
+            plt.scatter(X, abs_diff_mean, label=exp['label'], s=12)
 
         plt.xlabel('Episode')
         plt.ylabel('Q-values error')
