@@ -22,16 +22,16 @@ PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
 EXPS_DATA = [
             # {'id': '8_8_q_learning_2021-04-09-18-04-25', 'label': 'Q-learning'},
-            # {'id': '8_8_dqn_2021-04-10-16-37-20', 'label': 'DQN+one_hot_obs+rep_size=500_000'},
-            # {'id': '8_8_dqn_2021-04-10-17-26-17', 'label': 'DQN+smooth_obs+rep_size=500_000'},
-            {'id': '8_8_dqn_2021-04-10-18-12-30', 'label': 'DQN+random_obs+rep_size=500_000'},
-            # {'id': '8_8_dqn_2021-04-10-19-21-50', 'label': 'DQN+random_obs+rep_size=400_000'},
-            {'id': '8_8_dqn_2021-04-10-21-04-23', 'label': 'DQN+random_obs+rep_size=300_000'},
-            {'id': '8_8_dqn_2021-04-10-21-40-43', 'label': 'DQN+random_obs+rep_size=200_000'},
-            {'id': '8_8_dqn_2021-04-10-22-21-22', 'label': 'DQN+random_obs+rep_size=100_000'},
-            {'id': '8_8_dqn_2021-04-10-23-53-24', 'label': 'DQN+random_obs+rep_size=50_000'},
-            {'id': '8_8_dqn_2021-04-11-00-23-21', 'label': 'DQN+random_obs+rep_size=10_000'},
-            ] 
+            # {'id': '8_8_dqn_2021-04-10-16-37-20', 'label': 'DQN+1hot+500k'},
+            # {'id': '8_8_dqn_2021-04-10-17-26-17', 'label': 'DQN+smooth+500k'},
+            {'id': '8_8_dqn_2021-04-10-18-12-30', 'label': 'DQN+rand+500k'},
+            # {'id': '8_8_dqn_2021-04-10-19-21-50', 'label': 'DQN+rand+400k'},
+            {'id': '8_8_dqn_2021-04-10-21-04-23', 'label': 'DQN+rand+300k'},
+            {'id': '8_8_dqn_2021-04-10-21-40-43', 'label': 'DQN+rand+200k'},
+            {'id': '8_8_dqn_2021-04-10-22-21-22', 'label': 'DQN+rand+100k'},
+            {'id': '8_8_dqn_2021-04-10-23-53-24', 'label': 'DQN+rand+50k'},
+            {'id': '8_8_dqn_2021-04-11-00-23-21', 'label': 'DQN+rand+10k'},
+            ]
 VAL_ITER_DATA = '8_8_val_iter_2021-04-09-18-08-36'
 
 
@@ -156,7 +156,7 @@ if __name__ == "__main__":
         lowess = sm.nonparametric.lowess(Y, X, frac=0.10)
 
         p = plt.plot(X, Y, alpha=0.20)
-        plt.plot(X, lowess[:,1], color=p[0].get_color(), label=exp['id'], zorder=10)
+        plt.plot(X, lowess[:,1], color=p[0].get_color(), label=exp['label'], zorder=10)
 
     plt.xlabel('Episode')
     plt.ylabel('Reward')
@@ -177,7 +177,7 @@ if __name__ == "__main__":
         Y = data[exp['id']]['epsilon_values']
         X = np.linspace(1, len(Y), len(Y))
 
-        plt.plot(X,Y,label=exp['id'])
+        plt.plot(X,Y,label=exp['label'])
 
     plt.xlabel('Episode')
     plt.ylabel('Epsilon')
@@ -248,7 +248,7 @@ if __name__ == "__main__":
         y_axis_range = [0,6]
         num_rows = math.ceil(len(EXPS_DATA) / num_cols)
         fig, axs = plt.subplots(num_rows, num_cols)
-        fig.tight_layout()
+        fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
         fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
         for (ax, exp) in zip(axs.flat, EXPS_DATA):
@@ -287,10 +287,9 @@ if __name__ == "__main__":
             ax.set_ylim(y_axis_range)
             ax.set_ylabel('Q-values error')
             ax.set_xlabel('Episode')
-
             ax.set_title(exp['label'])
 
-        # plt.title('mean(abs(val_iter_Q_vals - Q_vals))')
+        fig.suptitle('mean(abs(val_iter_Q_vals - Q_vals))')
 
         plt.legend()
 
@@ -299,12 +298,16 @@ if __name__ == "__main__":
         plt.close()
 
         # Distribution plot.
-        fig = plt.figure()
-        fig.set_size_inches(FIGURE_X, FIGURE_Y)
+        num_cols = 3
+        y_axis_range = [0,11]
+        num_rows = math.ceil(len(EXPS_DATA) / num_cols)
+        fig, axs = plt.subplots(num_rows, num_cols)
+        fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
+        fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
         val_iter_Q_vals_flattened = val_iter_Q_vals.flatten()
 
-        for exp in EXPS_DATA:
+        for (ax, exp) in zip(axs.flat, EXPS_DATA):
 
             exp_Q_vals_flattened = exp_Q_vals[exp['id']].reshape(exp_Q_vals[exp['id']].shape[0], -1)
 
@@ -313,28 +316,34 @@ if __name__ == "__main__":
             abs_diff_list = abs_diff[X,:].tolist() # Sub-sample.
             abs_diff_mean = np.mean(abs_diff[X,:], axis=1) # Sub-sample.
 
-            violin = plt.violinplot(abs_diff_list, positions=X,
+            violin = ax.violinplot(abs_diff_list, positions=X,
                                     showextrema=True, widths=350)
 
-            plt.scatter(X, abs_diff_mean, label=exp['label'], s=12)
+            ax.scatter(X, abs_diff_mean, label=exp['label'], s=12)
 
-        plt.xlabel('Episode')
-        plt.ylabel('Q-values error')
-        plt.title('Dist. of abs(val_iter_Q_vals - Q_vals)')
+            ax.set_ylim(y_axis_range)
+            ax.set_xlabel('Episode')
+            ax.set_ylabel('Q-values error')
+            ax.set_title(exp['label'])
+            #ax.legend()
 
-        plt.legend()
+        fig.suptitle('Dist. of abs(val_iter_Q_vals - Q_vals)')
 
         plt.savefig('{0}/q_values_violinplot_error.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
         plt.savefig('{0}/q_values_violinplot_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
         plt.close()
 
         # Distribution plot for max Q-values.
-        fig = plt.figure()
-        fig.set_size_inches(FIGURE_X, FIGURE_Y)
+        num_cols = 3
+        y_axis_range = [0,11]
+        num_rows = math.ceil(len(EXPS_DATA) / num_cols)
+        fig, axs = plt.subplots(num_rows, num_cols)
+        fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
+        fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
         val_iter_Q_vals_flattened = np.max(val_iter_Q_vals, axis=1)
 
-        for exp in EXPS_DATA:
+        for (ax, exp) in zip(axs.flat, EXPS_DATA):
 
             exp_Q_vals_flattened = np.max(exp_Q_vals[exp['id']], axis=2)
 
@@ -343,18 +352,21 @@ if __name__ == "__main__":
             abs_diff_list = abs_diff[X,:].tolist() # Sub-sample.
             abs_diff_mean = np.mean(abs_diff[X,:], axis=1) # Sub-sample.
 
-            violin = plt.violinplot(abs_diff_list, positions=X,
+            violin = ax.violinplot(abs_diff_list, positions=X,
                                     showextrema=True, widths=350)
 
-            plt.scatter(X, abs_diff_mean, label=exp['label'], s=12)
+            ax.scatter(X, abs_diff_mean, label=exp['label'], s=12)
 
-        plt.xlabel('Episode')
-        plt.ylabel('Q-values error')
-        plt.title('Dist. of abs(max(val_iter_Q_vals) - max(Q_vals))')
+            ax.set_ylim(y_axis_range)
+            ax.set_xlabel('Episode')
+            ax.set_ylabel('Q-values error')
+            ax.set_title(exp['label'])
+            #ax.legend()
+
+        fig.suptitle('Dist. of abs(max(val_iter_Q_vals) - max(Q_vals))')
 
         plt.legend()
 
         plt.savefig('{0}/q_values_violinplot_maxQ_error.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
         plt.savefig('{0}/q_values_violinplot_maxQ_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
         plt.close()
-
