@@ -1,5 +1,6 @@
 import os
 import sys
+import math
 import json
 import random
 import numpy as np
@@ -26,7 +27,7 @@ EXP_IDS = [
             '8_8_dqn_2021-04-10-18-12-30', # DQN + random_obs + replay_size=500_000
             #'8_8_dqn_2021-04-10-19-21-50', # DQN + random_obs + replay_size=400_000
             '8_8_dqn_2021-04-10-21-04-23', # DQN + random_obs + replay_size=300_000
-            #'8_8_dqn_2021-04-10-21-40-43', # DQN + random_obs + replay_size=200_000
+            '8_8_dqn_2021-04-10-21-40-43', # DQN + random_obs + replay_size=200_000
             '8_8_dqn_2021-04-10-22-21-22', # DQN + random_obs + replay_size=100_000
             '8_8_dqn_2021-04-10-23-53-24', # DQN + random_obs + replay_size=50_000
             '8_8_dqn_2021-04-11-00-23-21', # DQN + random_obs + replay_size=10_000
@@ -230,7 +231,7 @@ if __name__ == "__main__":
             Y = np.sum(np.abs(val_iter_Q_vals - exp_Q_vals[exp_id]), axis=(1,2))
             X = np.linspace(1, len(Y), len(Y))
 
-            plt.plot(X,Y,label=exp_id)
+            plt.plot(X, Y, label=exp_id)
 
         plt.xlabel('Episode')
         plt.ylabel('Q-values error')
@@ -243,10 +244,14 @@ if __name__ == "__main__":
         plt.close()
 
         # Mean + std/CI plot.
-        fig = plt.figure()
-        fig.set_size_inches(FIGURE_X, FIGURE_Y)
+        num_cols = 3
+        y_axis_range = [0,6]
+        num_rows = math.ceil(len(EXP_IDS) / num_cols)
+        fig, axs = plt.subplots(num_rows, num_cols)
+        fig.tight_layout()
+        fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
-        for exp_id in EXP_IDS:
+        for (ax, exp_id) in zip(axs.flat, EXP_IDS):
 
             Q_abs_diffs = np.abs(val_iter_Q_vals - exp_Q_vals[exp_id])
             Y = np.mean(Q_abs_diffs, axis=(1,2))
@@ -260,9 +265,9 @@ if __name__ == "__main__":
             CI_bootstrap = np.flip(CI_bootstrap, axis=0)
             CI_lengths = np.abs(np.subtract(CI_bootstrap,Y[X_CI]))
 
-            p = plt.plot(X,Y,label=exp_id)
-            plt.fill_between(X_CI, Y[X_CI]-CI_lengths[0], Y[X_CI]+CI_lengths[1], color=p[0].get_color(), alpha=0.15)
-            # plt.fill_between(X, Y-Y_std, Y+Y_std, color=p[0].get_color(), alpha=0.15)
+            p = ax.plot(X,Y,label='Q-vals')
+            ax.fill_between(X_CI, Y[X_CI]-CI_lengths[0], Y[X_CI]+CI_lengths[1], color=p[0].get_color(), alpha=0.15)
+            # ax.fill_between(X, Y-Y_std, Y+Y_std, color=p[0].get_color(), alpha=0.15)
 
             # Max Q-values.
             Q_abs_diffs = np.abs(np.max(val_iter_Q_vals, axis=1) - np.max(exp_Q_vals[exp_id], axis=2))
@@ -275,11 +280,16 @@ if __name__ == "__main__":
             CI_bootstrap = np.flip(CI_bootstrap, axis=0)
             CI_lengths = np.abs(np.subtract(CI_bootstrap,Y[X_CI]))
 
-            p = plt.plot(X, Y, label=exp_id + '_maxQ')
-            plt.fill_between(X_CI, Y[X_CI]-CI_lengths[0], Y[X_CI]+CI_lengths[1], color=p[0].get_color(), alpha=0.15)
+            p = ax.plot(X, Y, label='max Q-vals')
+            ax.fill_between(X_CI, Y[X_CI]-CI_lengths[0], Y[X_CI]+CI_lengths[1], color=p[0].get_color(), alpha=0.15)
 
-        plt.xlabel('Episode')
-        plt.ylabel('Q-values error')
+            ax.legend()
+            ax.set_ylim(y_axis_range)
+            ax.set_ylabel('Q-values error')
+            ax.set_xlabel('Episode')
+
+            ax.set_title(exp_id)
+
         plt.title('mean(abs(val_iter_Q_vals - Q_vals))')
 
         plt.legend()
