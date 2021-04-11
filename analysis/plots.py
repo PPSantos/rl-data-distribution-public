@@ -154,8 +154,8 @@ if __name__ == "__main__":
         X = np.linspace(1, len(Y), len(Y))
         lowess = sm.nonparametric.lowess(Y, X, frac=0.10)
 
-        p = plt.plot(X, lowess[:,1], label=exp_id,)
-        plt.plot(X, Y, color=p[0].get_color(), alpha=0.20)
+        p = plt.plot(X, Y, alpha=0.20)
+        plt.plot(X, lowess[:,1], color=p[0].get_color(), label=exp_id, zorder=10)
 
     plt.xlabel('Episode')
     plt.ylabel('Reward')
