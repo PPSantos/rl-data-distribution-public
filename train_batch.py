@@ -22,3 +22,6 @@ if __name__ == "__main__":
 
     args['dqn_args']['max_replay_size'] = 50_000
     train(args)
+
+    args['dqn_args']['max_replay_size'] = 25_000
+    train(args)

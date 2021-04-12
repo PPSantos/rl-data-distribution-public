@@ -21,26 +21,42 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
 EXPS_DATA = [
-            # {'id': '8_8_q_learning_2021-04-09-18-04-25', 'label': 'Q-learning'},
+            #{'id': '8_8_q_learning_2021-04-12-00-34-49', 'label': 'Q-learning'}, #8,8,no walls
+            #{'id': '8_8_q_learning_2021-04-12-00-43-35', 'label': 'Q-learning'}, #8,8, walls
 
-            #{'id': '8_8_dqn_2021-04-10-18-12-30', 'label': 'DQN+rand+500k'}, # 1 run.
-            # {'id': '8_8_dqn_2021-04-10-19-21-50', 'label': 'DQN+rand+400k'}, # 1 run.
-            #{'id': '8_8_dqn_2021-04-10-21-04-23', 'label': 'DQN+rand+300k'}, # 1 run.
-            #{'id': '8_8_dqn_2021-04-10-21-40-43', 'label': 'DQN+rand+200k'}, # 1 run.
-            #{'id': '8_8_dqn_2021-04-10-22-21-22', 'label': 'DQN+rand+100k'}, # 1 run.
-            #{'id': '8_8_dqn_2021-04-10-23-53-24', 'label': 'DQN+rand+50k'}, # 1 run.
-            #{'id': '8_8_dqn_2021-04-11-00-23-21', 'label': 'DQN+rand+10k'}, # 1 run.
+            #{'id': '8_8_dqn_2021-04-11-11-16-35', 'label': 'DQN+1hot+500k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-11-34-37', 'label': 'DQN+1hot+400k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-11-52-38', 'label': 'DQN+1hot+300k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-12-10-49', 'label': 'DQN+1hot+200k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-12-28-48', 'label': 'DQN+1hot+100k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-12-47-05', 'label': 'DQN+1hot+50k'},  #8,8,no walls
 
-            {'id': '8_8_dqn_2021-04-11-11-16-35', 'label': 'DQN+1hot+500k'},
-            {'id': '8_8_dqn_2021-04-11-11-34-37', 'label': 'DQN+1hot+400k'},
-            {'id': '8_8_dqn_2021-04-11-11-52-38', 'label': 'DQN+1hot+300k'},
-            {'id': '8_8_dqn_2021-04-11-12-10-49', 'label': 'DQN+1hot+200k'},
-            {'id': '8_8_dqn_2021-04-11-12-28-48', 'label': 'DQN+1hot+100k'},
-            {'id': '8_8_dqn_2021-04-11-12-47-05', 'label': 'DQN+1hot+50k'},
+            #{'id': '8_8_dqn_2021-04-11-13-53-49', 'label': 'DQN+smooth+500k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-14-12-11', 'label': 'DQN+smooth+400k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-14-30-14', 'label': 'DQN+smooth+300k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-14-48-09', 'label': 'DQN+smooth+200k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-15-06-07', 'label': 'DQN+smooth+100k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-15-24-06', 'label': 'DQN+smooth+50k'},  #8,8,no walls
+
+            #{'id': '8_8_dqn_2021-04-11-17-29-29', 'label': 'DQN+rand+500k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-17-47-22', 'label': 'DQN+rand+400k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-18-05-20', 'label': 'DQN+rand+300k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-18-23-27', 'label': 'DQN+rand+200k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-18-41-34', 'label': 'DQN+rand+100k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-11-19-00-43', 'label': 'DQN+rand+50k'}, #8,8,no walls
+
+            {'id': '8_8_dqn_2021-04-12-01-00-07', 'label': 'DQN+1hot+500k'}, #8,8,walls
+            {'id': '8_8_dqn_2021-04-12-01-18-48', 'label': 'DQN+1hot+400k'}, #8,8,walls
+            {'id': '8_8_dqn_2021-04-12-01-37-13', 'label': 'DQN+1hot+300k'}, #8,8,walls
+            {'id': '8_8_dqn_2021-04-12-01-55-38', 'label': 'DQN+1hot+200k'}, #8,8,walls
+            {'id': '8_8_dqn_2021-04-12-02-14-20', 'label': 'DQN+1hot+100k'}, #8,8,walls
+            {'id': '8_8_dqn_2021-04-12-02-33-06', 'label': 'DQN+1hot+50k'},  #8,8,walls
+            {'id': '8_8_dqn_2021-04-12-02-51-56', 'label': 'DQN+1hot+25k'},  #8,8,walls
 
             ]
-VAL_ITER_DATA = '8_8_val_iter_2021-04-09-18-08-36'
 
+#VAL_ITER_DATA = '8_8_val_iter_2021-04-09-18-08-36' #8,8,no walls
+VAL_ITER_DATA = '8_8_val_iter_2021-04-12-08-53-47' #8,8,walls
 
 def calculate_CI_bootstrap(x_hat, samples, num_resamples=20000):
     """
