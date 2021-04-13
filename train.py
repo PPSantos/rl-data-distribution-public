@@ -11,15 +11,16 @@ from rlutil.json_utils import NumpyEncoder
 from algos import value_iteration, q_learning, dqn
 from envs import env_suite
 
+from rlutil.envs.gridcraft.grid_spec_cy import TileType
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 
 DEFAULT_TRAIN_ARGS = {
 
     # General arguments.
-    'num_runs': 5,
-    'num_processors': 5,
-    'algo': 'dqn',
+    'num_runs': 6,
+    'num_processors': 1,
+    'algo': 'q_learning',
     'num_episodes': 10_000,
     'gamma': 0.9,
 
@@ -29,9 +30,9 @@ DEFAULT_TRAIN_ARGS = {
         'size_y': 8,
         'dim_obs': 8,
         'time_limit': 50,
-        'wall_ratio': 0.25,
-        'tabular': False,
-        'seed': 421,
+        'wall_ratio': 0.2,
+        'tabular': True,
+        'seed': 1892,
         'smooth_obs': False,
         'one_hot_obs': True,
     },
@@ -79,7 +80,8 @@ def train_run(run_args):
     time.sleep(time_delay)
 
     # Load environment.
-    env = env_suite.random_grid_env(**args['env_args'], distance_reward=False, absorb=False)
+    env, env_grid_spec = env_suite.random_grid_env(**args['env_args'], distance_reward=False, absorb=False)
+
     # print('Env num states:', env.num_states)
     # print('Env num actions:', env.num_actions)
     # print('Env transition matrix shape:', env.transition_matrix().shape)
@@ -100,7 +102,7 @@ def train_run(run_args):
 
     elif args['algo'] == 'dqn':
         args['dqn_args']['discount'] = args['gamma']
-        agent = dqn.DQN(env, args['dqn_args'])
+        agent = dqn.DQN(env, env_grid_spec, args['dqn_args'])
 
     else:
         raise ValueError("Unknown algorithm.")

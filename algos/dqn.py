@@ -16,7 +16,7 @@ from acme.tf import networks
 from acme import wrappers
 
 from algos import dqn_acme
-#from ilurl.utils.default_logger import make_default_logger
+from rlutil.envs.gridcraft.grid_spec_cy import TileType
 
 
 def _make_network(env_spec : dm_env,
@@ -40,9 +40,10 @@ def wrap_env(env):
 
 class DQN(object):
 
-    def __init__(self, env, dqn_args):
+    def __init__(self, env, env_grid_spec, dqn_args):
 
         self.base_env = env
+        self.env_grid_spec = env_grid_spec
         self.env = wrap_env(env)
         env_spec = acme.make_environment_spec(self.env)
 
@@ -78,27 +79,23 @@ class DQN(object):
 
             episode_rewards.append(episode_cumulative_reward)
 
-            # Store current Q-values.
+            # Store current Q-values (filters wall states).
             for state in range(self.base_env.num_states):
-                obs = self.base_env.observation(state)
-                qvs = self.agent.get_Q_vals(obs)
-                Q_vals[episode,state,:] = qvs
-
-        # Calculate policy.
-        policy = {}
-        max_Q_vals = {}
-        for state in range(self.base_env.num_states):
-            obs = self.base_env.observation(state)
-            qvs = self.agent.get_Q_vals(obs)
-            policy[state] = np.argmax(qvs)
-            max_Q_vals[state] = np.max(qvs)
+                xy = self.env_grid_spec.idx_to_xy(state)
+                tile_type = self.env_grid_spec.get_value(xy)
+                if tile_type == TileType.WALL:
+                    Q_vals[episode,state,:] = 0
+                else:
+                    obs = self.base_env.observation(state)
+                    qvs = self.agent.get_Q_vals(obs)
+                    Q_vals[episode,state,:] = qvs
 
         data = {}
         data['episode_rewards'] = episode_rewards
         data['epsilon_values'] = None
         data['states_counts'] = states_counts
         data['Q_vals'] = Q_vals
-        data['max_Q_vals'] = max_Q_vals
-        data['policy'] = policy
+        data['max_Q_vals'] = np.max(Q_vals[-1], axis=1)
+        data['policy'] = np.argmax(Q_vals[-1], axis=1)
 
         return data

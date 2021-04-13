@@ -52,7 +52,7 @@ def random_grid_env(size_x, size_y, dim_obs=32, time_limit=50, wall_ratio=0.1, s
         else:
             env = wrap_obs_time(env, time_limit=time_limit, one_hot_obs=one_hot_obs, dim_obs=dim_obs, smooth_obs=smooth_obs)
 
-    return env
+    return env, gs
 
 def wrap_obs_time(env, dim_obs=32, time_limit=50, smooth_obs=False, one_hot_obs=False):
     if smooth_obs:

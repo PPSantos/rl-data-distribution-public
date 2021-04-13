@@ -29,16 +29,9 @@ class ValueIteration(object):
             if delta < self.epsilon:
                 break
 
-        # Calculate policy.
-        policy = {}
-        max_Q_vals = {}
-        for state in range(self.env.num_states):
-            policy[state] = np.argmax(Q_vals[state])
-            max_Q_vals[state] = np.max(Q_vals[state])
-
         data = {}
         data['Q_vals'] = Q_vals
-        data['max_Q_vals'] = max_Q_vals
-        data['policy'] = policy
+        data['max_Q_vals'] = np.max(Q_vals, axis=1)
+        data['policy'] = np.argmax(Q_vals, axis=1)
 
         return data

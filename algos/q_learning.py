@@ -64,19 +64,12 @@ class QLearning(object):
             episode_rewards.append(episode_cumulative_reward)
             Q_vals[episode,:,:] = Q
 
-        # Calculate policy.
-        policy = {}
-        max_Q_vals = {}
-        for state in range(self.env.num_states):
-            policy[state] = np.argmax(Q[state])
-            max_Q_vals[state] = np.max(Q[state])
-
         data = {}
         data['episode_rewards'] = episode_rewards
         data['epsilon_values'] = epsilon_values
         data['states_counts'] = states_counts
         data['Q_vals'] = Q_vals
-        data['max_Q_vals'] = max_Q_vals
-        data['policy'] = policy
+        data['policy'] = np.argmax(Q_vals[-1], axis=1)
+        data['max_Q_vals'] = np.max(Q_vals[-1], axis=1)
 
         return data

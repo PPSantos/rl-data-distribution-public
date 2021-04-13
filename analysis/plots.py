@@ -20,7 +20,15 @@ FIGURE_Y = 4.0
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
+# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-10-09-46' # Env-8,8-1
+VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-27-39' # Env-8,8-2
+
+# VAL_ITER_DATA = '8_8_val_iter_2021-04-12-08-53-47' #8,8,walls
+
 EXPS_DATA = [
+            # {'id': '8_8_q_learning_2021-04-13-10-25-28', 'label': 'Q-learning'}, # Env-8,8-1
+            {'id': '8_8_q_learning_2021-04-13-17-44-22', 'label': 'Q-learning'}, # Env-8,8-2
+            
             #{'id': '8_8_q_learning_2021-04-12-00-34-49', 'label': 'Q-learning'}, #8,8,no walls
             #{'id': '8_8_q_learning_2021-04-12-00-43-35', 'label': 'Q-learning'}, #8,8, walls
 
@@ -45,7 +53,7 @@ EXPS_DATA = [
             #{'id': '8_8_dqn_2021-04-11-18-41-34', 'label': 'DQN+rand+100k'}, #8,8,no walls
             #{'id': '8_8_dqn_2021-04-11-19-00-43', 'label': 'DQN+rand+50k'}, #8,8,no walls
 
-            {'id': '8_8_dqn_2021-04-12-01-00-07', 'label': 'DQN+1hot+500k'}, #8,8,walls
+            # {'id': '8_8_dqn_2021-04-12-01-00-07', 'label': 'DQN+1hot+500k'}, #8,8,walls
             # {'id': '8_8_dqn_2021-04-12-01-18-48', 'label': 'DQN+1hot+400k'}, #8,8,walls
             # {'id': '8_8_dqn_2021-04-12-01-37-13', 'label': 'DQN+1hot+300k'}, #8,8,walls
             # {'id': '8_8_dqn_2021-04-12-01-55-38', 'label': 'DQN+1hot+200k'}, #8,8,walls
@@ -55,8 +63,6 @@ EXPS_DATA = [
 
             ]
 
-#VAL_ITER_DATA = '8_8_val_iter_2021-04-09-18-08-36' #8,8,no walls
-VAL_ITER_DATA = '8_8_val_iter_2021-04-12-08-53-47' #8,8,walls
 
 def calculate_CI_bootstrap(x_hat, samples, num_resamples=20000):
     """
@@ -89,23 +95,16 @@ def xy_to_idx(key, width, height):
     else:
         raise NotImplementedError()
 
-def print_policy(policy, sizes):
+def print_env(data, sizes, float_format=None):
     size_x, size_y = sizes[0], sizes[1]
     sys.stdout.write('-'*(size_x+2)+'\n')
     for h in range(size_y):
         sys.stdout.write('|')
         for w in range(size_x):
-            sys.stdout.write(str(policy[str(xy_to_idx((w,h), size_x, size_y))]))
-        sys.stdout.write('|\n')
-    sys.stdout.write('-' * (size_x + 2)+'\n')
-
-def plot_Q_vals(q_vals, sizes):
-    size_x, size_y = sizes[0], sizes[1]
-    sys.stdout.write('-'*(size_x+2)+'\n')
-    for h in range(size_y):
-        sys.stdout.write('|')
-        for w in range(size_x):
-            sys.stdout.write("{:.1f} ".format(q_vals[str(xy_to_idx((w,h),size_x, size_y))]))
+            if float_format:
+                sys.stdout.write(float_format.format(data[xy_to_idx((w,h),size_x, size_y)]))
+            else:
+                sys.stdout.write(str(data[xy_to_idx((w,h), size_x, size_y)]))
         sys.stdout.write('|\n')
     sys.stdout.write('-' * (size_x + 2)+'\n')
 
@@ -152,56 +151,51 @@ if __name__ == "__main__":
 
         # Q_vals field.
         q_concatenated = np.array([e['Q_vals'] for e in exp_data])
-        q_concatenated = np.mean(q_concatenated, axis=0)
-        # Filter walls states (zero Q-vals at walls positions).
-        for s in range(q_concatenated.shape[1]):
-            if val_iter_data['max_Q_vals'][str(s)] == 0:
-                q_concatenated[:,s,:] = 0
-        parsed_data['Q_vals'] = q_concatenated
+        parsed_data['Q_vals'] = np.mean(q_concatenated, axis=0)
 
-        # max_Q_vals and policy field.
-        max_Q_vals = [e['max_Q_vals'] for e in exp_data]
-        for i in range(len(exp_data)):
-            print(i)
-            print(exp_data[i]['max_Q_vals'])
-        policies = [e['policy'] for e in exp_data]
-        # Filter walls states (zero Q-vals at walls positions).
-        for e in range(len(max_Q_vals)):
-            for s in range(len(max_Q_vals[e])):
-                if val_iter_data['max_Q_vals'][str(s)] == 0:
-                    max_Q_vals[e][str(s)] = 0
-                    policies[e][str(s)] = 0
+        # max_Q_vals field.
+        parsed_data['max_Q_vals'] = np.array([e['max_Q_vals'] for e in exp_data])
 
-        parsed_data['max_Q_vals'] = max_Q_vals
-        parsed_data['policies'] = policies
+        # policy field.
+        parsed_data['policies'] = np.array([e['policy'] for e in exp_data])
+
+        # states_counts field.
+        parsed_data['states_counts'] = np.array([e['states_counts'] for e in exp_data])
 
         data[exp['id']] = parsed_data
 
     """
-        Plot policies.
+        Print policies.
     """
     print(f'{VAL_ITER_DATA} policy:')
-    print_policy(val_iter_data['policy'], (args['env_args']['size_x'], args['env_args']['size_y']))
-
+    print_env(val_iter_data['policy'], (args['env_args']['size_x'], args['env_args']['size_y']))
     for exp in EXPS_DATA:
-        for i, policy in enumerate(data[exp['id']]['policies']):
+        for (i, policy) in enumerate(data[exp['id']]['policies']):
             print(f"{exp['label']} policy (run {i}):")
-            print_policy(policy, (args['env_args']['size_x'], args['env_args']['size_y']))
+            print_env(policy, (args['env_args']['size_x'], args['env_args']['size_y']))
 
     """
-        Plot max Q-values.
+        Print max Q-values.
     """
     print('\n')
     print(f'{VAL_ITER_DATA} max Q-values:')
-    plot_Q_vals(val_iter_data['max_Q_vals'], (args['env_args']['size_x'], args['env_args']['size_y']))
-
+    print_env(val_iter_data['max_Q_vals'], (args['env_args']['size_x'], args['env_args']['size_y']), float_format="{:.1f} ")
     for exp in EXPS_DATA:
         for i, qs in enumerate(data[exp['id']]['max_Q_vals']):
             print(f"{exp['label']} max Q-values (run {i}):")
-            plot_Q_vals(qs, (args['env_args']['size_x'], args['env_args']['size_y']))
+            print_env(qs, (args['env_args']['size_x'], args['env_args']['size_y']), float_format="{:.1f} ")
 
     """
-        Episode rewards (averaged over all runs).
+        Print states counts.
+    """
+    print('\n')
+    for exp in EXPS_DATA:
+        for i, counts in enumerate(data[exp['id']]['states_counts']):
+            print(f"{exp['label']} states_counts (run {i}):")
+            print_env(counts, (args['env_args']['size_x'], args['env_args']['size_y']), float_format="{:.0f} ")
+
+    """
+        Plot episode rewards (averaged over all runs).
     """
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
