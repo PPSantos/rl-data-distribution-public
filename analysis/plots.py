@@ -204,7 +204,7 @@ if __name__ == "__main__":
         rewards = data[exp['id']]['episode_rewards']
         Y = np.mean(rewards, axis=0)
         X = np.linspace(1, len(Y), len(Y))
-        lowess = sm.nonparametric.lowess(Y, X, frac=0.10)
+        lowess = sm.nonparametric.lowess(Y, X, frac=0.10, is_sorted=True, it=0)
 
         p = plt.plot(X, Y, alpha=0.20)
         plt.plot(X, lowess[:,1], color=p[0].get_color(), label=exp['label'], zorder=10)
@@ -232,7 +232,7 @@ if __name__ == "__main__":
         for (i, run_data) in enumerate(data[exp['id']]['episode_rewards']):
             Y = run_data
             X = np.linspace(1, len(Y), len(Y))
-            lowess = sm.nonparametric.lowess(Y, X, frac=0.10)
+            lowess = sm.nonparametric.lowess(Y, X, frac=0.10, is_sorted=True, it=0)
 
             p = ax.plot(X, Y, alpha=0.20)
             ax.plot(X, lowess[:,1], color=p[0].get_color(), label=f"{i}", zorder=10)
