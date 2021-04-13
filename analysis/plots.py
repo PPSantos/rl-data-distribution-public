@@ -20,14 +20,14 @@ FIGURE_Y = 4.0
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
-# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-10-09-46' # Env-8,8-1
-VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-27-39' # Env-8,8-2
+VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-55-56' # Env-8,8-1
+# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-27-39' # Env-8,8-2
 
 # VAL_ITER_DATA = '8_8_val_iter_2021-04-12-08-53-47' #8,8,walls
 
 EXPS_DATA = [
-            # {'id': '8_8_q_learning_2021-04-13-10-25-28', 'label': 'Q-learning'}, # Env-8,8-1
-            {'id': '8_8_q_learning_2021-04-13-17-44-22', 'label': 'Q-learning'}, # Env-8,8-2
+            {'id': '8_8_q_learning_2021-04-13-17-56-48', 'label': 'Q-learning'}, # Env-8,8-1
+            # {'id': '8_8_q_learning_2021-04-13-17-44-22', 'label': 'Q-learning'}, # Env-8,8-2
             
             #{'id': '8_8_q_learning_2021-04-12-00-34-49', 'label': 'Q-learning'}, #8,8,no walls
             #{'id': '8_8_q_learning_2021-04-12-00-43-35', 'label': 'Q-learning'}, #8,8, walls
