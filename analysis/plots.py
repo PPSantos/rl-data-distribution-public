@@ -20,46 +20,42 @@ FIGURE_Y = 4.0
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
-VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-55-56' # Env-8,8-1
+# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-55-56' # Env-8,8-1
 # VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-27-39' # Env-8,8-2
-
-# VAL_ITER_DATA = '8_8_val_iter_2021-04-12-08-53-47' #8,8,walls
+VAL_ITER_DATA = '8_8_val_iter_2021-04-13-22-56-57' # Env-8,8-3
 
 EXPS_DATA = [
-            {'id': '8_8_q_learning_2021-04-13-17-56-48', 'label': 'Q-learning'}, # Env-8,8-1
-            # {'id': '8_8_q_learning_2021-04-13-17-44-22', 'label': 'Q-learning'}, # Env-8,8-2
-            
-            #{'id': '8_8_q_learning_2021-04-12-00-34-49', 'label': 'Q-learning'}, #8,8,no walls
-            #{'id': '8_8_q_learning_2021-04-12-00-43-35', 'label': 'Q-learning'}, #8,8, walls
+            # {'id': '8_8_q_learning_2021-04-13-17-56-48', 'label': 'Q-learning'}, # Env-8,8-1
 
-            #{'id': '8_8_dqn_2021-04-11-11-16-35', 'label': 'DQN+1hot+500k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-11-34-37', 'label': 'DQN+1hot+400k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-11-52-38', 'label': 'DQN+1hot+300k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-12-10-49', 'label': 'DQN+1hot+200k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-12-28-48', 'label': 'DQN+1hot+100k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-12-47-05', 'label': 'DQN+1hot+50k'},  #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-13-18-29-44', 'label': 'DQN+1hot+500k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-13-18-52-45', 'label': 'DQN+1hot+400k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-13-19-15-32', 'label': 'DQN+1hot+300k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-13-19-38-17', 'label': 'DQN+1hot+200k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-13-20-01-22', 'label': 'DQN+1hot+100k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-13-20-24-30', 'label': 'DQN+1hot+50k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-13-20-48-35', 'label': 'DQN+1hot+25k'}, # Env-8,8-1
 
-            #{'id': '8_8_dqn_2021-04-11-13-53-49', 'label': 'DQN+smooth+500k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-14-12-11', 'label': 'DQN+smooth+400k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-14-30-14', 'label': 'DQN+smooth+300k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-14-48-09', 'label': 'DQN+smooth+200k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-15-06-07', 'label': 'DQN+smooth+100k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-15-24-06', 'label': 'DQN+smooth+50k'},  #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-13-21-12-55', 'label': 'DQN+smooth+500k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-13-21-36-27', 'label': 'DQN+smooth+400k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-13-21-59-39', 'label': 'DQN+smooth+300k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-13-22-22-29', 'label': 'DQN+smooth+200k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-13-22-45-18', 'label': 'DQN+smooth+100k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-13-23-08-11', 'label': 'DQN+smooth+50k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-13-23-31-12', 'label': 'DQN+smooth+25k'}, # Env-8,8-1
 
-            #{'id': '8_8_dqn_2021-04-11-17-29-29', 'label': 'DQN+rand+500k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-17-47-22', 'label': 'DQN+rand+400k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-18-05-20', 'label': 'DQN+rand+300k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-18-23-27', 'label': 'DQN+rand+200k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-18-41-34', 'label': 'DQN+rand+100k'}, #8,8,no walls
-            #{'id': '8_8_dqn_2021-04-11-19-00-43', 'label': 'DQN+rand+50k'}, #8,8,no walls
+            #{'id': '8_8_dqn_2021-04-13-23-54-09', 'label': 'DQN+rand+500k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-14-00-16-45', 'label': 'DQN+rand+400k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-14-00-39-22', 'label': 'DQN+rand+300k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-14-01-02-03', 'label': 'DQN+rand+200k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-14-01-24-01', 'label': 'DQN+rand+100k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-14-01-45-49', 'label': 'DQN+rand+50k'}, # Env-8,8-1
+            #{'id': '8_8_dqn_2021-04-14-02-07-55', 'label': 'DQN+rand+25k'}, # Env-8,8-1
 
-            # {'id': '8_8_dqn_2021-04-12-01-00-07', 'label': 'DQN+1hot+500k'}, #8,8,walls
-            # {'id': '8_8_dqn_2021-04-12-01-18-48', 'label': 'DQN+1hot+400k'}, #8,8,walls
-            # {'id': '8_8_dqn_2021-04-12-01-37-13', 'label': 'DQN+1hot+300k'}, #8,8,walls
-            # {'id': '8_8_dqn_2021-04-12-01-55-38', 'label': 'DQN+1hot+200k'}, #8,8,walls
-            # {'id': '8_8_dqn_2021-04-12-02-14-20', 'label': 'DQN+1hot+100k'}, #8,8,walls
-            # {'id': '8_8_dqn_2021-04-12-02-33-06', 'label': 'DQN+1hot+50k'},  #8,8,walls
-            # {'id': '8_8_dqn_2021-04-12-02-51-56', 'label': 'DQN+1hot+25k'},  #8,8,walls
+            #################################################################################
+            # {'id': '8_8_q_learning_2021-04-13-22-33-17', 'label': 'Q-learning'}, # Env-8,8-2
+
+            #################################################################################
+            {'id': '8_8_q_learning_2021-04-13-23-39-31', 'label': 'Q-learning'}, # Env-8,8-3 (20k episodes)
 
             ]
 
