@@ -35,6 +35,7 @@ import trfl
 
 from algos.utils import tf2_savers
 from algos.utils.tf2_layers import EpsilonGreedyExploration
+from algos.dqn_acme_unprioritized_learning import DQNUnprioritizedLearner
 
 
 class DQN(agent.Agent):
@@ -55,6 +56,7 @@ class DQN(agent.Agent):
             samples_per_insert: float = 32.0,
             min_replay_size: int = 20,
             max_replay_size: int = 1000000,
+            prioritized_replay: bool = True,
             importance_sampling_exponent: float = 0.2,
             priority_exponent: float = 0.6,
             n_step: int = 5,
@@ -80,6 +82,7 @@ class DQN(agent.Agent):
             following arguments are related to dataset construction and will be
             ignored if a dataset argument is passed.
         max_replay_size: maximum replay size.
+        prioritized_replay: whether to use a prioritized replay buffer.
         importance_sampling_exponent: power to which importance weights are raised
             before normalizing (beta). See https://arxiv.org/pdf/1710.02298.pdf
         priority_exponent: exponent used in prioritized sampling (omega).
@@ -97,9 +100,13 @@ class DQN(agent.Agent):
 
         # Create a replay server to add data to. This uses no limiter behavior in
         # order to allow the Agent interface to handle it.
+        if prioritized_replay:
+            reverb_table_sampler = reverb.selectors.Prioritized(priority_exponent)
+        else:
+            reverb_table_sampler = reverb.selectors.Uniform()
         replay_table = reverb.Table(
             name=adders.DEFAULT_PRIORITY_TABLE,
-            sampler=reverb.selectors.Prioritized(priority_exponent),
+            sampler=reverb_table_sampler,
             remover=reverb.selectors.Fifo(),
             max_size=max_replay_size,
             rate_limiter=reverb.rate_limiters.MinSize(1),
@@ -138,18 +145,31 @@ class DQN(agent.Agent):
         actor = actors.FeedForwardActor(policy_network, adder)
 
         # The learner updates the parameters (and initializes them).
-        learner = learning.DQNLearner(
-            network=network,
-            target_network=target_network,
-            discount=discount,
-            importance_sampling_exponent=importance_sampling_exponent,
-            learning_rate=learning_rate,
-            target_update_period=target_update_period,
-            dataset=dataset,
-            replay_client=replay_client,
-            max_gradient_norm=max_gradient_norm,
-            logger=logger,
-            checkpoint=False)
+        if prioritized_replay:
+            learner = learning.DQNLearner(
+                network=network,
+                target_network=target_network,
+                discount=discount,
+                importance_sampling_exponent=importance_sampling_exponent,
+                learning_rate=learning_rate,
+                target_update_period=target_update_period,
+                dataset=dataset,
+                replay_client=replay_client,
+                max_gradient_norm=max_gradient_norm,
+                logger=logger,
+                checkpoint=False)
+        else:
+            learner = DQNUnprioritizedLearner(
+                network=network,
+                target_network=target_network,
+                discount=discount,
+                learning_rate=learning_rate,
+                target_update_period=target_update_period,
+                dataset=dataset,
+                replay_client=replay_client,
+                max_gradient_norm=max_gradient_norm,
+                logger=logger,
+                checkpoint=False)
 
         self._saver = tf2_savers.Saver(learner.state)
 

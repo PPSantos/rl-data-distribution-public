@@ -18,9 +18,9 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 DEFAULT_TRAIN_ARGS = {
 
     # General arguments.
-    'num_runs': 6,
+    'num_runs': 1,
     'num_processors': 1,
-    'algo': 'q_learning',
+    'algo': 'dqn',
     'num_episodes': 10_000,
     'gamma': 0.9,
 
@@ -31,7 +31,7 @@ DEFAULT_TRAIN_ARGS = {
         'dim_obs': 8,
         'time_limit': 50,
         'wall_ratio': 0.0,
-        'tabular': True,
+        'tabular': False,
         'seed': 11,
         'smooth_obs': False,
         'one_hot_obs': True,
@@ -58,6 +58,7 @@ DEFAULT_TRAIN_ARGS = {
         'samples_per_insert': 128.0,
         'min_replay_size': 50_000,
         'max_replay_size': 500_000,
+        'prioritized_replay': False,
         'importance_sampling_exponent': 0.9,
         'priority_exponent': 0.6,
         'n_step': 1,
