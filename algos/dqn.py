@@ -92,7 +92,6 @@ class DQN(object):
 
         data = {}
         data['episode_rewards'] = episode_rewards
-        data['epsilon_values'] = None
         data['states_counts'] = states_counts
         data['Q_vals'] = Q_vals
         data['max_Q_vals'] = np.max(Q_vals[-1], axis=1)

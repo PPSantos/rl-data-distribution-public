@@ -27,7 +27,6 @@ class QLearning(object):
 
         Q = np.zeros((self.env.num_states, self.env.num_actions))
 
-        epsilon_values = []
         episode_rewards = []
         states_counts = np.zeros((self.env.num_states))
         Q_vals = np.zeros((num_episodes, self.env.num_states, self.env.num_actions))
@@ -60,13 +59,11 @@ class QLearning(object):
 
                 s_t = s_t1
 
-            epsilon_values.append(epsilon)
             episode_rewards.append(episode_cumulative_reward)
             Q_vals[episode,:,:] = Q
 
         data = {}
         data['episode_rewards'] = episode_rewards
-        data['epsilon_values'] = epsilon_values
         data['states_counts'] = states_counts
         data['Q_vals'] = Q_vals
         data['policy'] = np.argmax(Q_vals[-1], axis=1)

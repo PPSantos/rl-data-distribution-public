@@ -21,8 +21,8 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
 # VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-55-56' # Env-8,8-1
-# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-27-39' # Env-8,8-2
-VAL_ITER_DATA = '8_8_val_iter_2021-04-13-22-56-57' # Env-8,8-3
+VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-27-39' # Env-8,8-2
+# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-22-56-57' # Env-8,8-3
 
 EXPS_DATA = [
             # {'id': '8_8_q_learning_2021-04-13-17-56-48', 'label': 'Q-learning'}, # Env-8,8-1
@@ -52,10 +52,10 @@ EXPS_DATA = [
             #{'id': '8_8_dqn_2021-04-14-02-07-55', 'label': 'DQN+rand+25k'}, # Env-8,8-1
 
             #################################################################################
-            # {'id': '8_8_q_learning_2021-04-13-22-33-17', 'label': 'Q-learning'}, # Env-8,8-2
+            {'id': '8_8_q_learning_2021-04-13-22-33-17', 'label': 'Q-learning'}, # Env-8,8-2
 
             #################################################################################
-            {'id': '8_8_q_learning_2021-04-13-23-39-31', 'label': 'Q-learning'}, # Env-8,8-3 (20k episodes)
+            # {'id': '8_8_q_learning_2021-04-13-23-39-31', 'label': 'Q-learning'}, # Env-8,8-3 (20k episodes)
 
             ]
 
@@ -121,6 +121,7 @@ if __name__ == "__main__":
         val_iter_data = json.loads(val_iter_data)
         val_iter_data = val_iter_data[0]
     f.close()
+    val_iter_data['Q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
 
     # Load and parse data.
     data = {}
@@ -138,25 +139,19 @@ if __name__ == "__main__":
         parsed_data = {}
 
         # episode_rewards field.
-        parsed_data['episode_rewards'] = np.array([e['episode_rewards'] for e in exp_data])
-
-        # epsilon_values field.
-        # e_concatenated = np.array([e['epsilon_values'] for e in exp_data])
-        # e_concatenated = np.mean(e_concatenated, axis=0)
-        # parsed_data['epsilon_values'] = e_concatenated
+        parsed_data['episode_rewards'] = np.array([e['episode_rewards'] for e in exp_data]) # [R,E]
 
         # Q_vals field.
-        q_concatenated = np.array([e['Q_vals'] for e in exp_data])
-        parsed_data['Q_vals'] = np.mean(q_concatenated, axis=0)
-
+        parsed_data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,E,S,A]
+        
         # max_Q_vals field.
-        parsed_data['max_Q_vals'] = np.array([e['max_Q_vals'] for e in exp_data])
+        parsed_data['max_Q_vals'] = np.array([e['max_Q_vals'] for e in exp_data]) # [R,S]
 
         # policy field.
-        parsed_data['policies'] = np.array([e['policy'] for e in exp_data])
+        parsed_data['policies'] = np.array([e['policy'] for e in exp_data]) # [R,S]
 
         # states_counts field.
-        parsed_data['states_counts'] = np.array([e['states_counts'] for e in exp_data])
+        parsed_data['states_counts'] = np.array([e['states_counts'] for e in exp_data]) # [R,S]
 
         data[exp['id']] = parsed_data
 
@@ -197,8 +192,8 @@ if __name__ == "__main__":
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
     for exp in EXPS_DATA:
-        rewards = data[exp['id']]['episode_rewards']
-        Y = np.mean(rewards, axis=0)
+        rewards = data[exp['id']]['episode_rewards'] # [R,E]
+        Y = np.mean(rewards, axis=0) # [E]
         X = np.linspace(1, len(Y), len(Y))
         lowess = sm.nonparametric.lowess(Y, X, frac=0.10, is_sorted=True, it=0)
 
@@ -226,7 +221,7 @@ if __name__ == "__main__":
     for (ax, exp) in zip(axs.flat, EXPS_DATA):
 
         for (i, run_data) in enumerate(data[exp['id']]['episode_rewards']):
-            Y = run_data
+            Y = run_data # [E]
             X = np.linspace(1, len(Y), len(Y))
             lowess = sm.nonparametric.lowess(Y, X, frac=0.10, is_sorted=True, it=0)
 
@@ -243,40 +238,16 @@ if __name__ == "__main__":
     plt.close()
 
     """
-        Epsilon.
-    """
-    """ fig = plt.figure()
-    fig.set_size_inches(FIGURE_X, FIGURE_Y)
-
-    for exp in EXPS_DATA:
-        Y = data[exp['id']]['epsilon_values']
-        X = np.linspace(1, len(Y), len(Y))
-
-        plt.plot(X,Y,label=exp['label'])
-
-    plt.xlabel('Episode')
-    plt.ylabel('Epsilon')
-
-    plt.savefig('{0}/episode_epsilon.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/episode_epsilon.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
-    plt.close() """
-
-    """
         Q-values plots.
     """
-    # Prepare data to plot.
-    val_iter_Q_vals = np.array(val_iter_data['Q_vals'])
-    exp_Q_vals = {}
-    for exp in EXPS_DATA:
-        exp_Q_vals[exp['id']] = np.array(data[exp['id']]['Q_vals'])
-
     # Sum plot.
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
     for exp in EXPS_DATA:
-
-        Y = np.sum(np.abs(val_iter_Q_vals - exp_Q_vals[exp['id']]), axis=(1,2))
+        errors = np.abs(val_iter_data['Q_vals'] - data[exp['id']]['Q_vals']) # [R,E,S,A]
+        errors = np.mean(errors, axis=0) # [E,S,A]
+        Y = np.sum(errors, axis=(1,2)) # [E]
         X = np.linspace(1, len(Y), len(Y))
 
         plt.plot(X, Y, label=exp['label'])
@@ -301,14 +272,16 @@ if __name__ == "__main__":
 
     for (ax, exp) in zip(axs.flat, EXPS_DATA):
 
-        Q_abs_diffs = np.abs(val_iter_Q_vals - exp_Q_vals[exp['id']])
-        Y = np.mean(Q_abs_diffs, axis=(1,2))
+        errors = np.abs(val_iter_data['Q_vals'] - data[exp['id']]['Q_vals']) # [R,E,S,A]
+        errors = np.mean(errors, axis=0) # [E,S,A]
+        Y = np.mean(errors, axis=(1,2)) # [E]
         X = np.linspace(1, len(Y), len(Y))
-        # Y_std = np.std(Q_abs_diffs, axis=(1,2))
+        # Y_std = np.std(errors, axis=(1,2))
+
         # CI calculation.
-        Q_abs_diffs_flatten = Q_abs_diffs.reshape(len(Y), -1)
+        errors_flatten = errors.reshape(len(Y), -1) # [E,S*A]
         X_CI = np.arange(0, len(Y), 100)
-        CI_bootstrap = [calculate_CI_bootstrap(Y[x], Q_abs_diffs_flatten[x,:]) for x in X_CI]
+        CI_bootstrap = [calculate_CI_bootstrap(Y[x], errors_flatten[x,:]) for x in X_CI]
         CI_bootstrap = np.array(CI_bootstrap).T
         CI_bootstrap = np.flip(CI_bootstrap, axis=0)
         CI_lengths = np.abs(np.subtract(CI_bootstrap,Y[X_CI]))
@@ -318,12 +291,13 @@ if __name__ == "__main__":
         # ax.fill_between(X, Y-Y_std, Y+Y_std, color=p[0].get_color(), alpha=0.15)
 
         # Max Q-values.
-        Q_abs_diffs = np.abs(np.max(val_iter_Q_vals, axis=1) - np.max(exp_Q_vals[exp['id']], axis=2))
-        Y = np.mean(Q_abs_diffs, axis=1)
+        errors = np.abs(np.max(val_iter_data['Q_vals'], axis=1) - np.max(data[exp['id']]['Q_vals'], axis=3)) # [R,E,S]
+        errors = np.mean(errors, axis=0) # [E,S]
+        Y = np.mean(errors, axis=1) # [E]
         X = np.linspace(1, len(Y), len(Y))
         # CI calculation.
         X_CI = np.arange(0, len(Y), 100)
-        CI_bootstrap = [calculate_CI_bootstrap(Y[x], Q_abs_diffs[x,:]) for x in X_CI]
+        CI_bootstrap = [calculate_CI_bootstrap(Y[x], errors[x,:]) for x in X_CI]
         CI_bootstrap = np.array(CI_bootstrap).T
         CI_bootstrap = np.flip(CI_bootstrap, axis=0)
         CI_lengths = np.abs(np.subtract(CI_bootstrap,Y[X_CI]))
@@ -353,16 +327,15 @@ if __name__ == "__main__":
     fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
     fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
-    val_iter_Q_vals_flattened = val_iter_Q_vals.flatten()
-
     for (ax, exp) in zip(axs.flat, EXPS_DATA):
 
-        exp_Q_vals_flattened = exp_Q_vals[exp['id']].reshape(exp_Q_vals[exp['id']].shape[0], -1)
+        errors = np.abs(val_iter_data['Q_vals'] - data[exp['id']]['Q_vals']) # [R,E,S,A]
+        errors = np.mean(errors, axis=0) # [E,S,A]
+        errors = errors.reshape(errors.shape[0], -1) # [E,S*A]
 
-        abs_diff = np.abs(val_iter_Q_vals_flattened - exp_Q_vals_flattened)
-        X = np.arange(0, len(abs_diff), 500)
-        abs_diff_list = abs_diff[X,:].tolist() # Sub-sample.
-        abs_diff_mean = np.mean(abs_diff[X,:], axis=1) # Sub-sample.
+        X = np.arange(0, len(errors), 500)
+        abs_diff_list = errors[X,:].tolist() # Sub-sample.
+        abs_diff_mean = np.mean(errors[X,:], axis=1) # Sub-sample.
 
         violin = ax.violinplot(abs_diff_list, positions=X,
                                 showextrema=True, widths=350)
@@ -389,16 +362,15 @@ if __name__ == "__main__":
     fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
     fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
-    val_iter_Q_vals_flattened = np.max(val_iter_Q_vals, axis=1)
-
     for (ax, exp) in zip(axs.flat, EXPS_DATA):
 
-        exp_Q_vals_flattened = np.max(exp_Q_vals[exp['id']], axis=2)
+        errors = np.abs(np.max(val_iter_data['Q_vals'], axis=1) - np.max(data[exp['id']]['Q_vals'], axis=3)) # [R,E,S]
+        errors = np.mean(errors, axis=0) # [E,S,A]
+        errors = errors.reshape(errors.shape[0], -1) # [E,S*A]
 
-        abs_diff = np.abs(val_iter_Q_vals_flattened - exp_Q_vals_flattened)
-        X = np.arange(0, len(abs_diff), 500)
-        abs_diff_list = abs_diff[X,:].tolist() # Sub-sample.
-        abs_diff_mean = np.mean(abs_diff[X,:], axis=1) # Sub-sample.
+        X = np.arange(0, len(errors), 500)
+        abs_diff_list = errors[X,:].tolist() # Sub-sample.
+        abs_diff_mean = np.mean(errors[X,:], axis=1) # Sub-sample.
 
         violin = ax.violinplot(abs_diff_list, positions=X,
                                 showextrema=True, widths=350)
