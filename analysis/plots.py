@@ -291,7 +291,10 @@ if __name__ == "__main__":
         # ax.fill_between(X, Y-Y_std, Y+Y_std, color=p[0].get_color(), alpha=0.15)
 
         # Max Q-values.
-        errors = np.abs(np.max(val_iter_data['Q_vals'], axis=1) - np.max(data[exp['id']]['Q_vals'], axis=3)) # [R,E,S]
+        errors = np.abs(val_iter_data['Q_vals'] - data[exp['id']]['Q_vals']) # [R,E,S,A]
+        maximizing_actions = np.argmax(data[exp['id']]['Q_vals'], axis=3) # [R,E,S]
+        x, y, z = np.indices(maximizing_actions.shape)
+        errors = errors[x,y,z,maximizing_actions] # [R,E,S]
         errors = np.mean(errors, axis=0) # [E,S]
         Y = np.mean(errors, axis=1) # [E]
         X = np.linspace(1, len(Y), len(Y))
@@ -364,9 +367,11 @@ if __name__ == "__main__":
 
     for (ax, exp) in zip(axs.flat, EXPS_DATA):
 
-        errors = np.abs(np.max(val_iter_data['Q_vals'], axis=1) - np.max(data[exp['id']]['Q_vals'], axis=3)) # [R,E,S]
-        errors = np.mean(errors, axis=0) # [E,S,A]
-        errors = errors.reshape(errors.shape[0], -1) # [E,S*A]
+        errors = np.abs(val_iter_data['Q_vals'] - data[exp['id']]['Q_vals']) # [R,E,S,A]
+        maximizing_actions = np.argmax(data[exp['id']]['Q_vals'], axis=3) # [R,E,S]
+        x, y, z = np.indices(maximizing_actions.shape)
+        errors = errors[x,y,z,maximizing_actions] # [R,E,S]
+        errors = np.mean(errors, axis=0) # [E,S]
 
         X = np.arange(0, len(errors), 500)
         abs_diff_list = errors[X,:].tolist() # Sub-sample.
