@@ -15,19 +15,16 @@ from acme import specs
 from acme.tf import networks
 from acme import wrappers
 
-from algos import dqn_acme
+from algos.dqn import dqn_acme
 from rlutil.envs.gridcraft.grid_spec_cy import TileType
 
 
 def _make_network(env_spec : dm_env,
-                  torso_layers : Sequence[int] = [10],
-                  head_layers  : Sequence[int] = [10]):
+                  hidden_layers : Sequence[int] = [10,10]):
+    layers = hidden_layers + [env_spec.actions.num_values]
+    print(layers)
     network = snt.Sequential([
-        # Torso MLP.
-        snt.nets.MLP(torso_layers, activate_final=True),
-        # Dueling MLP head.
-        networks.DuellingMLP(num_actions=env_spec.actions.num_values,
-                            hidden_sizes=head_layers)  
+        snt.nets.MLP(layers, activate_final=False),
     ])
     return network
 
@@ -47,10 +44,26 @@ class DQN(object):
         self.env = wrap_env(env)
         env_spec = acme.make_environment_spec(self.env)
 
-        network = _make_network(env_spec)
+        network = _make_network(env_spec,
+                        hidden_layers=dqn_args['hidden_layers'])
 
         self.agent = dqn_acme.DQN(environment_spec=env_spec,
-                                    network=network, **dqn_args)
+                                    network=network,
+                                    batch_size=dqn_args['batch_size'],
+                                    prefetch_size=dqn_args['prefetch_size'],
+                                    target_update_period=dqn_args['target_update_period'],
+                                    samples_per_insert=dqn_args['samples_per_insert'],
+                                    min_replay_size=dqn_args['min_replay_size'],
+                                    max_replay_size=dqn_args['max_replay_size'],
+                                    prioritized_replay=dqn_args['prioritized_replay'],
+                                    importance_sampling_exponent=dqn_args['importance_sampling_exponent'],
+                                    priority_exponent=dqn_args['priority_exponent'],
+                                    n_step=dqn_args['n_step'],
+                                    epsilon_init=dqn_args['epsilon_init'],
+                                    epsilon_final=dqn_args['epsilon_final'],
+                                    epsilon_schedule_timesteps=dqn_args['epsilon_schedule_timesteps'],
+                                    learning_rate=dqn_args['learning_rate'],
+                                    discount=dqn_args['discount'])
 
     def train(self, num_episodes):
 

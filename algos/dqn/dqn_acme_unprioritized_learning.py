@@ -124,8 +124,10 @@ class DQNUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
       # The rewards and discounts have to have the same type as network values.
       r_t = tf.cast(transitions.reward, q_tm1.dtype)
       r_t = tf.clip_by_value(r_t, -1., 1.)
-      d_t = tf.cast(transitions.discount, q_tm1.dtype) * tf.cast(
+      d_t = tf.cast(tf.ones_like(transitions.discount), q_tm1.dtype) * tf.cast(
           self._discount, q_tm1.dtype)
+      # d_t = tf.cast(transitions.discount, q_tm1.dtype) * tf.cast(
+      #    self._discount, q_tm1.dtype) # transitions.discount = 0 if last timestep.
 
       # Compute the loss.
       _, extra = trfl.double_qlearning(q_tm1, transitions.action, r_t, d_t,

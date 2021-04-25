@@ -20,14 +20,16 @@ FIGURE_Y = 4.0
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
-# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-55-56' # Env-8,8-1
-VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-27-39' # Env-8,8-2
+VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-55-56' # Env-8,8-1
+# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-27-39' # Env-8,8-2
 # VAL_ITER_DATA = '8_8_val_iter_2021-04-13-22-56-57' # Env-8,8-3
 
 EXPS_DATA = [
-            # {'id': '8_8_q_learning_2021-04-13-17-56-48', 'label': 'Q-learning'}, # Env-8,8-1
+            # {'id': '8_8_q_learning_2021-04-23-11-32-21', 'label': 'Q-learning'}, # Env-8,8-1
 
-            #{'id': '8_8_dqn_2021-04-13-18-29-44', 'label': 'DQN+1hot+500k'}, # Env-8,8-1
+            #{'id': '8_8_oracle_fqi_2021-04-24-23-50-30', 'label': 'OracleFQI-10k'}, # Env-8,8-1
+            {'id': '8_8_oracle_fqi_2021-04-25-13-58-37', 'label': 'OracleFQI-1k'}, # Env-8,8-1
+
             #{'id': '8_8_dqn_2021-04-13-18-52-45', 'label': 'DQN+1hot+400k'}, # Env-8,8-1
             #{'id': '8_8_dqn_2021-04-13-19-15-32', 'label': 'DQN+1hot+300k'}, # Env-8,8-1
             #{'id': '8_8_dqn_2021-04-13-19-38-17', 'label': 'DQN+1hot+200k'}, # Env-8,8-1
@@ -52,7 +54,7 @@ EXPS_DATA = [
             #{'id': '8_8_dqn_2021-04-14-02-07-55', 'label': 'DQN+rand+25k'}, # Env-8,8-1
 
             #################################################################################
-            {'id': '8_8_q_learning_2021-04-13-22-33-17', 'label': 'Q-learning'}, # Env-8,8-2
+            # {'id': '8_8_q_learning_2021-04-23-09-54-34', 'label': 'Q-learning'}, # Env-8,8-2
 
             #################################################################################
             # {'id': '8_8_q_learning_2021-04-13-23-39-31', 'label': 'Q-learning'}, # Env-8,8-3 (20k episodes)

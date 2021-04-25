@@ -35,7 +35,7 @@ import trfl
 
 from algos.utils import tf2_savers
 from algos.utils.tf2_layers import EpsilonGreedyExploration
-from algos.dqn_acme_unprioritized_learning import DQNUnprioritizedLearner
+from algos.dqn.dqn_acme_unprioritized_learning import DQNUnprioritizedLearner
 
 
 class DQN(agent.Agent):
@@ -97,6 +97,8 @@ class DQN(agent.Agent):
         logger: logger object to be used by learner.
         max_gradient_norm: used for gradient clipping.
         """
+
+        print('discount', discount)
 
         # Create a replay server to add data to. This uses no limiter behavior in
         # order to allow the Agent interface to handle it.

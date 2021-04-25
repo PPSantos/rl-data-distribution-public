@@ -8,8 +8,12 @@ from datetime import datetime
 import multiprocessing as mp
 
 from rlutil.json_utils import NumpyEncoder
-from algos import value_iteration, q_learning, dqn
 from envs import env_suite
+
+from algos.value_iteration import ValueIteration
+from algos.q_learning import QLearning
+from algos.dqn.dqn import DQN
+from algos.oracle_fqi.oracle_fqi import OracleFQI
 
 from rlutil.envs.gridcraft.grid_spec_cy import TileType
 
@@ -20,8 +24,8 @@ DEFAULT_TRAIN_ARGS = {
     # General arguments.
     'num_runs': 1,
     'num_processors': 1,
-    'algo': 'dqn',
-    'num_episodes': 10_000,
+    'algo': 'oracle_fqi',
+    'num_episodes': 2_000, # 100_000 steps
     'gamma': 0.9,
 
     # Env. arguments.
@@ -34,7 +38,7 @@ DEFAULT_TRAIN_ARGS = {
         'tabular': False,
         'seed': 11,
         'smooth_obs': False,
-        'one_hot_obs': True,
+        'one_hot_obs': False,
     },
 
     # Value iteration arguments.
@@ -66,6 +70,26 @@ DEFAULT_TRAIN_ARGS = {
         'epsilon_final': 0.01,
         'epsilon_schedule_timesteps': 450_000,
         'learning_rate': 1e-03,
+        'hidden_layers': [10,10],
+    },
+
+    # Oracle FQI arguments.
+    'oracle_fqi_args': {
+        'oracle_q_vals': '8_8_val_iter_2021-04-13-17-55-56', # exp. id of val-iter/oracle Q-vals.
+        'batch_size': 100,
+        'prefetch_size': 1,
+        'num_sampling_steps': 1_000,
+        'num_gradient_steps': 20,
+        'max_replay_size': 100_000, # 1_000
+        'n_step': 1,
+        'epsilon_init': 0.9,
+        'epsilon_final': 0.01,
+        'epsilon_schedule_timesteps': 100_000,
+        'learning_rate': 1e-03,
+        'hidden_layers': [10,10],
+        #'target_update_period': 5_000,
+        #'samples_per_insert': 128.0,
+        #'min_replay_size': 50_000,
     }
 
 }
@@ -95,15 +119,30 @@ def train_run(run_args):
     # Instantiate algorithm.
     if args['algo'] == 'val_iter':
         args['val_iter_args']['gamma'] = args['gamma']
-        agent = value_iteration.ValueIteration(env, **args['val_iter_args'])
+        agent = ValueIteration(env, **args['val_iter_args'])
 
     elif args['algo'] == 'q_learning':
         args['q_learning_args']['gamma'] = args['gamma']
-        agent = q_learning.QLearning(env, **args['q_learning_args'])
+        agent = QLearning(env, **args['q_learning_args'])
 
     elif args['algo'] == 'dqn':
         args['dqn_args']['discount'] = args['gamma']
-        agent = dqn.DQN(env, env_grid_spec, args['dqn_args'])
+        agent = DQN(env, env_grid_spec, args['dqn_args'])
+
+    elif args['algo'] == 'oracle_fqi':
+
+        # Load optimal (oracle) policy/Q-values.
+        val_iter_path = DATA_FOLDER_PATH + args['oracle_fqi_args']['oracle_q_vals']
+        print(f"Opening experiment {args['oracle_fqi_args']['oracle_q_vals']} to get oracle Q-vals")
+        with open(val_iter_path + "/train_data.json", 'r') as f:
+            val_iter_data = json.load(f)
+            val_iter_data = json.loads(val_iter_data)
+            val_iter_data = val_iter_data[0]
+        f.close()
+
+        args['oracle_fqi_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
+        args['oracle_fqi_args']['discount'] = args['gamma']
+        agent = OracleFQI(env, env_grid_spec, args['oracle_fqi_args'])
 
     else:
         raise ValueError("Unknown algorithm.")

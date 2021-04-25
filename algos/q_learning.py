@@ -50,8 +50,12 @@ class QLearning(object):
                 s_t1, r_t1, done, info = self.env.step(a_t)
 
                 # Q-learning update.
+                # if not done:
                 Q[s_t][a_t] += self.alpha * \
-                    (r_t1 + self.gamma * np.max(Q[s_t1,:]) - Q[s_t][a_t])
+                        (r_t1 + self.gamma * np.max(Q[s_t1,:]) - Q[s_t][a_t])
+                # else:
+                #    Q[s_t][a_t] += self.alpha * \
+                #        (r_t1 + 0.0 - Q[s_t][a_t]) 
 
                 # Log data.
                 episode_cumulative_reward += r_t1
