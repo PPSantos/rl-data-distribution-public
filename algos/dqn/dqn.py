@@ -22,7 +22,7 @@ from rlutil.envs.gridcraft.grid_spec_cy import TileType
 def _make_network(env_spec : dm_env,
                   hidden_layers : Sequence[int] = [10,10]):
     layers = hidden_layers + [env_spec.actions.num_values]
-    print('network layers:' layers)
+    print('network layers:', layers)
     network = snt.Sequential([
         snt.nets.MLP(layers, activate_final=False),
     ])
