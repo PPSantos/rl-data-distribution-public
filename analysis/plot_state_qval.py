@@ -167,8 +167,16 @@ def main(exp_id, val_iter_exp):
         print_env(counts, (exp_args['env_args']['size_x'], exp_args['env_args']['size_y']), float_format="{:.0f} ")
 
     while True:
-        state_to_plot = int(input("Enter state to plot Q-val: "))
-        print(state_to_plot)
+        print("\nEnter state to plot Q-val")
+        line = int(input("\tline: "))
+        col = int(input("\tcolumn: "))
+        state_to_plot = exp_args['env_args']['size_x']*line+col
+        print(f'line={line}, col={col}: state={state_to_plot}')
+
+        # Display val. iter. Q-values.
+        print('Value iteration Q-values:')
+        for action in range(val_iter_data['Q_vals'].shape[-1]):
+            print(f"Q({state_to_plot},{action})={val_iter_data['Q_vals'][state_to_plot,action]}")
 
         # Plot.
         num_cols = 3
@@ -189,7 +197,6 @@ def main(exp_id, val_iter_exp):
                 l = ax.plot(X, Y, label=f'Action {action}')
 
                 # Plot true Q-values.
-                print(f"Val. iter. Q({state_to_plot},{action})={val_iter_data['Q_vals'][state_to_plot,action]}")
                 ax.hlines(val_iter_data['Q_vals'][state_to_plot,action],
                         xmin=0, xmax=run_Q_vals.shape[0], linestyles='--', color=l[0].get_color())
 
