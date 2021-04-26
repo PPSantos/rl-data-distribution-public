@@ -79,8 +79,8 @@ def main(exp_id, val_iter_exp):
     if (exp_id is None) or (val_iter_exp is None):
         c_args = get_arguments()
         exp_id = c_args.exp
-        val_iter_exp = args.val_iter_exp
-        
+        val_iter_exp = c_args.val_iter_exp
+
     print('Arguments (analysis/plots_single.py):')
     print('\tExp. id: {0}'.format(exp_id))
     print('\tVal. iter. exp. id: {0}\n'.format(val_iter_exp))
