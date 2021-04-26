@@ -25,7 +25,7 @@ DEFAULT_TRAIN_ARGS = {
     'num_runs': 1,
     'num_processors': 1,
     'algo': 'oracle_fqi',
-    'num_episodes': 2_000, # 100_000 steps
+    'num_episodes': 200,
     'gamma': 0.9,
 
     # Env. arguments.
@@ -38,7 +38,7 @@ DEFAULT_TRAIN_ARGS = {
         'tabular': False,
         'seed': 11,
         'smooth_obs': False,
-        'one_hot_obs': False,
+        'one_hot_obs': True,
     },
 
     # Value iteration arguments.
@@ -67,7 +67,7 @@ DEFAULT_TRAIN_ARGS = {
         'priority_exponent': 0.6,
         'n_step': 1,
         'epsilon_init': 0.9,
-        'epsilon_final': 0.01,
+        'epsilon_final': 0.0,
         'epsilon_schedule_timesteps': 450_000,
         'learning_rate': 1e-03,
         'hidden_layers': [10,10],
@@ -80,16 +80,13 @@ DEFAULT_TRAIN_ARGS = {
         'prefetch_size': 1,
         'num_sampling_steps': 1_000,
         'num_gradient_steps': 20,
-        'max_replay_size': 100_000, # 1_000
+        'max_replay_size': 500_000,
         'n_step': 1,
         'epsilon_init': 0.9,
-        'epsilon_final': 0.01,
-        'epsilon_schedule_timesteps': 100_000,
+        'epsilon_final': 0.0,
+        'epsilon_schedule_timesteps': 200_000,
         'learning_rate': 1e-03,
         'hidden_layers': [10,10],
-        #'target_update_period': 5_000,
-        #'samples_per_insert': 128.0,
-        #'min_replay_size': 50_000,
     }
 
 }
@@ -188,6 +185,8 @@ def train(train_args=None):
     dumped = json.dumps(train_data, cls=NumpyEncoder)
     json.dump(dumped, f)
     f.close()
+
+    return exp_name
 
 if __name__ == "__main__":
     train() # Uses DEFAULT_TRAIN_ARGS.

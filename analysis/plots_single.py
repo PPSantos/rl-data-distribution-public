@@ -28,11 +28,6 @@ def get_arguments():
 
     return parser.parse_args()
 
-def print_arguments(args):
-    print('Arguments (analysis/plots_single.py):')
-    print('\tExp. id: {0}'.format(args.exp))
-    print('\tVal. iter. exp. id: {0}\n'.format(args.val_iter_exp))
-
 def calculate_CI_bootstrap(x_hat, samples, num_resamples=20000):
     """
         Calculates 95 % interval using bootstrap.
@@ -78,21 +73,35 @@ def print_env(data, sizes, float_format=None):
     sys.stdout.write('-' * (size_x + 2)+'\n')
 
 
-if __name__ == "__main__":
+def main(exp_id, val_iter_exp):
 
-    c_args = get_arguments()
-    print_arguments(c_args)
+    # Parse arguments if needed.
+    if (exp_id is None) or (val_iter_exp is None):
+        c_args = get_arguments()
+        exp_id = c_args.exp
+        val_iter_exp = args.val_iter_exp
+        
+    print('Arguments (analysis/plots_single.py):')
+    print('\tExp. id: {0}'.format(exp_id))
+    print('\tVal. iter. exp. id: {0}\n'.format(val_iter_exp))
 
     # Prepare plots output folder.
-    output_folder = PLOTS_FOLDER_PATH + c_args.exp + '/'
+    output_folder = PLOTS_FOLDER_PATH + exp_id + '/'
     os.makedirs(output_folder, exist_ok=True)
 
     # Get args file (assumes all experiments share the same arguments).
-    exp_args = get_args_json_file(DATA_FOLDER_PATH + c_args.exp)
+    exp_args = get_args_json_file(DATA_FOLDER_PATH + exp_id)
+    print('Exp. args:')
+    print(exp_args)
+
+    # Store a copy of the args.json file inside plots folder.
+    with open(output_folder + "args.json", 'w') as f:
+        json.dump(exp_args, f)
+        f.close()
 
     # Load optimal policy/Q-values.
-    val_iter_path = DATA_FOLDER_PATH + c_args.val_iter_exp
-    print(f"Opening experiment {c_args.val_iter_exp}")
+    val_iter_path = DATA_FOLDER_PATH + val_iter_exp
+    print(f"Opening experiment {val_iter_exp}")
     with open(val_iter_path + "/train_data.json", 'r') as f:
         val_iter_data = json.load(f)
         val_iter_data = json.loads(val_iter_data)
@@ -104,8 +113,8 @@ if __name__ == "__main__":
     data = {}
 
     # Open data.
-    print(f"Opening experiment {c_args.exp}")
-    exp_path = DATA_FOLDER_PATH + c_args.exp
+    print(f"Opening experiment {exp_id}")
+    exp_path = DATA_FOLDER_PATH + exp_id
     with open(exp_path + "/train_data.json", 'r') as f:
         exp_data = json.load(f)
         exp_data = json.loads(exp_data)
@@ -133,20 +142,20 @@ if __name__ == "__main__":
     """
         Print policies.
     """
-    print(f'{c_args.val_iter_exp} policy:')
+    print(f'{val_iter_exp} policy:')
     print_env(val_iter_data['policy'], (exp_args['env_args']['size_x'], exp_args['env_args']['size_y']))
     for (i, policy) in enumerate(data['policies']):
-        print(f"{c_args.exp} policy (run {i}):")
+        print(f"{exp_id} policy (run {i}):")
         print_env(policy, (exp_args['env_args']['size_x'], exp_args['env_args']['size_y']))
 
     """
         Print max Q-values.
     """
     print('\n')
-    print(f'{c_args.val_iter_exp} max Q-values:')
+    print(f'{val_iter_exp} max Q-values:')
     print_env(val_iter_data['max_Q_vals'], (exp_args['env_args']['size_x'], exp_args['env_args']['size_y']), float_format="{:.1f} ")
     for i, qs in enumerate(data['max_Q_vals']):
-        print(f"{c_args.exp} max Q-values (run {i}):")
+        print(f"{exp_id} max Q-values (run {i}):")
         print_env(qs, (exp_args['env_args']['size_x'], exp_args['env_args']['size_y']), float_format="{:.1f} ")
 
     """
@@ -154,7 +163,7 @@ if __name__ == "__main__":
     """
     print('\n')
     for i, counts in enumerate(data['states_counts']):
-        print(f"{c_args.exp} states_counts (run {i}):")
+        print(f"{exp_id} states_counts (run {i}):")
         print_env(counts, (exp_args['env_args']['size_x'], exp_args['env_args']['size_y']), float_format="{:.0f} ")
 
     """
@@ -338,3 +347,6 @@ if __name__ == "__main__":
     plt.savefig('{0}/q_values_violinplot_maxQ_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/q_values_violinplot_maxQ_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
+
+if __name__ == "__main__":
+    main(exp_id=None,val_iter_exp=None)
