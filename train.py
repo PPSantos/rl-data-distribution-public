@@ -22,10 +22,10 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 DEFAULT_TRAIN_ARGS = {
 
     # General arguments.
-    'num_runs': 1,
-    'num_processors': 1,
+    'num_runs': 5,
+    'num_processors': 5,
     'algo': 'oracle_fqi',
-    'num_episodes': 200,
+    'num_episodes': 10_000,
     'gamma': 0.9,
 
     # Env. arguments.
@@ -34,9 +34,9 @@ DEFAULT_TRAIN_ARGS = {
         'size_y': 8,
         'dim_obs': 8,
         'time_limit': 50,
-        'wall_ratio': 0.0,
+        'wall_ratio': 0.2,
         'tabular': False,
-        'seed': 11,
+        'seed': 1892,
         'smooth_obs': False,
         'one_hot_obs': True,
     },
