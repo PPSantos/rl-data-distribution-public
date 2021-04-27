@@ -8,7 +8,7 @@ import pathlib
 import argparse
 
 import matplotlib
-#matplotlib.use('agg')
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 plt.style.use('ggplot')
@@ -86,7 +86,7 @@ def main(exp_id, val_iter_exp):
     print('\tVal. iter. exp. id: {0}\n'.format(val_iter_exp))
 
     # Prepare plots output folder.
-    output_folder = PLOTS_FOLDER_PATH + exp_id + '/'
+    output_folder = PLOTS_FOLDER_PATH + exp_id + '/Q-values/'
     os.makedirs(output_folder, exist_ok=True)
 
     # Get args file (assumes all experiments share the same arguments).
@@ -166,54 +166,59 @@ def main(exp_id, val_iter_exp):
         print(f"{exp_id} states_counts (run {i}):")
         print_env(counts, (exp_args['env_args']['size_x'], exp_args['env_args']['size_y']), float_format="{:.0f} ")
 
-    while True:
-        print("\nEnter state to plot Q-val")
-        line = int(input("\tline: "))
-        col = int(input("\tcolumn: "))
-        state_to_plot = exp_args['env_args']['size_x']*line+col
-        print(f'line={line}, col={col}: state={state_to_plot}')
+    """
+        Q-values plots.
+    """
+    for line in range(exp_args['env_args']['size_y']):
+        for col in range(exp_args['env_args']['size_x']):
 
-        # Display val. iter. Q-values.
-        print('Value iteration Q-values:')
-        for action in range(val_iter_data['Q_vals'].shape[-1]):
-            print(f"Q({state_to_plot},{action})={val_iter_data['Q_vals'][state_to_plot,action]}")
+            # print("\nEnter state to plot Q-val")
+            # line = int(input("\tline: "))
+            # col = int(input("\tcolumn: "))
+            state_to_plot = exp_args['env_args']['size_x']*line+col
+            print(f'line={line}, col={col}: state={state_to_plot}')
 
-        # Plot.
-        num_cols = 3
-        y_axis_range = [0,11]
-        num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
-        fig, axs = plt.subplots(num_rows, num_cols)
-        fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
-        fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
+            # Display val. iter. Q-values.
+            print('Value iteration Q-values:')
+            for action in range(val_iter_data['Q_vals'].shape[-1]):
+                print(f"Q({state_to_plot},{action})={val_iter_data['Q_vals'][state_to_plot,action]}")
 
-        i = 0
-        for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [E,S,A]
+            # Plot.
+            num_cols = 3
+            y_axis_range = [0,11]
+            num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
+            fig, axs = plt.subplots(num_rows, num_cols)
+            fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
+            fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
-            for action in range(run_Q_vals.shape[-1]):
-                
-                # Plot predicted Q-values.
-                Y = run_Q_vals[:,state_to_plot,action]
-                X = np.linspace(1, len(Y), len(Y))
-                l = ax.plot(X, Y, label=f'Action {action}')
+            i = 0
+            for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [E,S,A]
 
-                # Plot true Q-values.
-                ax.hlines(val_iter_data['Q_vals'][state_to_plot,action],
-                        xmin=0, xmax=run_Q_vals.shape[0], linestyles='--', color=l[0].get_color())
+                for action in range(run_Q_vals.shape[-1]):
+                    
+                    # Plot predicted Q-values.
+                    Y = run_Q_vals[:,state_to_plot,action]
+                    X = np.linspace(1, len(Y), len(Y))
+                    l = ax.plot(X, Y, label=f'Action {action}')
 
-            ax.legend()
-            ax.set_ylim(y_axis_range)
-            ax.set_xlabel('Episode')
-            ax.set_ylabel('Q-value')
-            ax.set_title(label=f"Run {i}")
+                    # Plot true Q-values.
+                    ax.hlines(val_iter_data['Q_vals'][state_to_plot,action],
+                            xmin=0, xmax=run_Q_vals.shape[0], linestyles='--', color=l[0].get_color())
 
-            i += 1
+                ax.legend()
+                ax.set_ylim(y_axis_range)
+                ax.set_xlabel('Episode')
+                ax.set_ylabel('Q-value')
+                ax.set_title(label=f"Run {i}")
 
-        fig.suptitle(f'Q-values, state {state_to_plot}')
+                i += 1
 
-        plt.show()
-        # plt.savefig('{0}/q_values_violinplot_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
-        # plt.savefig('{0}/q_values_violinplot_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-        # plt.close()
+            fig.suptitle(f'Q-values, state {state_to_plot}; line {line}, col {col}')
+
+            #plt.show()
+            #plt.savefig('{0}/Q_values_s{1}-{2}-{3}.pdf'.format(output_folder, state_to_plot, line, col), bbox_inches='tight', pad_inches=0)
+            plt.savefig('{0}/Q_values_s{1}-{2}-{3}.png'.format(output_folder, state_to_plot, line, col), bbox_inches='tight', pad_inches=0)
+            plt.close()
 
 if __name__ == "__main__":
     main(exp_id=None,val_iter_exp=None)
