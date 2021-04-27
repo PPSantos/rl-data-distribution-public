@@ -10,6 +10,7 @@ from rlutil import math_utils
 from rlutil.envs.gridcraft.grid_spec_cy import TileType
 
 
+# WARNING: Custom envs must be square.
 CUSTOM_ENVS = {
     'gridEnv1': grid_spec_cy.spec_from_sparse_locations(8, 8,
                     {TileType.START: [(0, 7)],

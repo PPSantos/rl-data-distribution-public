@@ -59,3 +59,8 @@ Exp. ids: [
     '8_8_oracle_fqi_2021-04-27-16-06-28', # 50 k
     '8_8_oracle_fqi_2021-04-27-16-17-17', # 25 k
 ]
+
+# Lava env. 1
+
+# Value iteration:
+lavaEnv1_val_iter_2021-04-27-19-47-36

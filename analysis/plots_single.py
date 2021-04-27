@@ -142,21 +142,22 @@ def main(exp_id, val_iter_exp):
     """
         Print policies.
     """
+    lateral_size = int(np.sqrt(len(val_iter_data['policy']))) # Assumes env. is a square.
     print(f'{val_iter_exp} policy:')
-    print_env(val_iter_data['policy'], (exp_args['env_args']['size_x'], exp_args['env_args']['size_y']))
+    print_env(val_iter_data['policy'], (lateral_size, lateral_size))
     for (i, policy) in enumerate(data['policies']):
         print(f"{exp_id} policy (run {i}):")
-        print_env(policy, (exp_args['env_args']['size_x'], exp_args['env_args']['size_y']))
+        print_env(policy, (lateral_size, lateral_size))
 
     """
         Print max Q-values.
     """
     print('\n')
     print(f'{val_iter_exp} max Q-values:')
-    print_env(val_iter_data['max_Q_vals'], (exp_args['env_args']['size_x'], exp_args['env_args']['size_y']), float_format="{:.1f} ")
+    print_env(val_iter_data['max_Q_vals'], (lateral_size, lateral_size), float_format="{:.1f} ")
     for i, qs in enumerate(data['max_Q_vals']):
         print(f"{exp_id} max Q-values (run {i}):")
-        print_env(qs, (exp_args['env_args']['size_x'], exp_args['env_args']['size_y']), float_format="{:.1f} ")
+        print_env(qs, (lateral_size, lateral_size), float_format="{:.1f} ")
 
     """
         Print states counts.
@@ -164,7 +165,7 @@ def main(exp_id, val_iter_exp):
     print('\n')
     for i, counts in enumerate(data['states_counts']):
         print(f"{exp_id} states_counts (run {i}):")
-        print_env(counts, (exp_args['env_args']['size_x'], exp_args['env_args']['size_y']), float_format="{:.0f} ")
+        print_env(counts, (lateral_size, lateral_size), float_format="{:.0f} ")
 
     """
         Plot episode rewards.
