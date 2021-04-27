@@ -20,15 +20,16 @@ FIGURE_Y = 4.0
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
-VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-55-56' # Env-8,8-1
+# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-55-56' # Env-8,8-1
 # VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-27-39' # Env-8,8-2
 # VAL_ITER_DATA = '8_8_val_iter_2021-04-13-22-56-57' # Env-8,8-3
+VAL_ITER_DATA = 'LavaEnv1_val_iter_2021-04-27-19-08-17' # lavaEnv1
 
 EXPS_DATA = [
-            # {'id': '8_8_q_learning_2021-04-23-11-32-21', 'label': 'Q-learning'}, # Env-8,8-1
+            {'id': 'LavaEnv1_q_learning_2021-04-27-19-07-31', 'label': 'Q-learning'},
 
             #{'id': '8_8_oracle_fqi_2021-04-24-23-50-30', 'label': 'OracleFQI-10k'}, # Env-8,8-1
-            {'id': '8_8_oracle_fqi_2021-04-25-13-58-37', 'label': 'OracleFQI-1k'}, # Env-8,8-1
+            # {'id': '8_8_oracle_fqi_2021-04-25-13-58-37', 'label': 'OracleFQI-1k'}, # Env-8,8-1
 
             #{'id': '8_8_dqn_2021-04-13-18-52-45', 'label': 'DQN+1hot+400k'}, # Env-8,8-1
             #{'id': '8_8_dqn_2021-04-13-19-15-32', 'label': 'DQN+1hot+300k'}, # Env-8,8-1
@@ -160,23 +161,24 @@ if __name__ == "__main__":
     """
         Print policies.
     """
+    lateral_size = int(np.sqrt(len(val_iter_data['policy']))) # Assumes env. is a square.
     print(f'{VAL_ITER_DATA} policy:')
-    print_env(val_iter_data['policy'], (args['env_args']['size_x'], args['env_args']['size_y']))
+    print_env(val_iter_data['policy'], (lateral_size, lateral_size))
     for exp in EXPS_DATA:
         for (i, policy) in enumerate(data[exp['id']]['policies']):
             print(f"{exp['label']} policy (run {i}):")
-            print_env(policy, (args['env_args']['size_x'], args['env_args']['size_y']))
+            print_env(policy, (lateral_size, lateral_size))
 
     """
         Print max Q-values.
     """
     print('\n')
     print(f'{VAL_ITER_DATA} max Q-values:')
-    print_env(val_iter_data['max_Q_vals'], (args['env_args']['size_x'], args['env_args']['size_y']), float_format="{:.1f} ")
+    print_env(val_iter_data['max_Q_vals'], (lateral_size, lateral_size), float_format="{:.1f} ")
     for exp in EXPS_DATA:
         for i, qs in enumerate(data[exp['id']]['max_Q_vals']):
             print(f"{exp['label']} max Q-values (run {i}):")
-            print_env(qs, (args['env_args']['size_x'], args['env_args']['size_y']), float_format="{:.1f} ")
+            print_env(qs, (lateral_size, lateral_size), float_format="{:.1f} ")
 
     """
         Print states counts.
@@ -185,7 +187,7 @@ if __name__ == "__main__":
     for exp in EXPS_DATA:
         for i, counts in enumerate(data[exp['id']]['states_counts']):
             print(f"{exp['label']} states_counts (run {i}):")
-            print_env(counts, (args['env_args']['size_x'], args['env_args']['size_y']), float_format="{:.0f} ")
+            print_env(counts, (lateral_size, lateral_size), float_format="{:.0f} ")
 
     """
         Plot episode rewards (averaged over all runs).

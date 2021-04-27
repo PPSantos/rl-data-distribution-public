@@ -15,8 +15,6 @@ from algos.q_learning import QLearning
 from algos.dqn.dqn import DQN
 from algos.oracle_fqi.oracle_fqi import OracleFQI
 
-from rlutil.envs.gridcraft.grid_spec_cy import TileType
-
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 
 DEFAULT_TRAIN_ARGS = {
