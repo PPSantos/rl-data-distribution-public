@@ -30,13 +30,10 @@ DEFAULT_TRAIN_ARGS = {
 
     # Env. arguments.
     'env_args': {
-        'size_x': 8,
-        'size_y': 8,
+        'env_name': 'gridEnv1',
         'dim_obs': 8,
         'time_limit': 50,
-        'wall_ratio': 0.2,
         'tabular': False,
-        'seed': 1892,
         'smooth_obs': False,
         'one_hot_obs': True,
     },
@@ -92,8 +89,9 @@ DEFAULT_TRAIN_ARGS = {
 }
 
 def create_exp_name(args):
-    return str(args['env_args']['size_x']) + '_' + str(args['env_args']['size_y']) + \
-        '_' + args['algo'] + '_' + str(datetime.today().strftime('%Y-%m-%d-%H-%M-%S'))
+    return args['env_args']['env_name'] + \
+        '_' + args['algo'] + '_' + \
+        str(datetime.today().strftime('%Y-%m-%d-%H-%M-%S'))
 
 def train_run(run_args):
 
@@ -102,7 +100,7 @@ def train_run(run_args):
     time.sleep(time_delay)
 
     # Load environment.
-    env, env_grid_spec = env_suite.random_grid_env(**args['env_args'], distance_reward=False, absorb=False)
+    env, env_grid_spec = env_suite.get_custom_env(**args['env_args'], absorb=False)
 
     # print('Env num states:', env.num_states)
     # print('Env num actions:', env.num_actions)
