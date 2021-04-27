@@ -41,5 +41,5 @@ if __name__ == "__main__":
 
     for exp_id in EXP_IDS:
         print(exp_id)
-        plots(exp_id, VAL_ITER_DATA)
+        #plots(exp_id, VAL_ITER_DATA)
         Qvalplots(exp_id, VAL_ITER_DATA)
