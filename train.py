@@ -20,15 +20,15 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 DEFAULT_TRAIN_ARGS = {
 
     # General arguments.
-    'num_runs': 5,
-    'num_processors': 5,
+    'num_runs': 1,
+    'num_processors': 1,
     'algo': 'oracle_fqi',
     'num_episodes': 10_000,
     'gamma': 0.9,
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'gridEnv1',
+        'env_name': 'gridEnv4',
         'dim_obs': 8,
         'time_limit': 50,
         'tabular': False,

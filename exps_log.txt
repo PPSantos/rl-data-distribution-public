@@ -64,3 +64,31 @@ Exp. ids: [
 
 # Value iteration:
 lavaEnv1_val_iter_2021-04-27-19-47-36
+
+[
+# One-hot observations.
+'lavaEnv1_oracle_fqi_2021-04-27-20-06-26',
+'lavaEnv1_oracle_fqi_2021-04-27-20-15-52',
+'lavaEnv1_oracle_fqi_2021-04-27-20-25-14',
+'lavaEnv1_oracle_fqi_2021-04-27-20-34-37',
+'lavaEnv1_oracle_fqi_2021-04-27-20-43-57',
+'lavaEnv1_oracle_fqi_2021-04-27-20-53-15',
+'lavaEnv1_oracle_fqi_2021-04-27-21-02-34',
+
+# Smoothed observations.
+'lavaEnv1_oracle_fqi_2021-04-27-21-11-52',
+'lavaEnv1_oracle_fqi_2021-04-27-21-21-08',
+'lavaEnv1_oracle_fqi_2021-04-27-21-30-21',
+'lavaEnv1_oracle_fqi_2021-04-27-21-39-35',
+'lavaEnv1_oracle_fqi_2021-04-27-21-48-53',
+'lavaEnv1_oracle_fqi_2021-04-27-21-58-07',
+'lavaEnv1_oracle_fqi_2021-04-27-22-07-24',
+
+# Random observations.
+'lavaEnv1_oracle_fqi_2021-04-27-22-16-42',
+'lavaEnv1_oracle_fqi_2021-04-27-22-25-57',
+'lavaEnv1_oracle_fqi_2021-04-27-22-35-11',
+'lavaEnv1_oracle_fqi_2021-04-27-22-44-27',
+'lavaEnv1_oracle_fqi_2021-04-27-22-53-45',
+'lavaEnv1_oracle_fqi_2021-04-27-23-03-06',
+'lavaEnv1_oracle_fqi_2021-04-27-23-12-27']
