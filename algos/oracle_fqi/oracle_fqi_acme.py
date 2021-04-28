@@ -93,7 +93,8 @@ class OracleFQI(FQIAgent):
             max_size=max_replay_size,
             rate_limiter=reverb.rate_limiters.MinSize(1),
             signature=adders.NStepTransitionAdder.signature(environment_spec,
-                                                extras_spec={'oracle_q_vals': np.float32(1.0)}))
+                                                extras_spec={'env_state': np.int32(1),
+                                                    'oracle_q_vals': np.float32(1.0)}))
         self._server = reverb.Server([replay_table], port=None)
 
         # The adder is used to insert observations into replay.
@@ -109,6 +110,7 @@ class OracleFQI(FQIAgent):
             server_address=address,
             batch_size=batch_size,
             prefetch_size=prefetch_size)
+        self.dataset_iterator = iter(dataset)
 
         policy_network = snt.Sequential([
             network,
@@ -171,3 +173,17 @@ class OracleFQI(FQIAgent):
 
     def load(self, p):
         self._saver.load(p)
+
+    def estimate_replay_buffer_counts(self, num_states, num_actions, batch_sampling_steps=10_000):
+        print('Estimating replay buffer counts...')
+        counts = np.zeros((num_states, num_actions))
+
+        for _ in range(batch_sampling_steps):
+            inputs = next(self.dataset_iterator)
+            states = inputs.data.extras['env_state'].numpy()
+            actions = inputs.data.action.numpy()
+
+            for (s, a) in zip(states, actions):
+                counts[s,a] += 1
+
+        return counts

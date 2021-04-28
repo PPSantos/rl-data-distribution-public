@@ -68,6 +68,7 @@ class OracleFQI(object):
         states_counts = np.zeros((self.env.num_states))
         episode_rewards = []
         Q_vals = np.zeros((num_episodes, self.base_env.num_states, self.base_env.num_actions))
+        replay_buffer_counts = []
 
         for episode in tqdm(range(num_episodes)):
 
@@ -88,7 +89,8 @@ class OracleFQI(object):
                 #print(timestep)
 
                 oracle_q_val = np.float32(self.oracle_q_vals[env_state,action])
-                self.agent.observe_with_extras(action, next_timestep=timestep, extras=(oracle_q_val,))
+                env_state = np.int32(env_state)
+                self.agent.observe_with_extras(action, next_timestep=timestep, extras=(env_state, oracle_q_val))
 
                 self.agent.update()
 
@@ -112,11 +114,17 @@ class OracleFQI(object):
                     qvs = self.agent.get_Q_vals(obs)
                     Q_vals[episode,state,:] = qvs
 
+            if (episode > 1) and (episode % 500 == 0):
+                # Estimate statistics of the replay buffer contents.
+                replay_buffer_counts.append(self.agent.estimate_replay_buffer_counts(
+                                                self.base_env.num_states, self.base_env.num_actions))
+
         data = {}
         data['episode_rewards'] = episode_rewards
         data['states_counts'] = states_counts
         data['Q_vals'] = Q_vals
         data['max_Q_vals'] = np.max(Q_vals[-1], axis=1)
         data['policy'] = np.argmax(Q_vals[-1], axis=1)
+        data['replay_buffer_counts'] = replay_buffer_counts
 
         return data

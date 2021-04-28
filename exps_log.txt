@@ -1,6 +1,9 @@
 # Experiments log book.
 
-# Env. 1:
+
+####################################
+############# gridEnv1 #############
+####################################
 Exp. ids: [
     # One-hot observations.
     '8_8_oracle_fqi_2021-04-27-00-33-38', # 500k
@@ -30,7 +33,10 @@ Exp. ids: [
     '8_8_oracle_fqi_2021-04-27-03-49-59', # 25 k
 ]
 
-# Env. 2:
+
+####################################
+############# gridEnv2 #############
+####################################
 Exp. ids: [
     # One-hot observations.
     '8_8_oracle_fqi_2021-04-27-12-45-12', # 500k
@@ -60,8 +66,70 @@ Exp. ids: [
     '8_8_oracle_fqi_2021-04-27-16-17-17', # 25 k
 ]
 
-# Lava env. 1
 
+####################################
+############# gridEnv3 #############
+####################################
+# TODO
+
+
+####################################
+############# gridEnv4 #############
+####################################
+# Value iteration:
+gridEnv4_val_iter_2021-04-28-09-54-18
+
+['gridEnv4_oracle_fqi_2021-04-28-10-01-44',
+'gridEnv4_oracle_fqi_2021-04-28-10-14-29',
+'gridEnv4_oracle_fqi_2021-04-28-10-24-30',
+'gridEnv4_oracle_fqi_2021-04-28-10-34-30',
+'gridEnv4_oracle_fqi_2021-04-28-10-44-29',
+'gridEnv4_oracle_fqi_2021-04-28-10-54-31',
+'gridEnv4_oracle_fqi_2021-04-28-11-04-40',
+
+'gridEnv4_oracle_fqi_2021-04-28-11-14-50',
+'gridEnv4_oracle_fqi_2021-04-28-11-25-18',
+'gridEnv4_oracle_fqi_2021-04-28-11-35-27',
+'gridEnv4_oracle_fqi_2021-04-28-11-45-33',
+'gridEnv4_oracle_fqi_2021-04-28-11-55-47',
+'gridEnv4_oracle_fqi_2021-04-28-12-06-05',
+'gridEnv4_oracle_fqi_2021-04-28-12-16-26',
+
+'gridEnv4_oracle_fqi_2021-04-28-12-26-53',
+'gridEnv4_oracle_fqi_2021-04-28-12-37-13',
+'gridEnv4_oracle_fqi_2021-04-28-12-47-30',
+'gridEnv4_oracle_fqi_2021-04-28-12-57-54',
+'gridEnv4_oracle_fqi_2021-04-28-13-08-03',
+'gridEnv4_oracle_fqi_2021-04-28-13-18-25',
+'gridEnv4_oracle_fqi_2021-04-28-13-28-46']
+
+# Env. 4 - 20k episodes (more training steps)
+['gridEnv4_oracle_fqi_2021-04-28-14-50-24',
+'gridEnv4_oracle_fqi_2021-04-28-15-10-32',
+'gridEnv4_oracle_fqi_2021-04-28-15-29-45',
+'gridEnv4_oracle_fqi_2021-04-28-15-49-23',
+'gridEnv4_oracle_fqi_2021-04-28-16-09-00',
+'gridEnv4_oracle_fqi_2021-04-28-16-28-37',
+'gridEnv4_oracle_fqi_2021-04-28-16-47-55',
+'gridEnv4_oracle_fqi_2021-04-28-17-07-24',
+'gridEnv4_oracle_fqi_2021-04-28-17-27-00',
+'gridEnv4_oracle_fqi_2021-04-28-17-47-07',
+'gridEnv4_oracle_fqi_2021-04-28-18-07-07',
+'gridEnv4_oracle_fqi_2021-04-28-18-27-25',
+'gridEnv4_oracle_fqi_2021-04-28-18-47-34',
+'gridEnv4_oracle_fqi_2021-04-28-19-07-41',
+'gridEnv4_oracle_fqi_2021-04-28-19-27-40',
+'gridEnv4_oracle_fqi_2021-04-28-19-47-47',
+'gridEnv4_oracle_fqi_2021-04-28-20-07-51',
+'gridEnv4_oracle_fqi_2021-04-28-20-27-56',
+'gridEnv4_oracle_fqi_2021-04-28-20-48-05',
+'gridEnv4_oracle_fqi_2021-04-28-21-08-22',
+'gridEnv4_oracle_fqi_2021-04-28-21-28-33']
+
+
+####################################
+############# lavaEnv1 #############
+####################################
 # Value iteration:
 lavaEnv1_val_iter_2021-04-27-19-47-36
 
@@ -91,4 +159,5 @@ lavaEnv1_val_iter_2021-04-27-19-47-36
 'lavaEnv1_oracle_fqi_2021-04-27-22-44-27',
 'lavaEnv1_oracle_fqi_2021-04-27-22-53-45',
 'lavaEnv1_oracle_fqi_2021-04-27-23-03-06',
-'lavaEnv1_oracle_fqi_2021-04-27-23-12-27']
+'lavaEnv1_oracle_fqi_2021-04-27-23-12-27'
+]
