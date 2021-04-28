@@ -23,7 +23,7 @@ DEFAULT_TRAIN_ARGS = {
     'num_runs': 5,
     'num_processors': 5,
     'algo': 'oracle_fqi',
-    'num_episodes': 10_000,
+    'num_episodes': 20_000,
     'gamma': 0.9,
 
     # Env. arguments.
@@ -70,16 +70,16 @@ DEFAULT_TRAIN_ARGS = {
 
     # Oracle FQI arguments.
     'oracle_fqi_args': {
-        'oracle_q_vals': '8_8_val_iter_2021-04-13-17-55-56', # exp. id of val-iter/oracle Q-vals.
+        'oracle_q_vals': 'gridEnv4_val_iter_2021-04-28-09-54-18', # exp. id of val-iter/oracle Q-vals.
         'batch_size': 100,
         'prefetch_size': 1,
         'num_sampling_steps': 1_000,
         'num_gradient_steps': 20,
-        'max_replay_size': 500_000,
+        'max_replay_size': 1_000_000,
         'n_step': 1,
         'epsilon_init': 0.9,
         'epsilon_final': 0.0,
-        'epsilon_schedule_timesteps': 200_000,
+        'epsilon_schedule_timesteps': 450_000,
         'learning_rate': 1e-03,
         'hidden_layers': [10,10],
     }
