@@ -20,15 +20,16 @@ FIGURE_Y = 4.0
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
-# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-55-56' # Env-8,8-1
-# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-27-39' # Env-8,8-2
-# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-22-56-57' # Env-8,8-3
-VAL_ITER_DATA = 'LavaEnv1_val_iter_2021-04-27-19-08-17' # lavaEnv1
+# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-55-56' # gridEnv1
+# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-27-39' # gridEnv2
+# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-22-56-57' # gridEnv3
+VAL_ITER_DATA = 'gridEnv4_val_iter_2021-04-28-09-54-18' # gridEnv4
+#VAL_ITER_DATA = 'LavaEnv1_val_iter_2021-04-27-19-08-17' # lavaEnv1
 
 EXPS_DATA = [
-            {'id': 'LavaEnv1_q_learning_2021-04-27-19-07-31', 'label': 'Q-learning'},
+            # {'id': 'LavaEnv1_q_learning_2021-04-27-19-07-31', 'label': 'Q-learning'},
 
-            #{'id': '8_8_oracle_fqi_2021-04-24-23-50-30', 'label': 'OracleFQI-10k'}, # Env-8,8-1
+            {'id': 'gridEnv4_oracle_fqi_2021-04-28-23-55-32', 'label': 'OracleFQI'}, # Env-8,8-1
             # {'id': '8_8_oracle_fqi_2021-04-25-13-58-37', 'label': 'OracleFQI-1k'}, # Env-8,8-1
 
             #{'id': '8_8_dqn_2021-04-13-18-52-45', 'label': 'DQN+1hot+400k'}, # Env-8,8-1

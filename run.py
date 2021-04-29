@@ -58,19 +58,19 @@ if __name__ == "__main__":
     """
         Random observations.
     """
-    args = DEFAULT_TRAIN_ARGS
-    args['env_args']['smooth_obs'] = False
-    args['env_args']['one_hot_obs'] = False
+    # args = DEFAULT_TRAIN_ARGS
+    # args['env_args']['smooth_obs'] = False
+    # args['env_args']['one_hot_obs'] = False
 
-    max_replay_sizes = [1_000_000, 750_000, 500_000, 300_000, 200_000, 100_000, 50_000]
+    # max_replay_sizes = [1_000_000, 750_000, 500_000, 300_000, 200_000, 100_000, 50_000]
 
-    for size in max_replay_sizes:
-        print(f'Random observation, max_replay_size={size}')
-        args['dqn_args']['max_replay_size'] = size
-        exp_id = train(args)
-        exp_ids.append(exp_id)
-        if COMPUTE_PLOTS:
-            plots(exp_id, VAL_ITER_DATA)
-            Qvalplots(exp_id, VAL_ITER_DATA)
+    # for size in max_replay_sizes:
+    #     print(f'Random observation, max_replay_size={size}')
+    #     args['dqn_args']['max_replay_size'] = size
+    #     exp_id = train(args)
+    #     exp_ids.append(exp_id)
+    #     if COMPUTE_PLOTS:
+    #         plots(exp_id, VAL_ITER_DATA)
+    #         Qvalplots(exp_id, VAL_ITER_DATA)
 
-    print('Exp. ids:', exp_ids)
+    # print('Exp. ids:', exp_ids)

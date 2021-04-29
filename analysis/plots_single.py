@@ -72,6 +72,25 @@ def print_env(data, sizes, float_format=None):
         sys.stdout.write('|\n')
     sys.stdout.write('-' * (size_x + 2)+'\n')
 
+""" def ridgeline(x, data, ax, overlap=0, fill=True, labels=None, n_points=150):
+    if overlap > 1 or overlap < 0:
+        raise ValueError('overlap must be in [0 1]')
+    # xx = np.linspace(np.min(np.concatenate(data)),
+    #                  np.max(np.concatenate(data)), n_points)
+    # curves = []
+    # ys = []
+    for i, d in enumerate(data):
+        # pdf = gaussian_kde(d)
+        y = i*(1.0-overlap)
+        # ys.append(y)
+        # curve = pdf(xx)
+        # if fill:
+        #     ax.fill_between(xx, np.ones(n_points)*y, 
+        #                      curve+y, zorder=len(data)-i+1, color=fill)
+        ax.plot(x, d+y, c='k', zorder=len(data)-i+1)
+    # if labels:
+    #     ax.yticks(ys, labels) """
+
 
 def main(exp_id, val_iter_exp):
 
@@ -88,6 +107,8 @@ def main(exp_id, val_iter_exp):
     # Prepare plots output folder.
     output_folder = PLOTS_FOLDER_PATH + exp_id + '/'
     os.makedirs(output_folder, exist_ok=True)
+    replay_buffer_plots_path = f'{output_folder}/replay_buffer'
+    os.makedirs(replay_buffer_plots_path, exist_ok=True)
 
     # Get args file (assumes all experiments share the same arguments).
     exp_args = get_args_json_file(DATA_FOLDER_PATH + exp_id)
@@ -138,6 +159,8 @@ def main(exp_id, val_iter_exp):
     # states_counts field.
     data['states_counts'] = np.array([e['states_counts'] for e in exp_data]) # [R,S]
 
+    # replay_buffer_counts field.
+    data['replay_buffer_counts'] = np.array([e['replay_buffer_counts'] for e in exp_data]) # [R,(E),S,A]
 
     """
         Print policies.
@@ -347,6 +370,153 @@ def main(exp_id, val_iter_exp):
 
     plt.savefig('{0}/q_values_violinplot_maxQ_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/q_values_violinplot_maxQ_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    """
+        Replay buffer statistics: P(a|s).
+    """
+    print('Computing `Replay buffer: P(a|s)` plots.')
+
+    for line in range(lateral_size):
+        for col in range(lateral_size):
+
+            state = lateral_size*line+col
+
+            num_cols = 3
+            y_axis_range = [0, 1.1]
+            num_rows = math.ceil(data['replay_buffer_counts'].shape[0] / num_cols)
+            fig, axs = plt.subplots(num_rows, num_cols)
+            fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
+            fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
+
+            i = 0
+            for (ax, run_data) in zip(axs.flat, data['replay_buffer_counts']): # run_data = [(E),S,A]
+
+                state_data = run_data[:,state,:] # [(E),A]
+
+                row_sums = np.sum(state_data, axis=1) # [(E)]
+                action_probs = state_data / row_sums[:, np.newaxis] # [(E), A]
+
+                for a in range(action_probs.shape[1]):
+                    Y = action_probs[:,a]
+                    X = np.arange(500, 20_000, 500)
+                    ax.plot(X, Y, label=f'Action {a}')
+
+                ax.set_ylim(y_axis_range)
+                ax.set_ylabel('P(a|s)')
+                ax.set_xlabel('Episode')
+                ax.set_title(f'Run {i}')
+
+                ax.legend()
+
+                i += 1
+
+            fig.suptitle(f'Replay buffer: P(a|s), state {state}; line {line}, col {col}')
+
+            plt.savefig(f'{replay_buffer_plots_path}/P_a_{state}.png', bbox_inches='tight', pad_inches=0)
+            plt.close()
+
+    """
+        Replay buffer statistics: H[P(a|s)].
+    """
+    print('Computing `Replay buffer: P(a|s) entropy` plots.')
+
+    for line in range(lateral_size):
+        for col in range(lateral_size):
+
+            state = lateral_size*line+col
+
+            num_cols = 3
+            #y_axis_range = [0, 1.1]
+            num_rows = math.ceil(data['replay_buffer_counts'].shape[0] / num_cols)
+            fig, axs = plt.subplots(num_rows, num_cols)
+            fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
+            fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
+
+            i = 0
+            for (ax, run_data) in zip(axs.flat, data['replay_buffer_counts']): # run_data = [(E),S,A]
+
+                state_data = run_data[:,state,:] # [(E),A]
+
+                row_sums = np.sum(state_data, axis=1) # [(E)]
+                action_probs = state_data / row_sums[:, np.newaxis] # [(E), A]
+
+                Y = -np.sum(action_probs * np.log(action_probs+1e-8), axis=1)
+                X = np.arange(500, 20_000, 500)
+                ax.plot(X, Y)
+
+                #ax.set_ylim(y_axis_range)
+                ax.set_ylabel('H[P(a|s)]')
+                ax.set_xlabel('Episode')
+                ax.set_title(f'Run {i}')
+
+                i += 1
+
+            fig.suptitle(f'Replay buffer: H[P(a|s)], state {state}; line {line}, col {col}')
+
+            plt.savefig(f'{replay_buffer_plots_path}/P_a_entropy_{state}.png', bbox_inches='tight', pad_inches=0)
+            plt.close()
+
+    """
+        Replay buffer statistics: P(s).
+    """
+    """ print('Computing `Replay buffer: P(s)` plots.')
+
+    num_cols = 3
+    num_rows = math.ceil(data['replay_buffer_counts'].shape[0] / num_cols)
+    fig, axs = plt.subplots(num_rows, num_cols)
+    fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
+    fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
+
+    i = 0
+    for (ax, run_data) in zip(axs.flat, data['replay_buffer_counts']): # run_data = [(E),S,A]
+
+        aggregated_data = np.sum(run_data, axis=2) # [(E),S]
+        row_sums = np.sum(aggregated_data, axis=1) # [(E)]
+        state_probs = aggregated_data / row_sums[:, np.newaxis] # [(E), S]
+
+        ridgeline(x=np.arange(0, state_probs.shape[1]), data=state_probs, ax=ax)
+        # joypy.joyplot(state_probs.tolist(), ax=ax)
+
+        ax.set_ylabel('P(s)')
+        ax.set_xlabel('Episode')
+        ax.set_title(f'Run {i}')
+
+        ax.legend()
+
+        i += 1
+
+    fig.suptitle(f'Replay buffer: P(s)')
+
+    plt.savefig(f'{replay_buffer_plots_path}/P_s.png', bbox_inches='tight', pad_inches=0)
+    plt.close() """
+
+    """
+        Replay buffer statistics: H[P(s)].
+    """
+    print('Computing `Replay buffer: H[P(s)]` plots.')
+
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    for i, run_data in enumerate(data['replay_buffer_counts']): # run_data = [(E),S,A]
+
+        aggregated_data = np.sum(run_data, axis=2) # [(E),S]
+        row_sums = np.sum(aggregated_data, axis=1) # [(E)]
+        state_probs = aggregated_data / row_sums[:, np.newaxis] # [(E), S]
+
+        Y = -np.sum(state_probs * np.log(state_probs+1e-8), axis=1)
+        X = np.arange(500, 20_000, 500)
+        plt.plot(X, Y, label=f'Run {i}')
+
+    plt.ylabel('H[P(s)]')
+    plt.xlabel('Episode')
+
+    plt.legend()
+
+    plt.title(f'Replay buffer: H[P(s)]')
+
+    plt.savefig(f'{replay_buffer_plots_path}/P_s_entropy.png', bbox_inches='tight', pad_inches=0)
     plt.close()
 
 if __name__ == "__main__":

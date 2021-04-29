@@ -52,7 +52,7 @@ DEFAULT_TRAIN_ARGS = {
     # DQN arguments.
     'dqn_args': {
         'batch_size': 128,
-        'prefetch_size': 2,
+        'prefetch_size': 4,
         'target_update_period': 5_000,
         'samples_per_insert': 128.0,
         'min_replay_size': 50_000,
@@ -72,7 +72,7 @@ DEFAULT_TRAIN_ARGS = {
     'oracle_fqi_args': {
         'oracle_q_vals': 'gridEnv4_val_iter_2021-04-28-09-54-18', # exp. id of val-iter/oracle Q-vals.
         'batch_size': 100,
-        'prefetch_size': 1,
+        'prefetch_size': 4,
         'num_sampling_steps': 1_000,
         'num_gradient_steps': 20,
         'max_replay_size': 1_000_000,

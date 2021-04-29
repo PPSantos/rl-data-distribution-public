@@ -5,36 +5,29 @@ from analysis.plot_state_qval import main as Qvalplots
 
 
 # `VAL_ITER_DATA` must be set if `COMPUTE_PLOTS` is True.
-VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-55-56'
+VAL_ITER_DATA = 'gridEnv4_val_iter_2021-04-28-09-54-18'
 
-EXP_IDS = [
-    # One-hot observations.
-    '8_8_oracle_fqi_2021-04-26-15-48-35',
-    '8_8_oracle_fqi_2021-04-26-15-58-11',
-    '8_8_oracle_fqi_2021-04-26-16-07-38',
-    '8_8_oracle_fqi_2021-04-26-16-16-54',
-    '8_8_oracle_fqi_2021-04-26-16-26-13',
-    '8_8_oracle_fqi_2021-04-26-16-35-30',
-    '8_8_oracle_fqi_2021-04-26-16-44-54',
-    
-    # Smoothed observations.
-    '8_8_oracle_fqi_2021-04-26-16-54-17',
-    '8_8_oracle_fqi_2021-04-26-17-03-33',
-    '8_8_oracle_fqi_2021-04-26-17-12-58',
-    '8_8_oracle_fqi_2021-04-26-17-22-23',
-    '8_8_oracle_fqi_2021-04-26-17-31-40',
-    '8_8_oracle_fqi_2021-04-26-17-41-00',
-    '8_8_oracle_fqi_2021-04-26-17-50-06',
-
-    # Random observations.
-    '8_8_oracle_fqi_2021-04-26-17-59-14',
-    '8_8_oracle_fqi_2021-04-26-18-08-22',
-    '8_8_oracle_fqi_2021-04-26-18-17-39',
-    '8_8_oracle_fqi_2021-04-26-18-27-00',
-    '8_8_oracle_fqi_2021-04-26-18-36-04',
-    '8_8_oracle_fqi_2021-04-26-18-45-18',
-    '8_8_oracle_fqi_2021-04-26-18-54-28'
-]
+EXP_IDS = ['gridEnv4_oracle_fqi_2021-04-28-14-50-24',
+'gridEnv4_oracle_fqi_2021-04-28-15-10-32',
+'gridEnv4_oracle_fqi_2021-04-28-15-29-45',
+'gridEnv4_oracle_fqi_2021-04-28-15-49-23',
+'gridEnv4_oracle_fqi_2021-04-28-16-09-00',
+'gridEnv4_oracle_fqi_2021-04-28-16-28-37',
+'gridEnv4_oracle_fqi_2021-04-28-16-47-55',
+'gridEnv4_oracle_fqi_2021-04-28-17-07-24',
+'gridEnv4_oracle_fqi_2021-04-28-17-27-00',
+'gridEnv4_oracle_fqi_2021-04-28-17-47-07',
+'gridEnv4_oracle_fqi_2021-04-28-18-07-07',
+'gridEnv4_oracle_fqi_2021-04-28-18-27-25',
+'gridEnv4_oracle_fqi_2021-04-28-18-47-34',
+'gridEnv4_oracle_fqi_2021-04-28-19-07-41',
+'gridEnv4_oracle_fqi_2021-04-28-19-27-40',
+'gridEnv4_oracle_fqi_2021-04-28-19-47-47',
+'gridEnv4_oracle_fqi_2021-04-28-20-07-51',
+'gridEnv4_oracle_fqi_2021-04-28-20-27-56',
+'gridEnv4_oracle_fqi_2021-04-28-20-48-05',
+'gridEnv4_oracle_fqi_2021-04-28-21-08-22',
+'gridEnv4_oracle_fqi_2021-04-28-21-28-33']
 
 if __name__ == "__main__":
 
