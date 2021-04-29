@@ -3,6 +3,7 @@ from train import DEFAULT_TRAIN_ARGS
 from analysis.plots_single import main as plots
 from analysis.plot_state_qval import main as Qvalplots
 
+# WARNING: CHOOSE THE `ARGS` DICTIONARY VARIABLE ACCORDINGLY. (e.g. oracle_fqi_args or dqn_args)
 
 # Whether to compute plots for each experiment.
 COMPUTE_PLOTS = True
@@ -26,7 +27,7 @@ if __name__ == "__main__":
 
     for size in max_replay_sizes:
         print(f'One-hot observation, max_replay_size={size}')
-        args['dqn_args']['max_replay_size'] = size
+        args['oracle_fqi_args']['max_replay_size'] = size
         exp_id = train(args)
         exp_ids.append(exp_id)
         if COMPUTE_PLOTS:
@@ -46,7 +47,7 @@ if __name__ == "__main__":
 
     for size in max_replay_sizes:
         print(f'Smoothed observation, max_replay_size={size}')
-        args['dqn_args']['max_replay_size'] = size
+        args['oracle_fqi_args']['max_replay_size'] = size
         exp_id = train(args)
         exp_ids.append(exp_id)
         if COMPUTE_PLOTS:
@@ -66,7 +67,7 @@ if __name__ == "__main__":
 
     # for size in max_replay_sizes:
     #     print(f'Random observation, max_replay_size={size}')
-    #     args['dqn_args']['max_replay_size'] = size
+    #     args['oracle_fqi_args']['max_replay_size'] = size
     #     exp_id = train(args)
     #     exp_ids.append(exp_id)
     #     if COMPUTE_PLOTS:
