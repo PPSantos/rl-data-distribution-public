@@ -126,6 +126,28 @@ gridEnv4_val_iter_2021-04-28-09-54-18
 'gridEnv4_oracle_fqi_2021-04-28-21-08-22',
 'gridEnv4_oracle_fqi_2021-04-28-21-28-33']
 
+# Env. 4 - 20k episodes + store replay buffer data.
+[
+# One-hot observations.    
+'gridEnv4_oracle_fqi_2021-04-28-23-55-32',
+'gridEnv4_oracle_fqi_2021-04-29-00-17-56',
+'gridEnv4_oracle_fqi_2021-04-29-00-40-23',
+'gridEnv4_oracle_fqi_2021-04-29-01-03-29',
+'gridEnv4_oracle_fqi_2021-04-29-01-26-22',
+'gridEnv4_oracle_fqi_2021-04-29-01-49-16',
+'gridEnv4_oracle_fqi_2021-04-29-02-12-01',
+
+# Smoothed observations.    
+'gridEnv4_oracle_fqi_2021-04-29-02-34-52',
+'gridEnv4_oracle_fqi_2021-04-29-02-59-34',
+'gridEnv4_oracle_fqi_2021-04-29-03-25-15',
+'gridEnv4_oracle_fqi_2021-04-29-03-50-03',
+'gridEnv4_oracle_fqi_2021-04-29-04-14-35',
+'gridEnv4_oracle_fqi_2021-04-29-04-39-05',
+'gridEnv4_oracle_fqi_2021-04-29-05-03-42']
+
+
+
 
 ####################################
 ############# lavaEnv1 #############
