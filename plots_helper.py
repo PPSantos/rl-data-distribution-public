@@ -8,23 +8,24 @@ from analysis.plot_state_qval import main as Qvalplots
 VAL_ITER_DATA = 'gridEnv4_val_iter_2021-04-28-09-54-18'
 
 EXP_IDS = [
-# One-hot observations.    
-'gridEnv4_oracle_fqi_2021-04-28-23-55-32',
-'gridEnv4_oracle_fqi_2021-04-29-00-17-56',
-'gridEnv4_oracle_fqi_2021-04-29-00-40-23',
-'gridEnv4_oracle_fqi_2021-04-29-01-03-29',
-'gridEnv4_oracle_fqi_2021-04-29-01-26-22',
-'gridEnv4_oracle_fqi_2021-04-29-01-49-16',
-'gridEnv4_oracle_fqi_2021-04-29-02-12-01',
+# One-hot observations.
+'gridEnv4_oracle_fqi_2021-04-29-17-59-57',
+'gridEnv4_oracle_fqi_2021-04-29-18-26-04',
+'gridEnv4_oracle_fqi_2021-04-29-18-50-15',
+'gridEnv4_oracle_fqi_2021-04-29-19-14-41',
+'gridEnv4_oracle_fqi_2021-04-29-19-39-33',
+'gridEnv4_oracle_fqi_2021-04-29-20-04-27',
+'gridEnv4_oracle_fqi_2021-04-29-20-29-14',
 
-# Smoothed observations.    
-'gridEnv4_oracle_fqi_2021-04-29-02-34-52',
-'gridEnv4_oracle_fqi_2021-04-29-02-59-34',
-'gridEnv4_oracle_fqi_2021-04-29-03-25-15',
-'gridEnv4_oracle_fqi_2021-04-29-03-50-03',
-'gridEnv4_oracle_fqi_2021-04-29-04-14-35',
-'gridEnv4_oracle_fqi_2021-04-29-04-39-05',
-'gridEnv4_oracle_fqi_2021-04-29-05-03-42']
+# Smoothed observations.
+'gridEnv4_oracle_fqi_2021-04-29-20-54-26',
+'gridEnv4_oracle_fqi_2021-04-29-21-18-38',
+'gridEnv4_oracle_fqi_2021-04-29-21-42-55',
+'gridEnv4_oracle_fqi_2021-04-29-22-08-03',
+'gridEnv4_oracle_fqi_2021-04-29-22-33-17',
+'gridEnv4_oracle_fqi_2021-04-29-22-58-29',
+'gridEnv4_oracle_fqi_2021-04-29-23-23-37'
+]
 
 if __name__ == "__main__":
 
