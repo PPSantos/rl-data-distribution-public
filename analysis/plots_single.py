@@ -395,7 +395,7 @@ def main(exp_id, val_iter_exp):
                 state_data = run_data[:,state,:] # [(E),A]
 
                 row_sums = np.sum(state_data, axis=1) # [(E)]
-                action_probs = state_data / row_sums[:, np.newaxis] # [(E), A]
+                action_probs = state_data / (row_sums[:, np.newaxis] + 1e-05) # [(E), A]
 
                 for a in range(action_probs.shape[1]):
                     Y = action_probs[:,a]
@@ -439,7 +439,7 @@ def main(exp_id, val_iter_exp):
                 state_data = run_data[:,state,:] # [(E),A]
 
                 row_sums = np.sum(state_data, axis=1) # [(E)]
-                action_probs = state_data / row_sums[:, np.newaxis] # [(E), A]
+                action_probs = state_data / (row_sums[:, np.newaxis] + 1e-05) # [(E), A]
 
                 Y = -np.sum(action_probs * np.log(action_probs+1e-8), axis=1)
                 X = np.arange(500, 20_000, 500)
@@ -503,7 +503,7 @@ def main(exp_id, val_iter_exp):
 
         aggregated_data = np.sum(run_data, axis=2) # [(E),S]
         row_sums = np.sum(aggregated_data, axis=1) # [(E)]
-        state_probs = aggregated_data / row_sums[:, np.newaxis] # [(E), S]
+        state_probs = aggregated_data / (row_sums[:, np.newaxis] + 1e-05) # [(E), S]
 
         Y = -np.sum(state_probs * np.log(state_probs+1e-8), axis=1)
         X = np.arange(500, 20_000, 500)
