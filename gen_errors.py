@@ -47,9 +47,9 @@ def exponentiated_quadratic(xa, xb):
 
 if __name__ == '__main__':
 
-    alphas = [0.1, 0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0, 20.0, 30.0]
-    """ num_classes = 100
-
+    # Entropy plot.
+    """ alphas = [0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0, 20.0, 30.0]
+    num_classes = 100
     entropies = []
     for alpha in alphas:
         expected_entropy = scipy.special.digamma(num_classes*alpha + 1) - scipy.special.digamma(alpha + 1)
@@ -59,11 +59,8 @@ if __name__ == '__main__':
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
     plt.plot(alphas, entropies)
     plt.xlabel('Alpha (Dirichelet parameter)')
-    plt.ylabel('Expected entropy')
-    #plt.title('Expected entropy of categorical dist. for different dirichlet alpha param.')
-    plt.show()
-    # plt.savefig('{0}/time_series.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    # plt.close() """
+    plt.ylabel('Expected entropy of categorical dist.')
+    plt.show() """
 
     # Mackey-Glass time-series data.
     """ num_points = 100
@@ -90,7 +87,7 @@ if __name__ == '__main__':
     # plt.savefig('{0}/time_series.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     # plt.close() """
 
-    # Gaussian process prior samples.
+    # Gaussian process prior samples data.
     nb_of_samples = 100
     number_of_functions = 5
     X = np.linspace(-10, 10, nb_of_samples)
@@ -101,66 +98,94 @@ if __name__ == '__main__':
         size=number_of_functions) # + 0.1*np.random.normal(size=nb_of_samples)
     
     # Plot data.
-    fig = plt.figure()
+    """ fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
     for s in range(number_of_functions):
         plt.scatter(X, Ys[s], label=f'Sample {s}')
     plt.title('Original functions: GP prior samples')
     plt.legend()
-    plt.show()
-    # plt.savefig('{0}/time_series.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    # plt.close()
+    plt.show() """
+
+    dirichlet_alphas = [0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
+    num_dirichlet_samples = 5
+    resample_size = 10_000
+
+    results_ranks = {}
+    results_errors = {}
+    for alpha in dirichlet_alphas:
+        results_ranks[str(alpha)] = []
+        results_errors[str(alpha)] = []
 
     for (i, Y) in enumerate(Ys):
-        print('Y=', i)
+        print('G.P. function sample number', i)
 
-        # Resample data.
-        X_data = []
-        Y_data = []
-        for _ in range(10000):
-            idx = np.random.choice(range(len(X)))
-            X_data.append(X[idx])
-            Y_data.append(Y[idx])
-        X_data = np.array(X_data)
-        Y_data = np.array(Y_data)
+        for alpha in dirichlet_alphas:
+            print('Alpha=', alpha)
 
-        # Plot resampled data.
-        fig, ax1 = plt.subplots()
-        fig.set_size_inches(FIGURE_X, FIGURE_Y)
+            for _ in range(num_dirichlet_samples):
+            
+                # Resample data.
+                X_resampled = []
+                Y_resampled = []
+                dirichlet_sample = np.random.dirichlet([alpha]*nb_of_samples)
+                for _ in range(resample_size):
+                    idx = np.random.choice(range(len(X)), p=dirichlet_sample)
+                    X_resampled.append(X[idx])
+                    Y_resampled.append(Y[idx])
+                X_resampled = np.array(X_resampled)
+                Y_resampled = np.array(Y_resampled)
 
-        ax1.scatter(X_data, Y_data, color='blue', label='Resampled data')
-        ax2 = ax1.twinx()
-        ax2.hist(X_data, 100, density=True, label='p(x)')
-        ax2.set_ylim([0,1.05])
+                # Plot resampled data.
+                """ fig, ax1 = plt.subplots()
+                fig.set_size_inches(FIGURE_X, FIGURE_Y)
+                ax1.scatter(X_resampled, Y_resampled, color='blue', label='Resampled data')
+                ax1.legend()
+                ax2 = ax1.twinx()
+                ax2.hist(X_resampled, 100, density=True, label='p(x)')
+                ax2.set_ylim([0,1.05])
+                plt.title('Resampled data')
+                plt.legend()
+                plt.show() """
 
-        plt.title('Resampled data')
-        plt.legend()
-        plt.show()
-        # plt.savefig('{0}/time_series.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-        # plt.close()
+                # Train and predict.
+                model = get_model(n_input_features=1)
+                model.fit(X_resampled, Y_resampled, epochs=200, batch_size=128, verbose=False)
+                Yhat = model.predict(X)
+                Yhat = Yhat.reshape(Yhat.shape[0])
 
-        # Train and predict.
-        model = get_model(n_input_features=1)
-        model.fit(X_data, Y_data, epochs=500, batch_size=128, verbose=True)
-        yhat = model.predict(X)
+                # Plot.
+                """ fig = plt.figure()
+                fig.set_size_inches(FIGURE_X, FIGURE_Y)
+                plt.scatter(X_resampled, Y_resampled, label='True')
+                plt.plot(X, Yhat, label='Prediction')
+                plt.title(f'Fit to function {i}')
+                plt.show() """
 
-        # Plot.
-        fig = plt.figure()
-        fig.set_size_inches(FIGURE_X, FIGURE_Y)
-        plt.scatter(X_data, Y_data, label='True')
-        plt.plot(X, yhat, label='Prediction')
-        plt.title(f'Fit to function {i}')
-        plt.show()
-        # plt.savefig('{0}/time_series.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-        # plt.close()
+                max_idx = np.argmax(Yhat)
+                Yhat_max_idx = Yhat[max_idx]
+                Y_max_idx = Y[max_idx]
+                X_max_idx = X[max_idx]
+                error_max_idx = np.abs(Y_max_idx - Yhat_max_idx)
+                # print('Yhat_max_idx:', Yhat_max_idx)
+                # print('Y_max_idx:', Y_max_idx)
+                # print('X_max_idx:', X_max_idx)
+                print('error_max_idx:', error_max_idx)
 
-        """ Yhat_max_pred = np.max(yhat)
-        Y_max_pred = Y[np.argmax(yhat)]
-        X_max_pred = X[np.argmax(yhat)]
-        error = np.abs(Y_max_pred - Yhat_max_pred)
-        print('Yhat_max_pred:', Yhat_max_pred)
-        print('Y_max_pred:', Y_max_pred)
-        print('X_max_pred:', X_max_pred)
-        print('Error (abs(Y_max_pred-Yhat_max_pred)):', error) """
+                errors = np.abs(Y - Yhat)
+                errors_sorted = np.argsort(errors)
+                error_rank = np.where(errors_sorted == max_idx)
+                error_rank = int(error_rank[0])
+                error_rank = len(errors) - error_rank
+                print('error_rank:', error_rank)
 
+                results_errors[str(alpha)].append(error_max_idx)
+                results_ranks[str(alpha)].append(error_rank)
 
+                """ fig = plt.figure()
+                fig.set_size_inches(FIGURE_X, FIGURE_Y)
+                plt.hist(errors, 50, density=True)
+                plt.title('Residuals errors')
+                plt.show() """
+
+    print(results_errors)
+    print(results_ranks)
