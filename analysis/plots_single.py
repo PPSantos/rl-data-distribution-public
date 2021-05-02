@@ -130,9 +130,6 @@ def main(exp_id, val_iter_exp):
     f.close()
     val_iter_data['Q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
 
-    # Load and parse data.
-    data = {}
-
     # Open data.
     print(f"Opening experiment {exp_id}")
     exp_path = DATA_FOLDER_PATH + exp_id
