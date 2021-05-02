@@ -19,6 +19,8 @@ FIGURE_Y = 4.0
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 
+SHOW_PLOTS = False
+
 args = {
     'nb_of_samples': 100,
     'number_of_functions': 10,
@@ -68,13 +70,14 @@ if __name__ == '__main__':
         mean=np.zeros(args['nb_of_samples']), cov=cov_matrix,
         size=args['number_of_functions']) # + 0.1*np.random.normal(size=args['nb_of_samples'])
     
-    # fig = plt.figure()
-    # fig.set_size_inches(FIGURE_X, FIGURE_Y)
-    # for s in range(args['number_of_functions']):
-    #     plt.scatter(X, Ys[s], label=f'Sample {s}')
-    # plt.title('Original functions: GP prior samples')
-    # plt.legend()
-    # plt.show()
+    if SHOW_PLOTS:
+        fig = plt.figure()
+        fig.set_size_inches(FIGURE_X, FIGURE_Y)
+        for s in range(args['number_of_functions']):
+            plt.scatter(X, Ys[s], label=f'Sample {s}')
+        plt.title('Original functions: GP prior samples')
+        plt.legend()
+        plt.show()
 
     data['X'] = X
     data['Ys'] = Ys
@@ -115,16 +118,17 @@ if __name__ == '__main__':
                 Y_resampled = np.array(Y_resampled)
 
                 # Plot resampled data.
-                # fig, ax1 = plt.subplots()
-                # fig.set_size_inches(FIGURE_X, FIGURE_Y)
-                # ax1.scatter(X_resampled, Y_resampled, color='blue', label='Resampled data')
-                # ax1.legend()
-                # ax2 = ax1.twinx()
-                # ax2.hist(X_resampled, 100, density=True, label='p(x)')
-                # ax2.set_ylim([0,1.05])
-                # plt.title('Resampled data')
-                # plt.legend()
-                # plt.show()
+                if SHOW_PLOTS:
+                    fig, ax1 = plt.subplots()
+                    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+                    ax1.scatter(X_resampled, Y_resampled, color='blue', label='Resampled data')
+                    ax1.legend()
+                    ax2 = ax1.twinx()
+                    ax2.hist(X_resampled, 100, density=True, label='p(x)')
+                    ax2.set_ylim([0,1.05])
+                    plt.title('Resampled data')
+                    plt.legend()
+                    plt.show()
 
                 # Train and predict.
                 model = get_model(n_input_features=1)
@@ -133,12 +137,13 @@ if __name__ == '__main__':
                 Yhat = Yhat.reshape(Yhat.shape[0])
 
                 # Plot predictions.
-                fig = plt.figure()
-                fig.set_size_inches(FIGURE_X, FIGURE_Y)
-                plt.scatter(X_resampled, Y_resampled, label='True')
-                plt.plot(X, Yhat, label='Prediction')
-                plt.title(f'Fit to function {i}')
-                plt.show()
+                if SHOW_PLOTS:
+                    fig = plt.figure()
+                    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+                    plt.scatter(X_resampled, Y_resampled, label='True')
+                    plt.plot(X, Yhat, label='Prediction')
+                    plt.title(f'Fit to function {i}')
+                    plt.show()
 
                 max_idx = np.argmax(Yhat)
                 Yhat_max_idx = Yhat[max_idx]
