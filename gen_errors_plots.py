@@ -14,7 +14,7 @@ FIGURE_Y = 4.0
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/analysis/plots/'
 
-exp_id = 'gen_errors_2021-05-02-12-34-19'
+exp_id = 'gen_errors_2021-05-02-19-57-45'
 
 def get_args_json_file(path):
     with open(path + "/args.json", 'r') as f:
