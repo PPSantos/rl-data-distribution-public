@@ -7,6 +7,7 @@
 	  source env/bin/activate
 	  git clone https://github.com/PPSantos/RL_playground/
 	  pip install -r RL_playground/requirements.txt
+	  pip install -e .
     ```
 2. Install acme framework (githash bc1b17e3a6731b520ba8c57e566a0b105ab5f8d1)
 	```bash
