@@ -4,67 +4,13 @@
 ####################################
 ############# gridEnv1 #############
 ####################################
-Exp. ids: [
-    # One-hot observations.
-    '8_8_oracle_fqi_2021-04-27-00-33-38', # 500k
-    '8_8_oracle_fqi_2021-04-27-00-43-49', # 400k
-    '8_8_oracle_fqi_2021-04-27-00-53-59', # 300k
-    '8_8_oracle_fqi_2021-04-27-01-03-40', # 200k
-    '8_8_oracle_fqi_2021-04-27-01-13-34', # 100k
-    '8_8_oracle_fqi_2021-04-27-01-23-29', # 50 k
-    '8_8_oracle_fqi_2021-04-27-01-33-12', # 25 k
-
-    # Smoothed observations.
-    '8_8_oracle_fqi_2021-04-27-01-43-11', # 500k
-    '8_8_oracle_fqi_2021-04-27-01-53-03', # 400k
-    '8_8_oracle_fqi_2021-04-27-02-02-48', # 300k
-    '8_8_oracle_fqi_2021-04-27-02-12-35', # 200k
-    '8_8_oracle_fqi_2021-04-27-02-22-15', # 100k
-    '8_8_oracle_fqi_2021-04-27-02-32-03', # 50 k
-    '8_8_oracle_fqi_2021-04-27-02-41-40', # 25 k
-
-    # Random observations.
-    '8_8_oracle_fqi_2021-04-27-02-51-30', # 500k
-    '8_8_oracle_fqi_2021-04-27-03-01-09', # 400k
-    '8_8_oracle_fqi_2021-04-27-03-10-55', # 300k
-    '8_8_oracle_fqi_2021-04-27-03-20-44', # 200k
-    '8_8_oracle_fqi_2021-04-27-03-30-26', # 100k
-    '8_8_oracle_fqi_2021-04-27-03-40-12', # 50 k
-    '8_8_oracle_fqi_2021-04-27-03-49-59', # 25 k
-]
+# TODO
 
 
 ####################################
 ############# gridEnv2 #############
 ####################################
-Exp. ids: [
-    # One-hot observations.
-    '8_8_oracle_fqi_2021-04-27-12-45-12', # 500k
-    '8_8_oracle_fqi_2021-04-27-12-56-34', # 400k
-    '8_8_oracle_fqi_2021-04-27-13-07-07', # 300k
-    '8_8_oracle_fqi_2021-04-27-13-17-18', # 200k
-    '8_8_oracle_fqi_2021-04-27-13-27-50', # 100k
-    '8_8_oracle_fqi_2021-04-27-13-38-17', # 50 k
-    '8_8_oracle_fqi_2021-04-27-13-48-27', # 25 k
-
-    # Smoothed observations.
-    '8_8_oracle_fqi_2021-04-27-13-58-57', # 500k
-    '8_8_oracle_fqi_2021-04-27-14-09-19', # 400k
-    '8_8_oracle_fqi_2021-04-27-14-19-49', # 300k
-    '8_8_oracle_fqi_2021-04-27-14-30-16', # 200k
-    '8_8_oracle_fqi_2021-04-27-14-40-44', # 100k
-    '8_8_oracle_fqi_2021-04-27-14-51-20', # 50 k
-    '8_8_oracle_fqi_2021-04-27-15-02-03', # 25 k
-    
-    # Random observations.
-    '8_8_oracle_fqi_2021-04-27-15-12-47', # 500k
-    '8_8_oracle_fqi_2021-04-27-15-23-29', # 400k
-    '8_8_oracle_fqi_2021-04-27-15-34-11', # 300k
-    '8_8_oracle_fqi_2021-04-27-15-44-53', # 200k
-    '8_8_oracle_fqi_2021-04-27-15-55-41', # 100k
-    '8_8_oracle_fqi_2021-04-27-16-06-28', # 50 k
-    '8_8_oracle_fqi_2021-04-27-16-17-17', # 25 k
-]
+# TODO
 
 
 ####################################
@@ -76,61 +22,9 @@ Exp. ids: [
 ####################################
 ############# gridEnv4 #############
 ####################################
-####################################
-############# gridEnv4 #############
-####################################
 # Value iteration:
 gridEnv4_val_iter_2021-04-28-09-54-18
 
-# Env. 4 - 10k episodes - wrong run.py setup.
-# ['gridEnv4_oracle_fqi_2021-04-28-10-01-44',
-# 'gridEnv4_oracle_fqi_2021-04-28-10-14-29',
-# 'gridEnv4_oracle_fqi_2021-04-28-10-24-30',
-# 'gridEnv4_oracle_fqi_2021-04-28-10-34-30',
-# 'gridEnv4_oracle_fqi_2021-04-28-10-44-29',
-# 'gridEnv4_oracle_fqi_2021-04-28-10-54-31',
-# 'gridEnv4_oracle_fqi_2021-04-28-11-04-40',
-# 
-# 'gridEnv4_oracle_fqi_2021-04-28-11-14-50',
-# 'gridEnv4_oracle_fqi_2021-04-28-11-25-18',
-# 'gridEnv4_oracle_fqi_2021-04-28-11-35-27',
-# 'gridEnv4_oracle_fqi_2021-04-28-11-45-33',
-# 'gridEnv4_oracle_fqi_2021-04-28-11-55-47',
-# 'gridEnv4_oracle_fqi_2021-04-28-12-06-05',
-# 'gridEnv4_oracle_fqi_2021-04-28-12-16-26',
-# 
-# 'gridEnv4_oracle_fqi_2021-04-28-12-26-53',
-# 'gridEnv4_oracle_fqi_2021-04-28-12-37-13',
-# 'gridEnv4_oracle_fqi_2021-04-28-12-47-30',
-# 'gridEnv4_oracle_fqi_2021-04-28-12-57-54',
-# 'gridEnv4_oracle_fqi_2021-04-28-13-08-03',
-# 'gridEnv4_oracle_fqi_2021-04-28-13-18-25',
-# 'gridEnv4_oracle_fqi_2021-04-28-13-28-46']
-
-# Env. 4 - 20k episodes (more training steps) - wrong run.py setup.
-# ['gridEnv4_oracle_fqi_2021-04-28-14-50-24',
-# 'gridEnv4_oracle_fqi_2021-04-28-15-10-32',
-# 'gridEnv4_oracle_fqi_2021-04-28-15-29-45',
-# 'gridEnv4_oracle_fqi_2021-04-28-15-49-23',
-# 'gridEnv4_oracle_fqi_2021-04-28-16-09-00',
-# 'gridEnv4_oracle_fqi_2021-04-28-16-28-37',
-# 'gridEnv4_oracle_fqi_2021-04-28-16-47-55',
-# 'gridEnv4_oracle_fqi_2021-04-28-17-07-24',
-# 'gridEnv4_oracle_fqi_2021-04-28-17-27-00',
-# 'gridEnv4_oracle_fqi_2021-04-28-17-47-07',
-# 'gridEnv4_oracle_fqi_2021-04-28-18-07-07',
-# 'gridEnv4_oracle_fqi_2021-04-28-18-27-25',
-# 'gridEnv4_oracle_fqi_2021-04-28-18-47-34',
-# 'gridEnv4_oracle_fqi_2021-04-28-19-07-41',
-# 'gridEnv4_oracle_fqi_2021-04-28-19-27-40',
-# 'gridEnv4_oracle_fqi_2021-04-28-19-47-47',
-# 'gridEnv4_oracle_fqi_2021-04-28-20-07-51',
-# 'gridEnv4_oracle_fqi_2021-04-28-20-27-56',
-# 'gridEnv4_oracle_fqi_2021-04-28-20-48-05',
-# 'gridEnv4_oracle_fqi_2021-04-28-21-08-22',
-# 'gridEnv4_oracle_fqi_2021-04-28-21-28-33']
-
-Env. 4 - 20k episodes
 [
 # One-hot observations.
 'gridEnv4_oracle_fqi_2021-04-29-17-59-57',
@@ -152,38 +46,35 @@ Env. 4 - 20k episodes
 ]
 
 
+####################################
+############# gridEnv5 #############
+####################################
+# Value iteration:
+gridEnv5_val_iter_2021-05-03-15-52-24
+
+[
+# One-hot observations.
+'gridEnv5_oracle_fqi_2021-05-03-15-55-28',
+'gridEnv5_oracle_fqi_2021-05-03-16-09-04',
+'gridEnv5_oracle_fqi_2021-05-03-16-22-39',
+'gridEnv5_oracle_fqi_2021-05-03-16-36-24',
+'gridEnv5_oracle_fqi_2021-05-03-16-50-00',
+'gridEnv5_oracle_fqi_2021-05-03-17-03-48',
+'gridEnv5_oracle_fqi_2021-05-03-17-17-52',
+
+# Smoothed observations.
+'gridEnv5_oracle_fqi_2021-05-03-17-31-58',
+'gridEnv5_oracle_fqi_2021-05-03-17-45-25',
+'gridEnv5_oracle_fqi_2021-05-03-17-59-06',
+'gridEnv5_oracle_fqi_2021-05-03-18-12-36',
+'gridEnv5_oracle_fqi_2021-05-03-18-26-09',
+'gridEnv5_oracle_fqi_2021-05-03-18-39-53',
+'gridEnv5_oracle_fqi_2021-05-03-18-53-57'
+]
+
 
 ####################################
 ############# lavaEnv1 #############
 ####################################
 # Value iteration:
 lavaEnv1_val_iter_2021-04-27-19-47-36
-
-[
-# One-hot observations.
-'lavaEnv1_oracle_fqi_2021-04-27-20-06-26',
-'lavaEnv1_oracle_fqi_2021-04-27-20-15-52',
-'lavaEnv1_oracle_fqi_2021-04-27-20-25-14',
-'lavaEnv1_oracle_fqi_2021-04-27-20-34-37',
-'lavaEnv1_oracle_fqi_2021-04-27-20-43-57',
-'lavaEnv1_oracle_fqi_2021-04-27-20-53-15',
-'lavaEnv1_oracle_fqi_2021-04-27-21-02-34',
-
-# Smoothed observations.
-'lavaEnv1_oracle_fqi_2021-04-27-21-11-52',
-'lavaEnv1_oracle_fqi_2021-04-27-21-21-08',
-'lavaEnv1_oracle_fqi_2021-04-27-21-30-21',
-'lavaEnv1_oracle_fqi_2021-04-27-21-39-35',
-'lavaEnv1_oracle_fqi_2021-04-27-21-48-53',
-'lavaEnv1_oracle_fqi_2021-04-27-21-58-07',
-'lavaEnv1_oracle_fqi_2021-04-27-22-07-24',
-
-# Random observations.
-'lavaEnv1_oracle_fqi_2021-04-27-22-16-42',
-'lavaEnv1_oracle_fqi_2021-04-27-22-25-57',
-'lavaEnv1_oracle_fqi_2021-04-27-22-35-11',
-'lavaEnv1_oracle_fqi_2021-04-27-22-44-27',
-'lavaEnv1_oracle_fqi_2021-04-27-22-53-45',
-'lavaEnv1_oracle_fqi_2021-04-27-23-03-06',
-'lavaEnv1_oracle_fqi_2021-04-27-23-12-27'
-]
