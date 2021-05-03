@@ -12,7 +12,10 @@ FIGURE_X = 6.0
 FIGURE_Y = 4.0
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
-PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/analysis/plots/'
+PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
+
+print(DATA_FOLDER_PATH)
+print(PLOTS_FOLDER_PATH)
 
 exp_id = 'gen_errors_2021-05-03-00-58-04'
 
