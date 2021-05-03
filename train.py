@@ -28,9 +28,9 @@ DEFAULT_TRAIN_ARGS = {
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'gridEnv4',
-        'dim_obs': 8,
-        'time_limit': 50,
+        'env_name': 'gridEnv5',
+        'dim_obs': 5,
+        'time_limit': 25,
         'tabular': False,
         'smooth_obs': False,
         'one_hot_obs': True,

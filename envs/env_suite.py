@@ -36,6 +36,11 @@ CUSTOM_ENVS = {
                                 (1, 4), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4)],
                     TileType.REWARD: [(7, 4)]}),
 
+    'gridEnv5': grid_spec_cy.spec_from_sparse_locations(5, 5,
+                    {TileType.START: [(0, 4)],
+                    TileType.WALL: [(1, 4), (2, 4), (3, 4)],
+                    TileType.REWARD: [(4, 4)]}),
+
     'lavaEnv1': grid_spec_cy.spec_from_sparse_locations(8, 8,
                     {TileType.START: [(0, 4)],
                     TileType.WALL: [(0, 0), (0, 1), (1, 0), (1, 1), (2, 0),
