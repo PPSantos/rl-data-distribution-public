@@ -9,7 +9,7 @@ from analysis.plot_state_qval import main as Qvalplots
 COMPUTE_PLOTS = True
 
 # `VAL_ITER_DATA` must be set if `COMPUTE_PLOTS` is True.
-VAL_ITER_DATA = 'gridEnv4_val_iter_2021-04-28-09-54-18'
+VAL_ITER_DATA = 'gridEnv5_val_iter_2021-05-03-15-52-24'
 
 
 if __name__ == "__main__":

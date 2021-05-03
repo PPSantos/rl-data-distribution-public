@@ -70,16 +70,16 @@ DEFAULT_TRAIN_ARGS = {
 
     # Oracle FQI arguments.
     'oracle_fqi_args': {
-        'oracle_q_vals': 'gridEnv4_val_iter_2021-04-28-09-54-18', # exp. id of val-iter/oracle Q-vals.
+        'oracle_q_vals': 'gridEnv5_val_iter_2021-05-03-15-52-24', # exp. id of val-iter/oracle Q-vals.
         'batch_size': 100,
         'prefetch_size': 4,
         'num_sampling_steps': 1_000,
         'num_gradient_steps': 20,
-        'max_replay_size': 1_000_000,
+        'max_replay_size': 500_000,
         'n_step': 1,
         'epsilon_init': 0.9,
         'epsilon_final': 0.0,
-        'epsilon_schedule_timesteps': 450_000,
+        'epsilon_schedule_timesteps': 225_000,
         'learning_rate': 1e-03,
         'hidden_layers': [10,10],
     }
