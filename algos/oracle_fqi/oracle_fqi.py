@@ -59,7 +59,9 @@ class OracleFQI(object):
                                     epsilon_final=oracle_fqi_args['epsilon_final'],
                                     epsilon_schedule_timesteps=oracle_fqi_args['epsilon_schedule_timesteps'],
                                     learning_rate=oracle_fqi_args['learning_rate'],
-                                    discount=oracle_fqi_args['discount'])
+                                    discount=oracle_fqi_args['discount'],
+                                    num_states=self.base_env.num_states,
+                                    num_actions=self.base_env.num_actions)
 
         self.oracle_q_vals = oracle_fqi_args['oracle_q_vals']
 
@@ -116,8 +118,7 @@ class OracleFQI(object):
 
             if (episode > 1) and (episode % 500 == 0):
                 # Estimate statistics of the replay buffer contents.
-                replay_buffer_counts.append(self.agent.estimate_replay_buffer_counts(
-                                                self.base_env.num_states, self.base_env.num_actions))
+                replay_buffer_counts.append(self.agent.estimate_replay_buffer_counts())
 
         data = {}
         data['episode_rewards'] = episode_rewards

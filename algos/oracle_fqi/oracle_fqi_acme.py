@@ -63,6 +63,8 @@ class OracleFQI(FQIAgent):
             discount: float = 0.99,
             max_gradient_norm: Optional[float] = None,
             logger: loggers.Logger = None,
+            num_states: int = None,
+            num_actions: int = None,
         ):
         """Initialize the agent.
         Args:
@@ -83,6 +85,9 @@ class OracleFQI(FQIAgent):
         logger: logger object to be used by learner.
         max_gradient_norm: used for gradient clipping.
         """
+
+        self.num_states = num_states
+        self.num_actions = num_actions
 
         # Create a replay server to add data to. This uses no limiter behavior in
         # order to allow the Agent interface to handle it.
@@ -140,7 +145,9 @@ class OracleFQI(FQIAgent):
             replay_client=replay_client,
             max_gradient_norm=max_gradient_norm,
             logger=logger,
-            checkpoint=False)
+            checkpoint=False,
+            num_states=self.num_states,
+            num_actions=self.num_actions)
 
         self._saver = tf2_savers.Saver(learner.state)
 
@@ -174,9 +181,9 @@ class OracleFQI(FQIAgent):
     def load(self, p):
         self._saver.load(p)
 
-    def estimate_replay_buffer_counts(self, num_states, num_actions, batch_sampling_steps=10_000):
+    def estimate_replay_buffer_counts(self, batch_sampling_steps=10_000):
         print('Estimating replay buffer counts...')
-        counts = np.zeros((num_states, num_actions))
+        counts = np.zeros((self.num_states, self.num_actions))
 
         for _ in range(batch_sampling_steps):
             inputs = next(self.dataset_iterator)

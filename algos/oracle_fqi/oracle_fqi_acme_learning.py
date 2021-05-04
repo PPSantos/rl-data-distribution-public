@@ -53,6 +53,8 @@ class OracleFQILearner(acme.Learner, tf2_savers.TFSaveable):
         logger: loggers.Logger = None,
         checkpoint: bool = True,
         max_gradient_norm: float = None,
+        num_states: int = None,
+        num_actions : int = None,
     ):
         """Initializes the learner.
 
@@ -105,6 +107,9 @@ class OracleFQILearner(acme.Learner, tf2_savers.TFSaveable):
         # fill the replay buffer.
         self._timestamp = None
 
+        self.num_states = num_states
+        self.num_actions = num_actions
+        self._replay_buffer_counts = tf.Variable(np.zeros((num_states,num_actions)))
 
     @tf.function
     def _step(self) -> Dict[str, tf.Tensor]:
@@ -112,6 +117,15 @@ class OracleFQILearner(acme.Learner, tf2_savers.TFSaveable):
         inputs = next(self._iterator)
         transitions: types.Transition = inputs.data
         targets = inputs.data.extras['oracle_q_vals']
+        states = inputs.data.extras['env_state']
+
+        # Calculate importance weights.
+        summed = tf.reduce_sum(self._replay_buffer_counts, axis=1, keepdims=True)
+        p_a_s = tf.divide(self._replay_buffer_counts, summed)
+
+        idxs = tf.stack([states, transitions.action], axis=1)
+        p_a_s = tf.gather_nd(p_a_s, idxs)
+        weights = tf.divide((1/self.num_actions), p_a_s)
 
         with tf.GradientTape() as tape:
 
@@ -120,6 +134,7 @@ class OracleFQILearner(acme.Learner, tf2_savers.TFSaveable):
 
             error = targets - qa_tm1 # [B]
             loss = losses.huber(error, self._huber_loss_parameter)
+            loss *= tf.cast(weights, loss.dtype)
             loss = tf.reduce_mean(loss, axis=[0])  # []
 
         # Do a step of SGD.
@@ -141,6 +156,9 @@ class OracleFQILearner(acme.Learner, tf2_savers.TFSaveable):
         for src, dest in zip(self._network.variables,
                             self._target_network.variables):
             dest.assign(src)
+
+    def update_replay_buffer_counts(self, state, action):
+        self._replay_buffer_counts[state,action].assign(self._replay_buffer_counts[state,action] + 1)
 
     def step(self):
         # Do a batch of SGD.
