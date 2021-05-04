@@ -25,6 +25,7 @@
 # Value iteration:
 gridEnv4_val_iter_2021-04-28-09-54-18
 
+# Default.
 [
 # One-hot observations.
 'gridEnv4_oracle_fqi_2021-04-29-17-59-57',
@@ -52,6 +53,7 @@ gridEnv4_val_iter_2021-04-28-09-54-18
 # Value iteration:
 gridEnv5_val_iter_2021-05-03-15-52-24
 
+# Default.
 [
 # One-hot observations.
 'gridEnv5_oracle_fqi_2021-05-03-23-33-44',

@@ -14,6 +14,7 @@ from algos.value_iteration import ValueIteration
 from algos.q_learning import QLearning
 from algos.dqn.dqn import DQN
 from algos.oracle_fqi.oracle_fqi import OracleFQI
+from algos.fqi.fqi import FQI
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 
@@ -22,7 +23,7 @@ DEFAULT_TRAIN_ARGS = {
     # General arguments.
     'num_runs': 5,
     'num_processors': 5,
-    'algo': 'oracle_fqi',
+    'algo': 'fqi',
     'num_episodes': 20_000,
     'gamma': 0.9,
 
@@ -68,6 +69,22 @@ DEFAULT_TRAIN_ARGS = {
         'hidden_layers': [10,10],
     },
 
+    # FQI arguments.
+    'fqi_args': {
+        'batch_size': 100,
+        'prefetch_size': 4,
+        'num_sampling_steps': 1_000,
+        'num_gradient_steps': 20,
+        'max_replay_size': 500_000,
+        'n_step': 1,
+        'epsilon_init': 0.9,
+        'epsilon_final': 0.0,
+        'epsilon_schedule_timesteps': 225_000,
+        'learning_rate': 1e-03,
+        'hidden_layers': [10,10],
+        'reweighting_type': None, # None, actions or full.
+    },
+
     # Oracle FQI arguments.
     'oracle_fqi_args': {
         'oracle_q_vals': 'gridEnv5_val_iter_2021-05-03-15-52-24', # exp. id of val-iter/oracle Q-vals.
@@ -82,6 +99,7 @@ DEFAULT_TRAIN_ARGS = {
         'epsilon_schedule_timesteps': 225_000,
         'learning_rate': 1e-03,
         'hidden_layers': [10,10],
+        'reweighting_type': 'actions', # None, actions or full.
     }
 
 }
@@ -121,6 +139,10 @@ def train_run(run_args):
     elif args['algo'] == 'dqn':
         args['dqn_args']['discount'] = args['gamma']
         agent = DQN(env, env_grid_spec, args['dqn_args'])
+
+    elif args['algo'] == 'fqi':
+        args['fqi_args']['discount'] = args['gamma']
+        agent = FQI(env, env_grid_spec, args['fqi_args'])
 
     elif args['algo'] == 'oracle_fqi':
 

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""OracleFQILearner learner implementation."""
+"""FQILearner learner implementation."""
 
 import time
 from typing import Dict, List
@@ -33,10 +33,10 @@ import tensorflow as tf
 import trfl
 
 
-class OracleFQILearner(acme.Learner, tf2_savers.TFSaveable):
-    """OracleFQILearner unprioritized learner.
+class FQILearner(acme.Learner, tf2_savers.TFSaveable):
+    """FQILearner unprioritized learner.
 
-    This is the learning component of a OracleFQILearner agent. It takes a dataset as input
+    This is the learning component of a FQILearner agent. It takes a dataset as input
     and implements update functionality to learn from this dataset.
     """
 
@@ -116,15 +116,25 @@ class OracleFQILearner(acme.Learner, tf2_savers.TFSaveable):
 
         inputs = next(self._iterator)
         transitions: types.Transition = inputs.data
-        targets = inputs.data.extras['oracle_q_vals']
 
         with tf.GradientTape() as tape:
+            # Evaluate our networks.
+            q_tm1 = self._network(transitions.observation)
+            q_t_value = self._target_network(transitions.next_observation)
+            q_t_selector = self._network(transitions.next_observation)
 
-            q_tm1 = self._network(transitions.observation) # [B,A]
-            qa_tm1 = trfl.indexing_ops.batched_index(q_tm1, transitions.action) # [B]
+            # The rewards and discounts have to have the same type as network values.
+            r_t = tf.cast(transitions.reward, q_tm1.dtype)
+            r_t = tf.clip_by_value(r_t, -1., 1.)
+            d_t = tf.cast(tf.ones_like(transitions.discount), q_tm1.dtype) * tf.cast(
+                self._discount, q_tm1.dtype)
+            # d_t = tf.cast(transitions.discount, q_tm1.dtype) * tf.cast(
+            #    self._discount, q_tm1.dtype) # transitions.discount = 0 if last timestep.
 
-            error = targets - qa_tm1 # [B]
-            loss = losses.huber(error, self._huber_loss_parameter)
+            # Compute the loss.
+            _, extra = trfl.double_qlearning(q_tm1, transitions.action, r_t, d_t,
+                                            q_t_value, q_t_selector)
+            loss = losses.huber(extra.td_error, self._huber_loss_parameter)
             loss = tf.reduce_mean(loss, axis=[0])  # []
 
         # Do a step of SGD.

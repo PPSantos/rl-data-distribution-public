@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""OracleFQILearner learner implementation."""
+"""OracleFQILearner learner implementation (actions re-weighting)."""
 
 import time
 from typing import Dict, List
@@ -33,8 +33,8 @@ import tensorflow as tf
 import trfl
 
 
-class OracleFQILearner(acme.Learner, tf2_savers.TFSaveable):
-    """OracleFQILearner unprioritized learner.
+class OracleFQILearnerReweightActions(acme.Learner, tf2_savers.TFSaveable):
+    """OracleFQILearner unprioritized learner (actions re-weighting).
 
     This is the learning component of a OracleFQILearner agent. It takes a dataset as input
     and implements update functionality to learn from this dataset.
@@ -117,6 +117,15 @@ class OracleFQILearner(acme.Learner, tf2_savers.TFSaveable):
         inputs = next(self._iterator)
         transitions: types.Transition = inputs.data
         targets = inputs.data.extras['oracle_q_vals']
+        states = inputs.data.extras['env_state']
+
+        # Calculate importance weights.
+        summed = tf.reduce_sum(self._replay_buffer_counts, axis=1, keepdims=True)
+        p_a_s = tf.divide(self._replay_buffer_counts, summed)
+
+        idxs = tf.stack([states, transitions.action], axis=1)
+        p_a_s = tf.gather_nd(p_a_s, idxs)
+        weights = tf.divide((1/self.num_actions), p_a_s)
 
         with tf.GradientTape() as tape:
 
@@ -125,6 +134,7 @@ class OracleFQILearner(acme.Learner, tf2_savers.TFSaveable):
 
             error = targets - qa_tm1 # [B]
             loss = losses.huber(error, self._huber_loss_parameter)
+            loss *= tf.cast(weights, loss.dtype)
             loss = tf.reduce_mean(loss, axis=[0])  # []
 
         # Do a step of SGD.

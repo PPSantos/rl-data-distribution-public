@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Oracle FQI agent implementation."""
+"""FQI agent implementation."""
 
 import copy
 from typing import Optional
@@ -24,7 +24,7 @@ from acme import datasets
 from acme import specs
 from acme import types
 from acme.adders import reverb as adders
-from algos.oracle_fqi.fqi_agent_acme import FQIAgent
+from algos.fqi.fqi_agent_acme import FQIAgent
 from acme.agents.tf.dqn import learning
 from acme.tf import utils as tf2_utils
 from acme.utils import loggers
@@ -34,17 +34,18 @@ import sonnet as snt
 import tensorflow as tf
 import trfl
 
-from algos.oracle_fqi import actors
+from algos.fqi import actors
 
 from algos.utils import tf2_savers
 from algos.utils.tf2_layers import EpsilonGreedyExploration
-from algos.oracle_fqi.oracle_fqi_acme_learning import OracleFQILearner
-from algos.oracle_fqi.oracle_fqi_acme_learning_actions import OracleFQILearnerReweightActions
+from algos.fqi.fqi_acme_learning import FQILearner
+
+#from algos.fqi.fqi_acme_learning_actions import FQILearnerReweightActions # TODO
 
 
-class OracleFQI(FQIAgent):
+class FQI(FQIAgent):
     """
-        OracleFQI agent.
+        FQI agent.
     """
 
     def __init__(
@@ -100,8 +101,7 @@ class OracleFQI(FQIAgent):
             max_size=max_replay_size,
             rate_limiter=reverb.rate_limiters.MinSize(1),
             signature=adders.NStepTransitionAdder.signature(environment_spec,
-                                                extras_spec={'env_state': np.int32(1),
-                                                    'oracle_q_vals': np.float32(1.0)}))
+                                                extras_spec={'env_state': np.int32(1),}))
         self._server = reverb.Server([replay_table], port=None)
 
         # The adder is used to insert observations into replay.
@@ -138,7 +138,7 @@ class OracleFQI(FQIAgent):
 
         # The learner updates the parameters (and initializes them).
         if reweighting_type is None:
-            learner = OracleFQILearner(
+            learner = FQILearner(
                 network=network,
                 target_network=target_network,
                 discount=discount,
@@ -151,18 +151,7 @@ class OracleFQI(FQIAgent):
                 num_states=self.num_states,
                 num_actions=self.num_actions)
         elif reweighting_type == 'actions':
-            learner = OracleFQILearnerReweightActions(
-                network=network,
-                target_network=target_network,
-                discount=discount,
-                learning_rate=learning_rate,
-                dataset=dataset,
-                replay_client=replay_client,
-                max_gradient_norm=max_gradient_norm,
-                logger=logger,
-                checkpoint=False,
-                num_states=self.num_states,
-                num_actions=self.num_actions)
+            raise NotImplementedError('TODO')
         elif reweighting_type == 'full':
             raise NotImplementedError('TODO')
 
