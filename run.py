@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     for size in max_replay_sizes:
         print(f'One-hot observation, max_replay_size={size}')
-        args['oracle_fqi_args']['max_replay_size'] = size
+        args['fqi_args']['max_replay_size'] = size
         exp_id = train(args)
         exp_ids.append(exp_id)
         if COMPUTE_PLOTS:
@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     for size in max_replay_sizes:
         print(f'Smoothed observation, max_replay_size={size}')
-        args['oracle_fqi_args']['max_replay_size'] = size
+        args['fqi_args']['max_replay_size'] = size
         exp_id = train(args)
         exp_ids.append(exp_id)
         if COMPUTE_PLOTS:
