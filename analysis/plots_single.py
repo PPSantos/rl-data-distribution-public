@@ -109,6 +109,8 @@ def main(exp_id, val_iter_exp):
     os.makedirs(output_folder, exist_ok=True)
     replay_buffer_plots_path = f'{output_folder}/replay_buffer'
     os.makedirs(replay_buffer_plots_path, exist_ok=True)
+    q_vals_folder_path = PLOTS_FOLDER_PATH + exp_id + '/Q-values'
+    os.makedirs(q_vals_folder_path, exist_ok=True)
 
     # Get args file (assumes all experiments share the same arguments).
     exp_args = get_args_json_file(DATA_FOLDER_PATH + exp_id)
@@ -209,6 +211,41 @@ def main(exp_id, val_iter_exp):
     plt.savefig('{0}/episode_rewards_avg.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/episode_rewards_avg.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
+
+    """
+        Maximizing action.
+    """
+    for line in range(lateral_size):
+        for col in range(lateral_size):
+
+            state = lateral_size*line+col
+
+            num_cols = 3
+            num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
+            fig, axs = plt.subplots(num_rows, num_cols)
+            fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
+            fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
+
+            i = 0
+            for (ax, run_data) in zip(axs.flat, data['Q_vals']): # run_data = [E,S,A]
+
+                state_data = run_data[:,state,:] # [E,A]
+                Y = np.argmax(state_data, axis=1) # [E]
+                X = np.linspace(1, len(Y), len(Y))
+
+                ax.plot(X, Y)
+
+                ax.set_ylim([-0.1,5.1])
+                ax.set_ylabel('Maximizing action')
+                ax.set_xlabel('Episode')
+                ax.set_title(f'Run {i}')
+
+                i += 1
+
+            fig.suptitle(f'Maximizing actions: state {state}; line {line}, col {col}')
+
+            plt.savefig(f'{q_vals_folder_path}/maximizing_action_s_{state}.png', bbox_inches='tight', pad_inches=0)
+            plt.close()
 
     """
         Q-values plots.
