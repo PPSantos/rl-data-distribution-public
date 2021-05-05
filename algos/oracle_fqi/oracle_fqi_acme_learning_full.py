@@ -121,7 +121,6 @@ class OracleFQILearnerReweightFull(acme.Learner, tf2_savers.TFSaveable):
 
         # Calculate importance weights.
         summed = tf.reduce_sum(self._replay_buffer_counts)
-        tf.print(summed)
         p_a_s = tf.divide(self._replay_buffer_counts, summed)
 
         idxs = tf.stack([states, transitions.action], axis=1)
