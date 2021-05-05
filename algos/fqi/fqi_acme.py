@@ -39,8 +39,7 @@ from algos.fqi import actors
 from algos.utils import tf2_savers
 from algos.utils.tf2_layers import EpsilonGreedyExploration
 from algos.fqi.fqi_acme_learning import FQILearner
-
-#from algos.fqi.fqi_acme_learning_actions import FQILearnerReweightActions # TODO
+from algos.fqi.fqi_acme_learning_actions import FQILearnerReweightActions
 
 
 class FQI(FQIAgent):
@@ -151,7 +150,18 @@ class FQI(FQIAgent):
                 num_states=self.num_states,
                 num_actions=self.num_actions)
         elif reweighting_type == 'actions':
-            raise NotImplementedError('TODO')
+            learner = FQILearnerReweightActions(
+                network=network,
+                target_network=target_network,
+                discount=discount,
+                learning_rate=learning_rate,
+                dataset=dataset,
+                replay_client=replay_client,
+                max_gradient_norm=max_gradient_norm,
+                logger=logger,
+                checkpoint=False,
+                num_states=self.num_states,
+                num_actions=self.num_actions)
         elif reweighting_type == 'full':
             raise NotImplementedError('TODO')
 

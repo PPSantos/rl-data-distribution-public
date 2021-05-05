@@ -23,7 +23,7 @@ DEFAULT_TRAIN_ARGS = {
     # General arguments.
     'num_runs': 5,
     'num_processors': 5,
-    'algo': 'oracle_fqi',
+    'algo': 'fqi',
     'num_episodes': 20_000,
     'gamma': 0.9,
 
@@ -82,7 +82,7 @@ DEFAULT_TRAIN_ARGS = {
         'epsilon_schedule_timesteps': 225_000,
         'learning_rate': 1e-03,
         'hidden_layers': [10,10],
-        'reweighting_type': None, # None, actions or full.
+        'reweighting_type': 'actions', # None, actions or full.
     },
 
     # Oracle FQI arguments.
