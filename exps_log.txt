@@ -79,7 +79,12 @@ gridEnv5_val_iter_2021-05-03-15-52-24
 ]
 
 # Oracle-FQI reweighted_type=full
-# TODO
+[
+# One-hot observations.
+'gridEnv5_oracle_fqi_2021-05-05-15-21-48', # max_replay=500_000
+# Smoothed observations.
+'gridEnv5_oracle_fqi_2021-05-05-15-38-47', # max_replay=500_000
+] 
 
 ####################################
 # FQI.
