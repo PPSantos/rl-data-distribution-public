@@ -25,7 +25,8 @@
 # Value iteration:
 gridEnv4_val_iter_2021-04-28-09-54-18
 
-# Default.
+####################################
+# Oracle-FQI Default.
 [
 # One-hot observations.
 'gridEnv4_oracle_fqi_2021-04-29-17-59-57', # max_replay=1_000_000
@@ -35,7 +36,6 @@ gridEnv4_val_iter_2021-04-28-09-54-18
 'gridEnv4_oracle_fqi_2021-04-29-19-39-33', # max_replay=200_000
 'gridEnv4_oracle_fqi_2021-04-29-20-04-27', # max_replay=100_000
 'gridEnv4_oracle_fqi_2021-04-29-20-29-14', # max_replay=50_000
-
 # Smoothed observations.
 'gridEnv4_oracle_fqi_2021-04-29-20-54-26', # max_replay=1_000_000
 'gridEnv4_oracle_fqi_2021-04-29-21-18-38', # max_replay=750_000
@@ -53,25 +53,35 @@ gridEnv4_val_iter_2021-04-28-09-54-18
 # Value iteration:
 gridEnv5_val_iter_2021-05-03-15-52-24
 
-
+####################################
 # Oracle-FQI Default.
 [
 # One-hot observations.
-'gridEnv5_oracle_fqi_2021-05-05-09-48-25',
-'gridEnv5_oracle_fqi_2021-05-05-10-04-52',
-'gridEnv5_oracle_fqi_2021-05-05-10-21-14',
-'gridEnv5_oracle_fqi_2021-05-05-10-37-59',
-'gridEnv5_oracle_fqi_2021-05-05-10-54-43',
-
+'gridEnv5_oracle_fqi_2021-05-05-09-48-25', # max_replay=500_000
+'gridEnv5_oracle_fqi_2021-05-05-10-04-52', # max_replay=300_000
+'gridEnv5_oracle_fqi_2021-05-05-10-21-14', # max_replay=200_000
+'gridEnv5_oracle_fqi_2021-05-05-10-37-59', # max_replay=100_000
+'gridEnv5_oracle_fqi_2021-05-05-10-54-43', # max_replay=50_000
 # Smoothed observations.
-'gridEnv5_oracle_fqi_2021-05-05-11-11-29',
-'gridEnv5_oracle_fqi_2021-05-05-11-28-04',
-'gridEnv5_oracle_fqi_2021-05-05-11-44-39',
-'gridEnv5_oracle_fqi_2021-05-05-12-01-35',
-'gridEnv5_oracle_fqi_2021-05-05-12-18-13'
+'gridEnv5_oracle_fqi_2021-05-05-11-11-29', # max_replay=500_000
+'gridEnv5_oracle_fqi_2021-05-05-11-28-04', # max_replay=300_000
+'gridEnv5_oracle_fqi_2021-05-05-11-44-39', # max_replay=200_000
+'gridEnv5_oracle_fqi_2021-05-05-12-01-35', # max_replay=100_000
+'gridEnv5_oracle_fqi_2021-05-05-12-18-13' # max_replay=50_000
 ]
 
+# Oracle-FQI reweighted_type=actions
+[
+# One-hot observations.
+'gridEnv5_oracle_fqi_2021-05-05-13-14-27', # max_replay=500_000
+# Smoothed observations.
+'gridEnv5_oracle_fqi_2021-05-05-13-31-00', # max_replay=500_000
+]
 
+# Oracle-FQI reweighted_type=full
+# TODO
+
+####################################
 # FQI.
 [
 # One-hot observations.
@@ -80,7 +90,6 @@ gridEnv5_val_iter_2021-05-03-15-52-24
 'gridEnv5_fqi_2021-05-05-01-23-16', # max_replay=200_000
 'gridEnv5_fqi_2021-05-05-01-39-40', # max_replay=100_000
 'gridEnv5_fqi_2021-05-05-01-56-05', # max_replay=50_000
-
 # Smoothed observations.
 'gridEnv5_fqi_2021-05-05-02-12-21', # max_replay=500_000
 'gridEnv5_fqi_2021-05-05-02-28-37', # max_replay=300_000
@@ -88,6 +97,12 @@ gridEnv5_val_iter_2021-05-03-15-52-24
 'gridEnv5_fqi_2021-05-05-03-01-20', # max_replay=100_000
 'gridEnv5_fqi_2021-05-05-03-17-36'  # max_replay=50_000
 ]
+
+# FQI reweighted_type=actions
+# TODO
+
+# FQI reweighted_type=full
+# TODO
 
 
 ####################################
