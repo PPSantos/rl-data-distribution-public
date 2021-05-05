@@ -40,6 +40,7 @@ from algos.utils import tf2_savers
 from algos.utils.tf2_layers import EpsilonGreedyExploration
 from algos.oracle_fqi.oracle_fqi_acme_learning import OracleFQILearner
 from algos.oracle_fqi.oracle_fqi_acme_learning_actions import OracleFQILearnerReweightActions
+from algos.oracle_fqi.oracle_fqi_acme_learning_full import OracleFQILearnerReweightFull
 
 
 class OracleFQI(FQIAgent):
@@ -164,8 +165,18 @@ class OracleFQI(FQIAgent):
                 num_states=self.num_states,
                 num_actions=self.num_actions)
         elif reweighting_type == 'full':
-            raise NotImplementedError('TODO')
-
+            learner = OracleFQILearnerReweightFull(
+                network=network,
+                target_network=target_network,
+                discount=discount,
+                learning_rate=learning_rate,
+                dataset=dataset,
+                replay_client=replay_client,
+                max_gradient_norm=max_gradient_norm,
+                logger=logger,
+                checkpoint=False,
+                num_states=self.num_states,
+                num_actions=self.num_actions)
         else:
             raise ValueError('Unknown reweighting type.')
 
