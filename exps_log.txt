@@ -104,7 +104,12 @@ gridEnv5_val_iter_2021-05-03-15-52-24
 ]
 
 # FQI reweighted_type=actions
-# TODO
+[
+# One-hot observations.
+'gridEnv5_fqi_2021-05-05-18-26-03',
+# Smoothed observations.
+'gridEnv5_fqi_2021-05-05-18-42-39'
+]
 
 # FQI reweighted_type=full
 # TODO
