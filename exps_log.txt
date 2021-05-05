@@ -28,22 +28,22 @@ gridEnv4_val_iter_2021-04-28-09-54-18
 # Default.
 [
 # One-hot observations.
-'gridEnv4_oracle_fqi_2021-04-29-17-59-57',
-'gridEnv4_oracle_fqi_2021-04-29-18-26-04',
-'gridEnv4_oracle_fqi_2021-04-29-18-50-15',
-'gridEnv4_oracle_fqi_2021-04-29-19-14-41',
-'gridEnv4_oracle_fqi_2021-04-29-19-39-33',
-'gridEnv4_oracle_fqi_2021-04-29-20-04-27',
-'gridEnv4_oracle_fqi_2021-04-29-20-29-14',
+'gridEnv4_oracle_fqi_2021-04-29-17-59-57', # max_replay=1_000_000
+'gridEnv4_oracle_fqi_2021-04-29-18-26-04', # max_replay=750_000
+'gridEnv4_oracle_fqi_2021-04-29-18-50-15', # max_replay=500_000
+'gridEnv4_oracle_fqi_2021-04-29-19-14-41', # max_replay=300_000
+'gridEnv4_oracle_fqi_2021-04-29-19-39-33', # max_replay=200_000
+'gridEnv4_oracle_fqi_2021-04-29-20-04-27', # max_replay=100_000
+'gridEnv4_oracle_fqi_2021-04-29-20-29-14', # max_replay=50_000
 
 # Smoothed observations.
-'gridEnv4_oracle_fqi_2021-04-29-20-54-26',
-'gridEnv4_oracle_fqi_2021-04-29-21-18-38',
-'gridEnv4_oracle_fqi_2021-04-29-21-42-55',
-'gridEnv4_oracle_fqi_2021-04-29-22-08-03',
-'gridEnv4_oracle_fqi_2021-04-29-22-33-17',
-'gridEnv4_oracle_fqi_2021-04-29-22-58-29',
-'gridEnv4_oracle_fqi_2021-04-29-23-23-37'
+'gridEnv4_oracle_fqi_2021-04-29-20-54-26', # max_replay=1_000_000
+'gridEnv4_oracle_fqi_2021-04-29-21-18-38', # max_replay=750_000
+'gridEnv4_oracle_fqi_2021-04-29-21-42-55', # max_replay=500_000
+'gridEnv4_oracle_fqi_2021-04-29-22-08-03', # max_replay=300_000
+'gridEnv4_oracle_fqi_2021-04-29-22-33-17', # max_replay=200_000
+'gridEnv4_oracle_fqi_2021-04-29-22-58-29', # max_replay=100_000
+'gridEnv4_oracle_fqi_2021-04-29-23-23-37'  # max_replay=50_000
 ]
 
 
@@ -53,25 +53,40 @@ gridEnv4_val_iter_2021-04-28-09-54-18
 # Value iteration:
 gridEnv5_val_iter_2021-05-03-15-52-24
 
-# Default.
+
+# Oracle-FQI Default.
 [
 # One-hot observations.
-'gridEnv5_oracle_fqi_2021-05-03-23-33-44',
-'gridEnv5_oracle_fqi_2021-05-03-23-46-48',
-'gridEnv5_oracle_fqi_2021-05-03-23-59-51',
-'gridEnv5_oracle_fqi_2021-05-04-00-12-52',
-'gridEnv5_oracle_fqi_2021-05-04-00-25-59',
-'gridEnv5_oracle_fqi_2021-05-04-00-39-25',
-'gridEnv5_oracle_fqi_2021-05-04-00-52-48',
+'gridEnv5_oracle_fqi_2021-05-05-09-48-25',
+'gridEnv5_oracle_fqi_2021-05-05-10-04-52',
+'gridEnv5_oracle_fqi_2021-05-05-10-21-14',
+'gridEnv5_oracle_fqi_2021-05-05-10-37-59',
+'gridEnv5_oracle_fqi_2021-05-05-10-54-43',
 
 # Smoothed observations.
-'gridEnv5_oracle_fqi_2021-05-04-01-06-14',
-'gridEnv5_oracle_fqi_2021-05-04-01-19-13',
-'gridEnv5_oracle_fqi_2021-05-04-01-32-09',
-'gridEnv5_oracle_fqi_2021-05-04-01-45-05',
-'gridEnv5_oracle_fqi_2021-05-04-01-58-06',
-'gridEnv5_oracle_fqi_2021-05-04-02-11-17',
-'gridEnv5_oracle_fqi_2021-05-04-02-24-27'
+'gridEnv5_oracle_fqi_2021-05-05-11-11-29',
+'gridEnv5_oracle_fqi_2021-05-05-11-28-04',
+'gridEnv5_oracle_fqi_2021-05-05-11-44-39',
+'gridEnv5_oracle_fqi_2021-05-05-12-01-35',
+'gridEnv5_oracle_fqi_2021-05-05-12-18-13'
+]
+
+
+# FQI.
+[
+# One-hot observations.
+'gridEnv5_fqi_2021-05-05-00-51-21', # max_replay=500_000
+'gridEnv5_fqi_2021-05-05-01-07-29', # max_replay=300_000
+'gridEnv5_fqi_2021-05-05-01-23-16', # max_replay=200_000
+'gridEnv5_fqi_2021-05-05-01-39-40', # max_replay=100_000
+'gridEnv5_fqi_2021-05-05-01-56-05', # max_replay=50_000
+
+# Smoothed observations.
+'gridEnv5_fqi_2021-05-05-02-12-21', # max_replay=500_000
+'gridEnv5_fqi_2021-05-05-02-28-37', # max_replay=300_000
+'gridEnv5_fqi_2021-05-05-02-45-00', # max_replay=200_000
+'gridEnv5_fqi_2021-05-05-03-01-20', # max_replay=100_000
+'gridEnv5_fqi_2021-05-05-03-17-36'  # max_replay=50_000
 ]
 
 
