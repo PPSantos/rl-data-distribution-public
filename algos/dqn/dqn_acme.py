@@ -1,49 +1,30 @@
-# python3
-# Copyright 2018 DeepMind Technologies Limited. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """DQN agent implementation."""
 
 import copy
 from typing import Optional
 
-from acme import datasets
 from acme import specs
 from acme import types
-from acme.adders import reverb as adders
-from acme.agents.tf import actors
 from acme.agents import agent
-from acme.agents.tf.dqn import learning
 from acme.tf import utils as tf2_utils
 from acme.utils import loggers
 
-import reverb
 import sonnet as snt
 import tensorflow as tf
 import trfl
 
-from algos.utils import tf2_savers
+from tf_agents.replay_buffers.tf_uniform_replay_buffer import TFUniformReplayBuffer
+
+from algos.dqn import actors
+from algos.utils import tf2_savers, spec_converter
 from algos.utils.tf2_layers import EpsilonGreedyExploration
 from algos.dqn.dqn_acme_unprioritized_learning import DQNUnprioritizedLearner
-
 
 class DQN(agent.Agent):
     """DQN agent.
     This implements a single-process DQN agent. This is a simple Q-learning
     algorithm that inserts N-step transitions into a replay buffer, and
-    periodically updates its policy by sampling these transitions using
-    prioritization.
+    periodically updates its policy by sampling these transitions.
     """
 
     def __init__(
@@ -98,37 +79,14 @@ class DQN(agent.Agent):
         max_gradient_norm: used for gradient clipping.
         """
 
-        print('discount', discount)
+        # Create replay buffer.
+        transition_spec = spec_converter.convert_env_spec(environment_spec)
+        self.replay_buffer = TFUniformReplayBuffer(data_spec=transition_spec,
+                                                    batch_size=1,
+                                                    max_length=max_replay_size)
+        dataset = self.replay_buffer.as_dataset(sample_batch_size=batch_size)
 
-        # Create a replay server to add data to. This uses no limiter behavior in
-        # order to allow the Agent interface to handle it.
-        if prioritized_replay:
-            reverb_table_sampler = reverb.selectors.Prioritized(priority_exponent)
-        else:
-            reverb_table_sampler = reverb.selectors.Uniform()
-        replay_table = reverb.Table(
-            name=adders.DEFAULT_PRIORITY_TABLE,
-            sampler=reverb_table_sampler,
-            remover=reverb.selectors.Fifo(),
-            max_size=max_replay_size,
-            rate_limiter=reverb.rate_limiters.MinSize(1),
-            signature=adders.NStepTransitionAdder.signature(environment_spec))
-        self._server = reverb.Server([replay_table], port=None)
-
-        # The adder is used to insert observations into replay.
-        address = f'localhost:{self._server.port}'
-        adder = adders.NStepTransitionAdder(
-            client=reverb.Client(address),
-            n_step=n_step,
-            discount=discount)
-
-        # The dataset provides an interface to sample from replay.
-        replay_client = reverb.TFClient(address)
-        dataset = datasets.make_reverb_dataset(
-            server_address=address,
-            batch_size=batch_size,
-            prefetch_size=prefetch_size)
-
+        # Create a epsilon-greedy policy network.
         policy_network = snt.Sequential([
             network,
             EpsilonGreedyExploration(epsilon_init=epsilon_init,
@@ -144,22 +102,11 @@ class DQN(agent.Agent):
         tf2_utils.create_variables(target_network, [environment_spec.observations])
 
         # Create the actor which defines how we take actions.
-        actor = actors.FeedForwardActor(policy_network, adder)
+        actor = actors.FeedForwardActor(policy_network, self.replay_buffer)
 
         # The learner updates the parameters (and initializes them).
         if prioritized_replay:
-            learner = learning.DQNLearner(
-                network=network,
-                target_network=target_network,
-                discount=discount,
-                importance_sampling_exponent=importance_sampling_exponent,
-                learning_rate=learning_rate,
-                target_update_period=target_update_period,
-                dataset=dataset,
-                replay_client=replay_client,
-                max_gradient_norm=max_gradient_norm,
-                logger=logger,
-                checkpoint=False)
+            raise NotImplementedError('Prioritized replaying not implemented.')
         else:
             learner = DQNUnprioritizedLearner(
                 network=network,
@@ -168,7 +115,6 @@ class DQN(agent.Agent):
                 learning_rate=learning_rate,
                 target_update_period=target_update_period,
                 dataset=dataset,
-                replay_client=replay_client,
                 max_gradient_norm=max_gradient_norm,
                 logger=logger,
                 checkpoint=False)
