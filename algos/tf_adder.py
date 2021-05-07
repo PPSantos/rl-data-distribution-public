@@ -40,5 +40,7 @@ class TFAdder(Adder):
 
         self._replay_buffer.add_batch(transition)
 
+        self._prev_timestep = next_timestep
+
     def reset(self):
         self._prev_timestep = None
