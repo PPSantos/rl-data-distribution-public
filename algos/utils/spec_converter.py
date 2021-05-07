@@ -4,9 +4,9 @@ from tf_agents.specs import tensor_spec
 
 
 # TODO: Make this creation dynamic.
-def convert_env_spec(environment_spec):
+def convert_env_spec(environment_spec, extras=None):
 
-    return (
+    spec = (
             tensor_spec.BoundedTensorSpec(environment_spec.observations.shape,
                                 dtype=tf.float32,
                                 minimum=environment_spec.observations.minimum,
@@ -26,4 +26,9 @@ def convert_env_spec(environment_spec):
                                 minimum=environment_spec.observations.minimum,
                                 maximum=environment_spec.observations.maximum,
                                 name='next_observation'),
-        )
+    )
+
+    if extras is not None:
+        spec += extras
+
+    return spec 

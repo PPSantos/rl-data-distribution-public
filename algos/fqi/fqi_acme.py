@@ -1,18 +1,3 @@
-# python3
-# Copyright 2018 DeepMind Technologies Limited. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """FQI agent implementation."""
 
 import copy
@@ -20,29 +5,28 @@ from typing import Optional
 
 import numpy as np
 
-from acme import datasets
 from acme import specs
 from acme import types
-from acme.adders import reverb as adders
-from algos.fqi.fqi_agent_acme import FQIAgent
-from acme.agents.tf.dqn import learning
+from algos import agent
 from acme.tf import utils as tf2_utils
 from acme.utils import loggers
 
-import reverb
 import sonnet as snt
 import tensorflow as tf
 import trfl
 
-from algos.fqi import actors
+from tf_agents.replay_buffers.tf_uniform_replay_buffer import TFUniformReplayBuffer
+from tf_agents.specs import tensor_spec
 
-from algos.utils import tf2_savers
+from algos import actors
+from algos.utils import tf2_savers, spec_converter
 from algos.utils.tf2_layers import EpsilonGreedyExploration
 from algos.fqi.fqi_acme_learning import FQILearner
-from algos.fqi.fqi_acme_learning_actions import FQILearnerReweightActions
+from algos.tf_adder import TFAdder
+#from algos.fqi.fqi_acme_learning_actions import FQILearnerReweightActions
 
 
-class FQI(FQIAgent):
+class FQI(agent.Agent):
     """
         FQI agent.
     """
@@ -91,33 +75,20 @@ class FQI(FQIAgent):
         self.num_states = num_states
         self.num_actions = num_actions
 
-        # Create a replay server to add data to. This uses no limiter behavior in
-        # order to allow the Agent interface to handle it.
-        replay_table = reverb.Table(
-            name=adders.DEFAULT_PRIORITY_TABLE,
-            sampler=reverb.selectors.Uniform(),
-            remover=reverb.selectors.Fifo(),
-            max_size=max_replay_size,
-            rate_limiter=reverb.rate_limiters.MinSize(1),
-            signature=adders.NStepTransitionAdder.signature(environment_spec,
-                                                extras_spec={'env_state': np.int32(1),}))
-        self._server = reverb.Server([replay_table], port=None)
-
-        # The adder is used to insert observations into replay.
-        address = f'localhost:{self._server.port}'
-        adder = adders.NStepTransitionAdder(
-            client=reverb.Client(address),
-            n_step=n_step,
-            discount=discount)
-
-        # The dataset provides an interface to sample from replay.
-        replay_client = reverb.TFClient(address)
-        dataset = datasets.make_reverb_dataset(
-            server_address=address,
-            batch_size=batch_size,
-            prefetch_size=prefetch_size)
+        # Create replay buffer.
+        extras = (tensor_spec.TensorSpec((),
+                                dtype=tf.int32,
+                                name='env_state'),)
+        transition_spec = spec_converter.convert_env_spec(environment_spec, extras=extras)
+        self.replay_buffer = TFUniformReplayBuffer(data_spec=transition_spec,
+                                                    batch_size=1,
+                                                    max_length=max_replay_size)
+        dataset = self.replay_buffer.as_dataset(sample_batch_size=batch_size)
         self.dataset_iterator = iter(dataset)
 
+        adder = TFAdder(self.replay_buffer, transition_spec)
+
+        # Create a epsilon-greedy policy network.
         policy_network = snt.Sequential([
             network,
             EpsilonGreedyExploration(epsilon_init=epsilon_init,
@@ -143,25 +114,25 @@ class FQI(FQIAgent):
                 discount=discount,
                 learning_rate=learning_rate,
                 dataset=dataset,
-                replay_client=replay_client,
                 max_gradient_norm=max_gradient_norm,
                 logger=logger,
-                checkpoint=False,
-                num_states=self.num_states,
-                num_actions=self.num_actions)
+                checkpoint=False)
+                #num_states=self.num_states,
+                #num_actions=self.num_actions)
         elif reweighting_type == 'actions':
-            learner = FQILearnerReweightActions(
-                network=network,
-                target_network=target_network,
-                discount=discount,
-                learning_rate=learning_rate,
-                dataset=dataset,
-                replay_client=replay_client,
-                max_gradient_norm=max_gradient_norm,
-                logger=logger,
-                checkpoint=False,
-                num_states=self.num_states,
-                num_actions=self.num_actions)
+            raise NotImplementedError('TODO')
+            # learner = FQILearnerReweightActions(
+            #     network=network,
+            #     target_network=target_network,
+            #     discount=discount,
+            #     learning_rate=learning_rate,
+            #     dataset=dataset,
+            #     replay_client=replay_client,
+            #     max_gradient_norm=max_gradient_norm,
+            #     logger=logger,
+            #     checkpoint=False,
+            #     num_states=self.num_states,
+            #     num_actions=self.num_actions)
         elif reweighting_type == 'full':
             raise NotImplementedError('TODO')
 
@@ -205,9 +176,9 @@ class FQI(FQIAgent):
         counts = np.zeros((self.num_states, self.num_actions))
 
         for _ in range(batch_sampling_steps):
-            inputs = next(self.dataset_iterator)
-            states = inputs.data.extras['env_state'].numpy()
-            actions = inputs.data.action.numpy()
+            data, _ = next(self.dataset_iterator)
+            states = data[5].numpy()
+            actions = data[1].numpy()
 
             for (s, a) in zip(states, actions):
                 counts[s,a] += 1

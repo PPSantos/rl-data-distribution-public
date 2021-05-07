@@ -90,10 +90,7 @@ class FeedForwardActor(core.Actor):
     def observe_with_extras(self, action: types.NestedArray, next_timestep: dm_env.TimeStep, extras=None):
         # Allows to add extras to the replay buffer.
         if self._adder:
-            if extras:
-                self._adder.add(action, next_timestep, extras=extras)
-            else:
-                self._adder.add(action, next_timestep)
+            self._adder.add(action, next_timestep, extras=extras)
 
     def update(self, wait: bool = False):
         if self._variable_client:

@@ -21,9 +21,9 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 DEFAULT_TRAIN_ARGS = {
 
     # General arguments.
-    'num_runs': 1,
-    'num_processors': 1,
-    'algo': 'dqn',
+    'num_runs': 5,
+    'num_processors': 5,
+    'algo': 'fqi',
     'num_episodes': 20_000,
     'gamma': 0.9,
 
@@ -191,11 +191,6 @@ def train(train_args=None):
     if args['num_processors'] > mp.cpu_count():
         args['num_processors'] = mp.cpu_count()
         print(f"Downgraded the number of processors to {args['num_processors']}.")
-
-
-    train_run((0,args))
-
-    exit() # TODO
 
     # Train agent(s).
     with mp.Pool(processes=args['num_processors']) as pool:

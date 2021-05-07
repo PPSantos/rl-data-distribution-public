@@ -15,7 +15,7 @@ import trfl
 
 from tf_agents.replay_buffers.tf_uniform_replay_buffer import TFUniformReplayBuffer
 
-from algos.dqn import actors
+from algos import actors
 from algos.utils import tf2_savers, spec_converter
 from algos.utils.tf2_layers import EpsilonGreedyExploration
 from algos.dqn.dqn_acme_unprioritized_learning import DQNUnprioritizedLearner

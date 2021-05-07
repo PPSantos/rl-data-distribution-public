@@ -7,7 +7,7 @@ import dm_env
 import numpy as np
 
 
-class FQIAgent(core.Actor, core.VariableSource):
+class Agent(core.Actor, core.VariableSource):
 
     def __init__(self, actor: core.Actor, learner: core.Learner,
                 num_sampling_steps: int, num_gradient_steps: int):
@@ -30,7 +30,7 @@ class FQIAgent(core.Actor, core.VariableSource):
     def observe_with_extras(self, action: types.NestedArray, next_timestep: dm_env.TimeStep, extras=None):
         self._num_observations += 1
         self._actor.observe_with_extras(action, next_timestep, extras)
-        self._learner.update_replay_buffer_counts(extras[0], action)
+        # self._learner.update_replay_buffer_counts(extras[0], action)
 
     def update(self):
         if self._num_observations % self._num_sampling_steps == 0:

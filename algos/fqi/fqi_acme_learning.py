@@ -48,13 +48,12 @@ class FQILearner(acme.Learner, tf2_savers.TFSaveable):
         learning_rate: float,
         dataset: tf.data.Dataset,
         huber_loss_parameter: float = 1.,
-        replay_client: reverb.TFClient = None,
         counter: counting.Counter = None,
         logger: loggers.Logger = None,
         checkpoint: bool = True,
         max_gradient_norm: float = None,
-        num_states: int = None,
-        num_actions : int = None,
+        # num_states: int = None,
+        # num_actions : int = None,
     ):
         """Initializes the learner.
 
@@ -66,7 +65,6 @@ class FQILearner(acme.Learner, tf2_savers.TFSaveable):
         dataset: dataset to learn from, whether fixed or from a replay buffer (see
             `acme.datasets.reverb.make_dataset` documentation).
         huber_loss_parameter: Quadratic-linear boundary for Huber loss.
-        replay_client: client to replay to allow for updating priorities.
         counter: Counter object for (potentially distributed) counting.
         logger: Logger object for writing logs to.
         checkpoint: boolean indicating whether to checkpoint the learner.
@@ -78,7 +76,6 @@ class FQILearner(acme.Learner, tf2_savers.TFSaveable):
         self._network = network
         self._target_network = target_network
         self._optimizer = snt.optimizers.Adam(learning_rate)
-        self._replay_client = replay_client
 
         # Internalise the hyperparameters.
         self._discount = discount
@@ -107,32 +104,39 @@ class FQILearner(acme.Learner, tf2_savers.TFSaveable):
         # fill the replay buffer.
         self._timestamp = None
 
-        self.num_states = num_states
-        self.num_actions = num_actions
-        self._replay_buffer_counts = tf.Variable(np.zeros((num_states,num_actions)))
+        # self.num_states = num_states
+        # self.num_actions = num_actions
+        #self._replay_buffer_counts = tf.Variable(np.zeros((num_states,num_actions)))
 
     @tf.function
     def _step(self) -> Dict[str, tf.Tensor]:
 
-        inputs = next(self._iterator)
-        transitions: types.Transition = inputs.data
+        data, info = next(self._iterator)
+
+        # Unpack data.
+        observation = data[0]
+        action = data[1]
+        reward = data[2]
+        discount = data[3]
+        next_observation = data[4]
+        # env_state = data[5]
 
         with tf.GradientTape() as tape:
             # Evaluate our networks.
-            q_tm1 = self._network(transitions.observation)
-            q_t_value = self._target_network(transitions.next_observation)
-            q_t_selector = self._network(transitions.next_observation)
+            q_tm1 = self._network(observation)
+            q_t_value = self._target_network(next_observation)
+            q_t_selector = self._network(next_observation)
 
             # The rewards and discounts have to have the same type as network values.
-            r_t = tf.cast(transitions.reward, q_tm1.dtype)
+            r_t = tf.cast(reward, q_tm1.dtype)
             r_t = tf.clip_by_value(r_t, -1., 1.)
-            d_t = tf.cast(tf.ones_like(transitions.discount), q_tm1.dtype) * tf.cast(
+            d_t = tf.cast(tf.ones_like(discount), q_tm1.dtype) * tf.cast(
                 self._discount, q_tm1.dtype)
-            # d_t = tf.cast(transitions.discount, q_tm1.dtype) * tf.cast(
-            #    self._discount, q_tm1.dtype) # transitions.discount = 0 if last timestep.
+            # d_t = tf.cast(discount, q_tm1.dtype) * tf.cast(
+            #    self._discount, q_tm1.dtype) # discount = 0 if last timestep.
 
             # Compute the loss.
-            _, extra = trfl.double_qlearning(q_tm1, transitions.action, r_t, d_t,
+            _, extra = trfl.double_qlearning(q_tm1, action, r_t, d_t,
                                             q_t_value, q_t_selector)
             loss = losses.huber(extra.td_error, self._huber_loss_parameter)
             loss = tf.reduce_mean(loss, axis=[0])  # []
