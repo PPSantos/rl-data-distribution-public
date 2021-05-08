@@ -78,18 +78,12 @@ class OracleFQI(object):
             timestep = self.env.reset()
             self.agent.observe_first(timestep)
             env_state = self.base_env.get_state()
-            #print(timestep)
 
             episode_cumulative_reward = 0
             while not timestep.last():
 
                 action = self.agent.select_action(timestep.observation)
                 timestep = self.env.step(action)
-
-                #print('env_state:', env_state)
-                #print('action:', action)
-                #print('env_state q_val:', self.oracle_q_vals[env_state,action])
-                #print(timestep)
 
                 oracle_q_val = np.float32(self.oracle_q_vals[env_state,action])
                 env_state = np.int32(env_state)
@@ -98,7 +92,6 @@ class OracleFQI(object):
                 self.agent.update()
 
                 env_state = self.base_env.get_state()
-                #print('env_state q_val:', self.oracle_q_vals[env_state,action])
 
                 # Log data.
                 episode_cumulative_reward += timestep.reward

@@ -15,10 +15,10 @@ import sonnet as snt
 import tensorflow as tf
 import trfl
 
-from tf_agents.replay_buffers.tf_uniform_replay_buffer import TFUniformReplayBuffer
 from tf_agents.specs import tensor_spec
 
 from algos import actors
+from algos.tf_uniform_replay_buffer import TFUniformReplayBuffer
 from algos.utils import tf2_savers, spec_converter
 from algos.utils.tf2_layers import EpsilonGreedyExploration
 from algos.fqi.fqi_acme_learning import FQILearner
@@ -82,7 +82,9 @@ class FQI(agent.Agent):
         transition_spec = spec_converter.convert_env_spec(environment_spec, extras=extras)
         self.replay_buffer = TFUniformReplayBuffer(data_spec=transition_spec,
                                                     batch_size=1,
-                                                    max_length=max_replay_size)
+                                                    max_length=max_replay_size,
+                                                    statistics_table_shape=(self.num_states,
+                                                                            self.num_actions))
         dataset = self.replay_buffer.as_dataset(sample_batch_size=batch_size)
         self.dataset_iterator = iter(dataset)
 

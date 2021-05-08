@@ -88,20 +88,20 @@ gridEnv5_val_iter_2021-05-03-15-52-24
 
 ####################################
 # FQI.
-[
+# [
 # One-hot observations.
-'gridEnv5_fqi_2021-05-05-00-51-21', # max_replay=500_000
-'gridEnv5_fqi_2021-05-05-01-07-29', # max_replay=300_000
-'gridEnv5_fqi_2021-05-05-01-23-16', # max_replay=200_000
-'gridEnv5_fqi_2021-05-05-01-39-40', # max_replay=100_000
-'gridEnv5_fqi_2021-05-05-01-56-05', # max_replay=50_000
+# 'gridEnv5_fqi_2021-05-05-00-51-21', # max_replay=500_000
+# 'gridEnv5_fqi_2021-05-05-01-07-29', # max_replay=300_000
+# 'gridEnv5_fqi_2021-05-05-01-23-16', # max_replay=200_000
+# 'gridEnv5_fqi_2021-05-05-01-39-40', # max_replay=100_000
+# 'gridEnv5_fqi_2021-05-05-01-56-05', # max_replay=50_000
 # Smoothed observations.
-'gridEnv5_fqi_2021-05-05-02-12-21', # max_replay=500_000
-'gridEnv5_fqi_2021-05-05-02-28-37', # max_replay=300_000
-'gridEnv5_fqi_2021-05-05-02-45-00', # max_replay=200_000
-'gridEnv5_fqi_2021-05-05-03-01-20', # max_replay=100_000
-'gridEnv5_fqi_2021-05-05-03-17-36'  # max_replay=50_000
-]
+# 'gridEnv5_fqi_2021-05-05-02-12-21', # max_replay=500_000
+# 'gridEnv5_fqi_2021-05-05-02-28-37', # max_replay=300_000
+# 'gridEnv5_fqi_2021-05-05-02-45-00', # max_replay=200_000
+# 'gridEnv5_fqi_2021-05-05-03-01-20', # max_replay=100_000
+# 'gridEnv5_fqi_2021-05-05-03-17-36'  # max_replay=50_000
+# ]
 
 # FQI reweighted_type=actions
 [
@@ -114,6 +114,22 @@ gridEnv5_val_iter_2021-05-03-15-52-24
 # FQI reweighted_type=full
 # TODO
 
+# FQI: TF-Agents version.
+[
+# One-hot observations.
+'gridEnv5_fqi_2021-05-07-18-35-58',
+'gridEnv5_fqi_2021-05-07-18-54-14',
+'gridEnv5_fqi_2021-05-07-19-12-41',
+'gridEnv5_fqi_2021-05-07-19-30-47',
+'gridEnv5_fqi_2021-05-07-19-49-22',
+
+# Smoothed observations.
+'gridEnv5_fqi_2021-05-07-20-07-35',
+'gridEnv5_fqi_2021-05-07-20-25-50',
+'gridEnv5_fqi_2021-05-07-20-44-07',
+'gridEnv5_fqi_2021-05-07-21-02-17',
+'gridEnv5_fqi_2021-05-07-21-20-04'
+]
 
 ####################################
 ############# lavaEnv1 #############

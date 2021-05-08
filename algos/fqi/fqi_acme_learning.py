@@ -52,8 +52,6 @@ class FQILearner(acme.Learner, tf2_savers.TFSaveable):
         logger: loggers.Logger = None,
         checkpoint: bool = True,
         max_gradient_norm: float = None,
-        # num_states: int = None,
-        # num_actions : int = None,
     ):
         """Initializes the learner.
 
@@ -103,10 +101,6 @@ class FQILearner(acme.Learner, tf2_savers.TFSaveable):
         # This is to avoid including the time it takes for actors to come online and
         # fill the replay buffer.
         self._timestamp = None
-
-        # self.num_states = num_states
-        # self.num_actions = num_actions
-        #self._replay_buffer_counts = tf.Variable(np.zeros((num_states,num_actions)))
 
     @tf.function
     def _step(self) -> Dict[str, tf.Tensor]:
@@ -160,9 +154,6 @@ class FQILearner(acme.Learner, tf2_savers.TFSaveable):
         for src, dest in zip(self._network.variables,
                             self._target_network.variables):
             dest.assign(src)
-
-    def update_replay_buffer_counts(self, state, action):
-        self._replay_buffer_counts[state,action].assign(self._replay_buffer_counts[state,action] + 1)
 
     def step(self):
         # Do a batch of SGD.
