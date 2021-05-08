@@ -109,7 +109,7 @@ class FQI(object):
 
             if (episode > 1) and (episode % 500 == 0):
                 # Estimate statistics of the replay buffer contents.
-                replay_buffer_counts.append(self.agent.estimate_replay_buffer_counts())
+                replay_buffer_counts.append(self.agent.get_replay_buffer_counts())
 
         data = {}
         data['episode_rewards'] = episode_rewards

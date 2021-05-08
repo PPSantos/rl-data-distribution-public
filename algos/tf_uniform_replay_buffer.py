@@ -585,6 +585,12 @@ class TFUniformReplayBuffer(replay_buffer.ReplayBuffer):
     rows = self._batch_offsets + id_mod
     return rows
 
+  def get_statistics(self):
+    """Statistics table getter."""
+    if self._update_statistics_table:
+      return self._statistics_table.numpy()
+    else:
+      return None
 
 def _valid_range_ids(last_id, max_length, num_steps=None):
   """Returns the [min_val, max_val) range of ids.

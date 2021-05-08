@@ -86,8 +86,6 @@ class FQI(agent.Agent):
                                                     statistics_table_shape=(self.num_states,
                                                                             self.num_actions))
         dataset = self.replay_buffer.as_dataset(sample_batch_size=batch_size)
-        self.dataset_iterator = iter(dataset)
-
         adder = TFAdder(self.replay_buffer, transition_spec)
 
         # Create a epsilon-greedy policy network.
@@ -152,16 +150,6 @@ class FQI(agent.Agent):
     def load(self, p):
         self._saver.load(p)
 
-    def estimate_replay_buffer_counts(self, batch_sampling_steps=10_000):
-        print('Estimating replay buffer counts...')
-        counts = np.zeros((self.num_states, self.num_actions))
-
-        for _ in range(batch_sampling_steps):
-            data, _ = next(self.dataset_iterator)
-            states = data[5].numpy()
-            actions = data[1].numpy()
-
-            for (s, a) in zip(states, actions):
-                counts[s,a] += 1
-
-        return counts
+    def get_replay_buffer_counts(self):
+        print('Getting replay buffer counts...')
+        return self.replay_buffer.get_statistics()
