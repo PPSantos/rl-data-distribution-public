@@ -10,3 +10,4 @@ pandas
 parameterized
 tqdm
 statsmodels
+tf-agents==0.7.1
