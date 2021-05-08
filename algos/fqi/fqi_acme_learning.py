@@ -11,7 +11,6 @@ from acme.tf import utils as tf2_utils
 from acme.utils import counting
 from acme.utils import loggers
 import numpy as np
-import reverb
 import sonnet as snt
 import tensorflow as tf
 import trfl
@@ -55,7 +54,6 @@ class FQILearner(acme.Learner, tf2_savers.TFSaveable):
         reweighting_type: loss importance sampling reweighting type. 
         """
         # Internalise agent components (replay buffer, networks, optimizer).
-        # TODO(b/155086959): Fix type stubs and remove.
         self._iterator = iter(dataset)  # pytype: disable=wrong-arg-types
         self._network = network
         self._target_network = target_network
@@ -96,15 +94,11 @@ class FQILearner(acme.Learner, tf2_savers.TFSaveable):
         data, info = next(self._iterator)
 
         # Unpack data.
-        observation = data[0]
-        action = data[1]
-        reward = data[2]
-        discount = data[3]
-        next_observation = data[4]
-        state = data[5]
+        observation, action, reward, discount, next_observation, state = data
 
+        # Calculate weights.
         weights = tf.ones_like(discount, dtype=tf.float32) # reweighting_type = 'default'
-        
+
         if tf.equal(self._reweighting_type, 'actions'):
             # Calculate importance weights: U(a|s)/P(a|s).
             summed = tf.reduce_sum(info.statistics, axis=1, keepdims=True) # [S]

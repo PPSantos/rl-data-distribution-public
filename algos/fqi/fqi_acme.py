@@ -7,7 +7,6 @@ import numpy as np
 
 from acme import specs
 from acme import types
-from algos import agent
 from acme.tf import utils as tf2_utils
 from acme.utils import loggers
 
@@ -17,7 +16,7 @@ import trfl
 
 from tf_agents.specs import tensor_spec
 
-from algos import actors
+from algos import agent, actors
 from algos.tf_uniform_replay_buffer import TFUniformReplayBuffer
 from algos.utils import tf2_savers, spec_converter
 from algos.utils.tf2_layers import EpsilonGreedyExploration

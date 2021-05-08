@@ -1,18 +1,3 @@
-# python3
-# Copyright 2018 DeepMind Technologies Limited. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """OracleFQILearner learner implementation."""
 
 import time
@@ -20,21 +5,19 @@ from typing import Dict, List
 
 import acme
 from acme import types
-from acme.adders import reverb as adders
 from acme.tf import losses
 from acme.tf import savers as tf2_savers
 from acme.tf import utils as tf2_utils
 from acme.utils import counting
 from acme.utils import loggers
 import numpy as np
-import reverb
 import sonnet as snt
 import tensorflow as tf
 import trfl
 
 
 class OracleFQILearner(acme.Learner, tf2_savers.TFSaveable):
-    """OracleFQILearner unprioritized learner.
+    """OracleFQILearner learner.
 
     This is the learning component of a OracleFQILearner agent. It takes a dataset as input
     and implements update functionality to learn from this dataset.
@@ -48,13 +31,11 @@ class OracleFQILearner(acme.Learner, tf2_savers.TFSaveable):
         learning_rate: float,
         dataset: tf.data.Dataset,
         huber_loss_parameter: float = 1.,
-        replay_client: reverb.TFClient = None,
         counter: counting.Counter = None,
         logger: loggers.Logger = None,
         checkpoint: bool = True,
         max_gradient_norm: float = None,
-        num_states: int = None,
-        num_actions : int = None,
+        reweighting_type: str = "default"
     ):
         """Initializes the learner.
 
@@ -66,19 +47,17 @@ class OracleFQILearner(acme.Learner, tf2_savers.TFSaveable):
         dataset: dataset to learn from, whether fixed or from a replay buffer (see
             `acme.datasets.reverb.make_dataset` documentation).
         huber_loss_parameter: Quadratic-linear boundary for Huber loss.
-        replay_client: client to replay to allow for updating priorities.
         counter: Counter object for (potentially distributed) counting.
         logger: Logger object for writing logs to.
         checkpoint: boolean indicating whether to checkpoint the learner.
         max_gradient_norm: used for gradient clipping.
+        reweighting_type: loss importance sampling reweighting type. 
         """
         # Internalise agent components (replay buffer, networks, optimizer).
-        # TODO(b/155086959): Fix type stubs and remove.
         self._iterator = iter(dataset)  # pytype: disable=wrong-arg-types
         self._network = network
         self._target_network = target_network
         self._optimizer = snt.optimizers.Adam(learning_rate)
-        self._replay_client = replay_client
 
         # Internalise the hyperparameters.
         self._discount = discount
@@ -107,24 +86,45 @@ class OracleFQILearner(acme.Learner, tf2_savers.TFSaveable):
         # fill the replay buffer.
         self._timestamp = None
 
-        self.num_states = num_states
-        self.num_actions = num_actions
-        self._replay_buffer_counts = tf.Variable(np.zeros((num_states,num_actions)))
+        self._reweighting_type = reweighting_type
 
     @tf.function
     def _step(self) -> Dict[str, tf.Tensor]:
 
-        inputs = next(self._iterator)
-        transitions: types.Transition = inputs.data
-        targets = inputs.data.extras['oracle_q_vals']
+        data, info = next(self._iterator)
+
+        # Unpack data.
+        observation, action, reward, discount, next_observation, state, targets = data
+
+        # Calculate weights.
+        weights = tf.ones_like(discount, dtype=tf.float32) # reweighting_type = 'default'
+        
+        if tf.equal(self._reweighting_type, 'actions'):
+            # Calculate importance weights: U(a|s)/P(a|s).
+            summed = tf.reduce_sum(info.statistics, axis=1, keepdims=True) # [S]
+            p_a_s = tf.divide(info.statistics, summed) # [S,A]
+            idxs = tf.stack([state, action], axis=1)
+            p_a_s = tf.gather_nd(p_a_s, idxs) # [B]
+            weights = tf.divide((1/info.statistics.shape[1]), p_a_s) # [B]
+            weights = tf.cast(weights, tf.float32)
+
+        if tf.equal(self._reweighting_type, 'full'):
+            # Calculate importance weights: U(a,s)/P(a,s).
+            summed = tf.reduce_sum(info.statistics) # []
+            p_a_s = tf.divide(info.statistics, summed) # [S,A]
+            idxs = tf.stack([state, action], axis=1)
+            p_a_s = tf.gather_nd(p_a_s, idxs) # [B]
+            weights = tf.divide((1/info.statistics.shape[1]), p_a_s) # [B]
+            weights = tf.cast(weights, tf.float32)
 
         with tf.GradientTape() as tape:
 
-            q_tm1 = self._network(transitions.observation) # [B,A]
-            qa_tm1 = trfl.indexing_ops.batched_index(q_tm1, transitions.action) # [B]
+            q_tm1 = self._network(observation) # [B,A]
+            qa_tm1 = trfl.indexing_ops.batched_index(q_tm1, action) # [B]
 
             error = targets - qa_tm1 # [B]
             loss = losses.huber(error, self._huber_loss_parameter)
+            loss *= tf.cast(weights, loss.dtype)
             loss = tf.reduce_mean(loss, axis=[0])  # []
 
         # Do a step of SGD.

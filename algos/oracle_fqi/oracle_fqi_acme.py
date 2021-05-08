@@ -1,18 +1,3 @@
-# python3
-# Copyright 2018 DeepMind Technologies Limited. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """Oracle FQI agent implementation."""
 
 import copy
@@ -20,30 +5,26 @@ from typing import Optional
 
 import numpy as np
 
-from acme import datasets
 from acme import specs
 from acme import types
-from acme.adders import reverb as adders
-from algos.oracle_fqi.fqi_agent_acme import FQIAgent
-from acme.agents.tf.dqn import learning
 from acme.tf import utils as tf2_utils
 from acme.utils import loggers
 
-import reverb
 import sonnet as snt
 import tensorflow as tf
 import trfl
 
-from algos.oracle_fqi import actors
+from tf_agents.specs import tensor_spec
 
-from algos.utils import tf2_savers
+from algos import agent, actors
+from algos.tf_uniform_replay_buffer import TFUniformReplayBuffer
+from algos.utils import tf2_savers, spec_converter
 from algos.utils.tf2_layers import EpsilonGreedyExploration
 from algos.oracle_fqi.oracle_fqi_acme_learning import OracleFQILearner
-from algos.oracle_fqi.oracle_fqi_acme_learning_actions import OracleFQILearnerReweightActions
-from algos.oracle_fqi.oracle_fqi_acme_learning_full import OracleFQILearnerReweightFull
+from algos.tf_adder import TFAdder
 
 
-class OracleFQI(FQIAgent):
+class OracleFQI(agent.Agent):
     """
         OracleFQI agent.
     """
@@ -65,7 +46,7 @@ class OracleFQI(FQIAgent):
             discount: float = 0.99,
             max_gradient_norm: Optional[float] = None,
             logger: loggers.Logger = None,
-            reweighting_type = None,
+            reweighting_type: str = 'default',
             num_states: int = None,
             num_actions: int = None,
         ):
@@ -87,38 +68,28 @@ class OracleFQI(FQIAgent):
         discount: discount to use for TD updates.
         logger: logger object to be used by learner.
         max_gradient_norm: used for gradient clipping.
+        reweighting_type: loss importance sampling reweighting type.
         """
 
         self.num_states = num_states
         self.num_actions = num_actions
 
-        # Create a replay server to add data to. This uses no limiter behavior in
-        # order to allow the Agent interface to handle it.
-        replay_table = reverb.Table(
-            name=adders.DEFAULT_PRIORITY_TABLE,
-            sampler=reverb.selectors.Uniform(),
-            remover=reverb.selectors.Fifo(),
-            max_size=max_replay_size,
-            rate_limiter=reverb.rate_limiters.MinSize(1),
-            signature=adders.NStepTransitionAdder.signature(environment_spec,
-                                                extras_spec={'env_state': np.int32(1),
-                                                    'oracle_q_vals': np.float32(1.0)}))
-        self._server = reverb.Server([replay_table], port=None)
-
-        # The adder is used to insert observations into replay.
-        address = f'localhost:{self._server.port}'
-        adder = adders.NStepTransitionAdder(
-            client=reverb.Client(address),
-            n_step=n_step,
-            discount=discount)
-
-        # The dataset provides an interface to sample from replay.
-        replay_client = reverb.TFClient(address)
-        dataset = datasets.make_reverb_dataset(
-            server_address=address,
-            batch_size=batch_size,
-            prefetch_size=prefetch_size)
-        self.dataset_iterator = iter(dataset)
+        # Create replay buffer.
+        env_state_spec = tensor_spec.TensorSpec((),
+                                dtype=tf.int32,
+                                name='env_state')
+        oracle_q_val_spec = tensor_spec.TensorSpec((),
+                                dtype=tf.float32,
+                                name='oracle_q_val')
+        extras = (env_state_spec, oracle_q_val_spec)
+        transition_spec = spec_converter.convert_env_spec(environment_spec, extras=extras)
+        self.replay_buffer = TFUniformReplayBuffer(data_spec=transition_spec,
+                                                    batch_size=1,
+                                                    max_length=max_replay_size,
+                                                    statistics_table_shape=(self.num_states,
+                                                                            self.num_actions))
+        dataset = self.replay_buffer.as_dataset(sample_batch_size=batch_size)
+        adder = TFAdder(self.replay_buffer, transition_spec)
 
         policy_network = snt.Sequential([
             network,
@@ -138,47 +109,16 @@ class OracleFQI(FQIAgent):
         actor = actors.FeedForwardActor(policy_network, adder)
 
         # The learner updates the parameters (and initializes them).
-        if reweighting_type is None:
-            learner = OracleFQILearner(
-                network=network,
-                target_network=target_network,
-                discount=discount,
-                learning_rate=learning_rate,
-                dataset=dataset,
-                replay_client=replay_client,
-                max_gradient_norm=max_gradient_norm,
-                logger=logger,
-                checkpoint=False,
-                num_states=self.num_states,
-                num_actions=self.num_actions)
-        elif reweighting_type == 'actions':
-            learner = OracleFQILearnerReweightActions(
-                network=network,
-                target_network=target_network,
-                discount=discount,
-                learning_rate=learning_rate,
-                dataset=dataset,
-                replay_client=replay_client,
-                max_gradient_norm=max_gradient_norm,
-                logger=logger,
-                checkpoint=False,
-                num_states=self.num_states,
-                num_actions=self.num_actions)
-        elif reweighting_type == 'full':
-            learner = OracleFQILearnerReweightFull(
-                network=network,
-                target_network=target_network,
-                discount=discount,
-                learning_rate=learning_rate,
-                dataset=dataset,
-                replay_client=replay_client,
-                max_gradient_norm=max_gradient_norm,
-                logger=logger,
-                checkpoint=False,
-                num_states=self.num_states,
-                num_actions=self.num_actions)
-        else:
-            raise ValueError('Unknown reweighting type.')
+        learner = OracleFQILearner(
+            network=network,
+            target_network=target_network,
+            discount=discount,
+            learning_rate=learning_rate,
+            dataset=dataset,
+            max_gradient_norm=max_gradient_norm,
+            logger=logger,
+            checkpoint=False,
+            reweighting_type=reweighting_type)
 
         self._saver = tf2_savers.Saver(learner.state)
 
@@ -212,16 +152,6 @@ class OracleFQI(FQIAgent):
     def load(self, p):
         self._saver.load(p)
 
-    def estimate_replay_buffer_counts(self, batch_sampling_steps=10_000):
-        print('Estimating replay buffer counts...')
-        counts = np.zeros((self.num_states, self.num_actions))
-
-        for _ in range(batch_sampling_steps):
-            inputs = next(self.dataset_iterator)
-            states = inputs.data.extras['env_state'].numpy()
-            actions = inputs.data.action.numpy()
-
-            for (s, a) in zip(states, actions):
-                counts[s,a] += 1
-
-        return counts
+    def get_replay_buffer_counts(self):
+        print('Getting replay buffer counts...')
+        return self.replay_buffer.get_statistics()
