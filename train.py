@@ -82,7 +82,7 @@ DEFAULT_TRAIN_ARGS = {
         'epsilon_schedule_timesteps': 225_000,
         'learning_rate': 1e-03,
         'hidden_layers': [10,10],
-        'reweighting_type': None, # None, actions or full.
+        'reweighting_type': 'actions', # default, actions or full.
     },
 
     # Oracle FQI arguments.
@@ -99,7 +99,7 @@ DEFAULT_TRAIN_ARGS = {
         'epsilon_schedule_timesteps': 225_000,
         'learning_rate': 1e-03,
         'hidden_layers': [10,10],
-        'reweighting_type': 'full', # None, actions or full.
+        'reweighting_type': 'default', # default, actions or full.
     }
 
 }

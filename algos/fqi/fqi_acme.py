@@ -23,7 +23,6 @@ from algos.utils import tf2_savers, spec_converter
 from algos.utils.tf2_layers import EpsilonGreedyExploration
 from algos.fqi.fqi_acme_learning import FQILearner
 from algos.tf_adder import TFAdder
-#from algos.fqi.fqi_acme_learning_actions import FQILearnerReweightActions
 
 
 class FQI(agent.Agent):
@@ -48,7 +47,7 @@ class FQI(agent.Agent):
             discount: float = 0.99,
             max_gradient_norm: Optional[float] = None,
             logger: loggers.Logger = None,
-            reweighting_type = None,
+            reweighting_type: str = 'default',
             num_states: int = None,
             num_actions: int = None,
         ):
@@ -70,6 +69,7 @@ class FQI(agent.Agent):
         discount: discount to use for TD updates.
         logger: logger object to be used by learner.
         max_gradient_norm: used for gradient clipping.
+        reweighting_type: loss importance sampling reweighting type. 
         """
 
         self.num_states = num_states
@@ -109,37 +109,16 @@ class FQI(agent.Agent):
         actor = actors.FeedForwardActor(policy_network, adder)
 
         # The learner updates the parameters (and initializes them).
-        if reweighting_type is None:
-            learner = FQILearner(
-                network=network,
-                target_network=target_network,
-                discount=discount,
-                learning_rate=learning_rate,
-                dataset=dataset,
-                max_gradient_norm=max_gradient_norm,
-                logger=logger,
-                checkpoint=False)
-                #num_states=self.num_states,
-                #num_actions=self.num_actions)
-        elif reweighting_type == 'actions':
-            raise NotImplementedError('TODO')
-            # learner = FQILearnerReweightActions(
-            #     network=network,
-            #     target_network=target_network,
-            #     discount=discount,
-            #     learning_rate=learning_rate,
-            #     dataset=dataset,
-            #     replay_client=replay_client,
-            #     max_gradient_norm=max_gradient_norm,
-            #     logger=logger,
-            #     checkpoint=False,
-            #     num_states=self.num_states,
-            #     num_actions=self.num_actions)
-        elif reweighting_type == 'full':
-            raise NotImplementedError('TODO')
-
-        else:
-            raise ValueError('Unknown reweighting type.')
+        learner = FQILearner(
+            network=network,
+            target_network=target_network,
+            discount=discount,
+            learning_rate=learning_rate,
+            dataset=dataset,
+            max_gradient_norm=max_gradient_norm,
+            logger=logger,
+            checkpoint=False,
+            reweighting_type=reweighting_type)
 
         self._saver = tf2_savers.Saver(learner.state)
 

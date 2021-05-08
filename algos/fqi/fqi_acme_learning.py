@@ -1,18 +1,3 @@
-# python3
-# Copyright 2018 DeepMind Technologies Limited. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """FQILearner learner implementation."""
 
 import time
@@ -20,7 +5,6 @@ from typing import Dict, List
 
 import acme
 from acme import types
-from acme.adders import reverb as adders
 from acme.tf import losses
 from acme.tf import savers as tf2_savers
 from acme.tf import utils as tf2_utils
@@ -34,7 +18,7 @@ import trfl
 
 
 class FQILearner(acme.Learner, tf2_savers.TFSaveable):
-    """FQILearner unprioritized learner.
+    """FQILearner learner.
 
     This is the learning component of a FQILearner agent. It takes a dataset as input
     and implements update functionality to learn from this dataset.
@@ -52,6 +36,7 @@ class FQILearner(acme.Learner, tf2_savers.TFSaveable):
         logger: loggers.Logger = None,
         checkpoint: bool = True,
         max_gradient_norm: float = None,
+        reweighting_type: str = "default"
     ):
         """Initializes the learner.
 
@@ -67,6 +52,7 @@ class FQILearner(acme.Learner, tf2_savers.TFSaveable):
         logger: Logger object for writing logs to.
         checkpoint: boolean indicating whether to checkpoint the learner.
         max_gradient_norm: used for gradient clipping.
+        reweighting_type: loss importance sampling reweighting type. 
         """
         # Internalise agent components (replay buffer, networks, optimizer).
         # TODO(b/155086959): Fix type stubs and remove.
@@ -102,6 +88,8 @@ class FQILearner(acme.Learner, tf2_savers.TFSaveable):
         # fill the replay buffer.
         self._timestamp = None
 
+        self._reweighting_type = reweighting_type
+
     @tf.function
     def _step(self) -> Dict[str, tf.Tensor]:
 
@@ -113,7 +101,27 @@ class FQILearner(acme.Learner, tf2_savers.TFSaveable):
         reward = data[2]
         discount = data[3]
         next_observation = data[4]
-        # env_state = data[5]
+        state = data[5]
+
+        weights = tf.ones_like(discount, dtype=tf.float32) # reweighting_type = 'default'
+        
+        if tf.equal(self._reweighting_type, 'actions'):
+            # Calculate importance weights: U(a|s)/P(a|s).
+            summed = tf.reduce_sum(info.statistics, axis=1, keepdims=True) # [S]
+            p_a_s = tf.divide(info.statistics, summed) # [S,A]
+            idxs = tf.stack([state, action], axis=1)
+            p_a_s = tf.gather_nd(p_a_s, idxs) # [B]
+            weights = tf.divide((1/info.statistics.shape[1]), p_a_s) # [B]
+            weights = tf.cast(weights, tf.float32)
+
+        if tf.equal(self._reweighting_type, 'full'):
+            # Calculate importance weights: U(a,s)/P(a,s).
+            summed = tf.reduce_sum(info.statistics) # []
+            p_a_s = tf.divide(info.statistics, summed) # [S,A]
+            idxs = tf.stack([state, action], axis=1)
+            p_a_s = tf.gather_nd(p_a_s, idxs) # [B]
+            weights = tf.divide((1/info.statistics.shape[1]), p_a_s) # [B]
+            weights = tf.cast(weights, tf.float32)
 
         with tf.GradientTape() as tape:
             # Evaluate our networks.
@@ -133,6 +141,7 @@ class FQILearner(acme.Learner, tf2_savers.TFSaveable):
             _, extra = trfl.double_qlearning(q_tm1, action, r_t, d_t,
                                             q_t_value, q_t_selector)
             loss = losses.huber(extra.td_error, self._huber_loss_parameter)
+            loss *= tf.cast(weights, loss.dtype)
             loss = tf.reduce_mean(loss, axis=[0])  # []
 
         # Do a step of SGD.
