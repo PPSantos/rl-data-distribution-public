@@ -83,6 +83,8 @@ DEFAULT_TRAIN_ARGS = {
         'learning_rate': 1e-03,
         'hidden_layers': [10,10],
         'reweighting_type': 'default', # default, actions or full.
+        'uniform_replay_buffer': False,
+        'uniform_static_dataset_size': 50_000,
     },
 
     # Oracle FQI arguments.

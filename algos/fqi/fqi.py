@@ -61,10 +61,17 @@ class FQI(object):
                                     learning_rate=fqi_args['learning_rate'],
                                     discount=fqi_args['discount'],
                                     reweighting_type=fqi_args['reweighting_type'],
+                                    uniform_replay_buffer=fqi_args['uniform_replay_buffer'],
                                     num_states=self.base_env.num_states,
                                     num_actions=self.base_env.num_actions)
 
+        self.uniform_replay_buffer = fqi_args['uniform_replay_buffer']
+        self.uniform_static_dataset_size = fqi_args['uniform_static_dataset_size']
+
     def train(self, num_episodes):
+
+        if self.uniform_replay_buffer:
+            static_dataset = self.create_static_uniform_dataset()
 
         states_counts = np.zeros((self.env.num_states))
         episode_rewards = []
@@ -85,6 +92,12 @@ class FQI(object):
 
                 env_state = np.int32(env_state)
                 self.agent.observe_with_extras(action, next_timestep=timestep, extras=(env_state,))
+
+                if self.uniform_replay_buffer:
+                    # Insert a randomly selected transition from the static dataset.
+                    idx = np.random.randint(self.uniform_static_dataset_size)
+                    transition, extras = static_dataset[idx]
+                    self.agent.add_to_replay_buffer(transition, extras)
 
                 self.agent.update()
 
@@ -120,3 +133,37 @@ class FQI(object):
         data['replay_buffer_counts'] = replay_buffer_counts
 
         return data
+
+    def create_static_uniform_dataset(self):
+        print('Creating static dataset with uniformly sampled transitions...')
+
+        static_dataset = []
+
+        for _ in range(self.uniform_static_dataset_size):
+            
+            # Randomly uniform sample state.
+            tile_type = TileType.WALL
+            while tile_type == TileType.WALL:
+                state = np.random.randint(self.base_env.num_states)
+                xy = self.env_grid_spec.idx_to_xy(state)
+                tile_type = self.env_grid_spec.get_value(xy)
+
+            observation = self.base_env.observation(state)
+
+            # Randomly uniform sample action.
+            action = np.random.randint(self.base_env.num_actions)
+
+            # Sample next state, observation and reward.
+            self.base_env.set_state(state)
+            next_observation, reward, done, info = self.base_env.step(action)
+
+            transition = (observation, action, reward, 1.0, next_observation)
+            extras = (state,)
+
+            static_dataset.append((transition, extras))
+
+            self.base_env.reset()
+
+        print(f'Static uniform dataset created containing {len(static_dataset)} transitions.')
+
+        return static_dataset

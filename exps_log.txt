@@ -140,22 +140,34 @@ gridEnv5_val_iter_2021-05-03-15-52-24
 # FQI: reweight_type=actions
 [
 # One-hot observations.
-'gridEnv5_fqi_2021-05-08-19-10-10',
-'gridEnv5_fqi_2021-05-08-19-31-42',
-'gridEnv5_fqi_2021-05-08-19-56-17',
-'gridEnv5_fqi_2021-05-08-20-22-17',
-'gridEnv5_fqi_2021-05-08-20-49-41',
+'gridEnv5_fqi_2021-05-08-19-10-10', # max_replay=500_000
+'gridEnv5_fqi_2021-05-08-19-31-42', # max_replay=300_000
+'gridEnv5_fqi_2021-05-08-19-56-17', # max_replay=200_000
+'gridEnv5_fqi_2021-05-08-20-22-17', # max_replay=100_000
+'gridEnv5_fqi_2021-05-08-20-49-41', # max_replay=50_000
 # Smoothed observations.
-'gridEnv5_fqi_2021-05-08-21-18-01',
-'gridEnv5_fqi_2021-05-08-21-39-25',
-'gridEnv5_fqi_2021-05-08-22-03-58',
-'gridEnv5_fqi_2021-05-08-22-29-53',
-'gridEnv5_fqi_2021-05-08-22-57-03'
+'gridEnv5_fqi_2021-05-08-21-18-01', # max_replay=500_000
+'gridEnv5_fqi_2021-05-08-21-39-25', # max_replay=300_000
+'gridEnv5_fqi_2021-05-08-22-03-58', # max_replay=200_000
+'gridEnv5_fqi_2021-05-08-22-29-53', # max_replay=100_000
+'gridEnv5_fqi_2021-05-08-22-57-03' # max_replay=50_000
 ]
 
 # FQI: reweight_type=full
-# TODO
-# RUNNING
+[
+# One-hot observations.
+'gridEnv5_fqi_2021-05-08-23-38-52', # max_replay=500_000
+'gridEnv5_fqi_2021-05-09-00-00-04', # max_replay=300_000
+'gridEnv5_fqi_2021-05-09-00-23-28', # max_replay=200_000
+'gridEnv5_fqi_2021-05-09-00-47-06', # max_replay=100_000
+'gridEnv5_fqi_2021-05-09-01-12-33', # max_replay=50_000
+# Smoothed observations.
+'gridEnv5_fqi_2021-05-09-01-38-32', # max_replay=500_000
+'gridEnv5_fqi_2021-05-09-01-58-01', # max_replay=300_000
+'gridEnv5_fqi_2021-05-09-02-19-48', # max_replay=200_000
+'gridEnv5_fqi_2021-05-09-02-44-19', # max_replay=100_000
+'gridEnv5_fqi_2021-05-09-03-11-35' # max_replay=50_000
+]
 
 
 ####################################
