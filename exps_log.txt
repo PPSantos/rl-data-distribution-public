@@ -79,6 +79,20 @@ gridEnv4_val_iter_2021-04-28-09-54-18
 # FQI: reweight_type=full
 # TODO
 
+# FQI: Uniform replay buffer
+[
+# One-hot observations.
+'gridEnv4_fqi_2021-05-10-17-15-36', # max_replay=1_000_000
+'gridEnv4_fqi_2021-05-10-17-59-38', # max_replay=750_000
+'gridEnv4_fqi_2021-05-10-18-46-30', # max_replay=500_000
+'gridEnv4_fqi_2021-05-10-19-37-38', # max_replay=300_000
+'gridEnv4_fqi_2021-05-10-20-31-34', # max_replay=200_000
+'gridEnv4_fqi_2021-05-10-21-27-04' # max_replay=100_000
+# TODO: max_replay=50_000
+# Smoothed observations.
+# TODO
+]
+
 
 ####################################
 ############# gridEnv5 #############
@@ -167,6 +181,22 @@ gridEnv5_val_iter_2021-05-03-15-52-24
 'gridEnv5_fqi_2021-05-09-02-19-48', # max_replay=200_000
 'gridEnv5_fqi_2021-05-09-02-44-19', # max_replay=100_000
 'gridEnv5_fqi_2021-05-09-03-11-35' # max_replay=50_000
+]
+
+# FQI: Uniform replay buffer
+[
+# One-hot observations.
+'gridEnv5_fqi_2021-05-10-12-28-45', # max_replay=500_000
+'gridEnv5_fqi_2021-05-10-12-47-50', # max_replay=300_000
+'gridEnv5_fqi_2021-05-10-13-09-04', # max_replay=200_000
+'gridEnv5_fqi_2021-05-10-13-31-47', # max_replay=100_000
+'gridEnv5_fqi_2021-05-10-13-56-00', # max_replay=50_000
+# Smoothed observations.
+'gridEnv5_fqi_2021-05-10-14-21-20', # max_replay=500_000
+'gridEnv5_fqi_2021-05-10-14-42-01', # max_replay=300_000
+'gridEnv5_fqi_2021-05-10-15-06-09', # max_replay=200_000
+'gridEnv5_fqi_2021-05-10-15-31-52', # max_replay=100_000
+'gridEnv5_fqi_2021-05-10-16-36-59', # max_replay=50_000
 ]
 
 
