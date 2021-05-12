@@ -66,12 +66,9 @@ class FQI(object):
                                     num_actions=self.base_env.num_actions)
 
         self.uniform_replay_buffer = fqi_args['uniform_replay_buffer']
-        self.uniform_static_dataset_size = fqi_args['uniform_static_dataset_size']
+        self.uniform_static_dataset_size = 500 # in episodes.
 
     def train(self, num_episodes):
-
-        if self.uniform_replay_buffer:
-            static_dataset = self.create_static_uniform_dataset()
 
         states_counts = np.zeros((self.env.num_states))
         episode_rewards = []
@@ -79,6 +76,11 @@ class FQI(object):
         replay_buffer_counts = []
 
         for episode in tqdm(range(num_episodes)):
+
+            if self.uniform_replay_buffer and (episode % self.uniform_static_dataset_size == 0):
+                # Create dataset with size = self.uniform_static_dataset_size * self.base_env.time_limit
+                static_dataset = self.create_static_uniform_dataset()
+                static_dataset_iterator = iter(static_dataset)
 
             timestep = self.env.reset()
             self.agent.observe_first(timestep)
@@ -94,9 +96,8 @@ class FQI(object):
                 self.agent.observe_with_extras(action, next_timestep=timestep, extras=(env_state,))
 
                 if self.uniform_replay_buffer:
-                    # Insert a randomly selected transition from the static dataset.
-                    idx = np.random.randint(self.uniform_static_dataset_size)
-                    transition, extras = static_dataset[idx]
+                    # Insert transition from the static dataset.
+                    transition, extras = next(static_dataset_iterator)
                     self.agent.add_to_replay_buffer(transition, extras)
 
                 self.agent.update()
@@ -138,9 +139,10 @@ class FQI(object):
         print('Creating static dataset with uniformly sampled transitions...')
 
         static_dataset = []
+        dataset_size = self.uniform_static_dataset_size * self.base_env.time_limit
 
-        for _ in range(self.uniform_static_dataset_size):
-            
+        for _ in range(dataset_size):
+
             # Randomly uniform sample state.
             tile_type = TileType.WALL
             while tile_type == TileType.WALL:
