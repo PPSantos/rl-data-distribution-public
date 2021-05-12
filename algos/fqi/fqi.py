@@ -159,8 +159,11 @@ class FQI(object):
             self.base_env.set_state(state)
             next_observation, reward, done, info = self.base_env.step(action)
 
-            transition = (observation, action, reward, 1.0, next_observation)
-            extras = (state,)
+            transition = (observation, np.array(action, dtype=np.int32),
+                            np.array(reward, dtype=np.float32),
+                            np.array(1.0, dtype=np.float32),
+                            next_observation)
+            extras = (np.int32(state),)
 
             static_dataset.append((transition, extras))
 
