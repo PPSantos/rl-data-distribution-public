@@ -199,6 +199,25 @@ gridEnv5_val_iter_2021-05-03-15-52-24
 'gridEnv5_fqi_2021-05-10-16-36-59', # max_replay=50_000
 ]
 
+# FQI: Uniform replay buffer: hidden_nodes=[20,40,20]
+[
+# Smoothed observations.
+'gridEnv5_fqi_2021-05-12-18-07-26', # max_replay=500_000
+'gridEnv5_fqi_2021-05-12-18-28-29', # max_replay=300_000
+'gridEnv5_fqi_2021-05-12-18-51-16', # max_replay=200_000
+'gridEnv5_fqi_2021-05-12-19-15-00', # max_replay=100_000
+'gridEnv5_fqi_2021-05-12-19-40-25', # max_replay=50_000
+]
+
+# FQI (reweight_type=default): hidden_nodes=[20,40,20]
+[
+'gridEnv5_fqi_2021-05-13-10-38-24',
+'gridEnv5_fqi_2021-05-13-10-57-59',
+'gridEnv5_fqi_2021-05-13-11-20-10',
+'gridEnv5_fqi_2021-05-13-11-43-16',
+'gridEnv5_fqi_2021-05-13-12-07-35'
+]
+
 
 ####################################
 ############# lavaEnv1 #############

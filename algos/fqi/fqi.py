@@ -39,6 +39,8 @@ class FQI(object):
 
     def __init__(self, env, env_grid_spec, fqi_args):
 
+        np.random.seed()
+
         self.base_env = env
         self.env_grid_spec = env_grid_spec
         self.env = wrap_env(env)
