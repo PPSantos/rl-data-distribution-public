@@ -70,17 +70,20 @@ class FQI(object):
         self.uniform_replay_buffer = fqi_args['uniform_replay_buffer']
         self.uniform_static_dataset_size = 500 # in episodes.
 
-    def train(self, num_episodes, num_learning_episodes, phi):
+    def train(self, num_episodes, num_rollouts, rollouts_period, rollouts_phi):
 
         states_counts = np.zeros((self.env.num_states))
         episode_rewards = []
         Q_vals = np.zeros((num_episodes, self.base_env.num_states, self.base_env.num_actions))
         replay_buffer_counts = []
 
+        # rollouts_episodes = [] # TODO
+        # rollouts_rewards = []
+
         for episode in tqdm(range(num_episodes)):
 
-            if (episode > 0) and (episode % num_learning_episodes == 0):
-                self.base_env.set_phi(phi)
+            # if (episode > 0) and (episode % num_learning_episodes == 0): # TODO
+            #     self.base_env.set_phi(phi)
 
             if self.uniform_replay_buffer and (episode % self.uniform_static_dataset_size == 0):
                 # Create dataset with size = self.uniform_static_dataset_size * self.base_env.time_limit
@@ -105,8 +108,7 @@ class FQI(object):
                     transition, extras = next(static_dataset_iterator)
                     self.agent.add_to_replay_buffer(transition, extras)
 
-                if episode < num_learning_episodes:
-                    self.agent.update()
+                self.agent.update()
 
                 env_state = self.base_env.get_state()
 
@@ -130,6 +132,8 @@ class FQI(object):
             if (episode > 1) and (episode % 500 == 0):
                 # Estimate statistics of the replay buffer contents.
                 replay_buffer_counts.append(self.agent.get_replay_buffer_counts())
+
+            if # TODO
 
         data = {}
         data['episode_rewards'] = episode_rewards

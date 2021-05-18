@@ -54,13 +54,13 @@ CUSTOM_ENVS = {
 }
 
 def get_custom_env(env_name, dim_obs=8, time_limit=50, tabular=False,
-    smooth_obs=False, one_hot_obs=False, absorb=False):
+    smooth_obs=False, one_hot_obs=False, absorb=False, phi=0.0):
 
     if env_name not in CUSTOM_ENVS.keys():
         raise KeyError('Unknown env. name.')
     
     gs = CUSTOM_ENVS[env_name]
-    env = grid_env_cy.GridEnv(gs, phi=0.0)
+    env = grid_env_cy.GridEnv(gs, phi=phi)
 
     if absorb:
         env = env_wrapper.AbsorbingStateWrapper(env)

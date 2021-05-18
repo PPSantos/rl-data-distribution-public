@@ -26,8 +26,11 @@ DEFAULT_TRAIN_ARGS = {
     'algo': 'fqi',
     'num_episodes': 20_000,
     'gamma': 0.9,
-    'num_learning_episodes': 10_000, # the step at which learning stops.
-    'phi': 0.2, # env. stochastic actions probability during evaluation.
+    'phi': 0.0,
+
+    'rollouts_period': 2_000,
+    'num_rollouts': 5,
+    'rollouts_phi': 0.2,
 
     # Env. arguments.
     'env_args': {
@@ -119,7 +122,8 @@ def train_run(run_args):
     time.sleep(time_delay)
 
     # Load environment.
-    env, env_grid_spec = env_suite.get_custom_env(**args['env_args'], absorb=False)
+    env, env_grid_spec = env_suite.get_custom_env(**args['env_args'],
+                                                phi=args['phi'], absorb=False)
 
     # print('Env num states:', env.num_states)
     # print('Env num actions:', env.num_actions)
@@ -166,9 +170,8 @@ def train_run(run_args):
         raise ValueError("Unknown algorithm.")
 
     # Train agent.
-    train_data = agent.train(num_episodes=args['num_episodes'],
-                            num_learning_episodes=args['num_learning_episodes'],
-                            phi=args['phi'])
+    train_data = agent.train(num_episodes=args['num_episodes'], num_rollouts=args['num_rollouts'],
+                            rollouts_period=args['rollouts_period'], rollouts_phi=args['rollouts_phi'])
 
     return train_data
 
