@@ -26,12 +26,14 @@ DEFAULT_TRAIN_ARGS = {
     'algo': 'fqi',
     'num_episodes': 20_000,
     'gamma': 0.9,
+    'num_learning_episodes': 10_000, # the step at which learning stops.
+    'phi': 0.2, # env. stochastic actions probability during evaluation.
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'gridEnv5',
-        'dim_obs': 5,
-        'time_limit': 25,
+        'env_name': 'gridEnv1',
+        'dim_obs': 8,
+        'time_limit': 50,
         'tabular': False,
         'smooth_obs': False,
         'one_hot_obs': True,
@@ -164,7 +166,9 @@ def train_run(run_args):
         raise ValueError("Unknown algorithm.")
 
     # Train agent.
-    train_data = agent.train(num_episodes=args['num_episodes'])
+    train_data = agent.train(num_episodes=args['num_episodes'],
+                            num_learning_episodes=args['num_learning_episodes'],
+                            phi=args['phi'])
 
     return train_data
 

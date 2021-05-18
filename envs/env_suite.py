@@ -60,7 +60,7 @@ def get_custom_env(env_name, dim_obs=8, time_limit=50, tabular=False,
         raise KeyError('Unknown env. name.')
     
     gs = CUSTOM_ENVS[env_name]
-    env = grid_env_cy.GridEnv(gs)
+    env = grid_env_cy.GridEnv(gs, phi=0.0)
 
     if absorb:
         env = env_wrapper.AbsorbingStateWrapper(env)
