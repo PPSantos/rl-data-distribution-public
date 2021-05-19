@@ -70,24 +70,21 @@ class FQI(object):
         self.uniform_replay_buffer = fqi_args['uniform_replay_buffer']
         self.uniform_static_dataset_size = 500 # in episodes.
 
-    def train(self, num_episodes, num_rollouts, rollouts_period, rollouts_phi):
+    def train(self, num_episodes, num_rollouts, rollouts_period, phi, rollouts_phi):
 
         states_counts = np.zeros((self.env.num_states))
         episode_rewards = []
         Q_vals = np.zeros((num_episodes, self.base_env.num_states, self.base_env.num_actions))
         replay_buffer_counts = []
 
-        # rollouts_episodes = [] # TODO
-        # rollouts_rewards = []
+        rollouts_episodes = []
+        rollouts_rewards = []
 
         for episode in tqdm(range(num_episodes)):
 
-            # if (episode > 0) and (episode % num_learning_episodes == 0): # TODO
-            #     self.base_env.set_phi(phi)
-
             if self.uniform_replay_buffer and (episode % self.uniform_static_dataset_size == 0):
                 # Create dataset with size = self.uniform_static_dataset_size * self.base_env.time_limit
-                static_dataset = self.create_static_uniform_dataset()
+                static_dataset = self._create_static_uniform_dataset()
                 static_dataset_iterator = iter(static_dataset)
 
             timestep = self.env.reset()
@@ -129,11 +126,24 @@ class FQI(object):
                     qvs = self.agent.get_Q_vals(obs)
                     Q_vals[episode,state,:] = qvs
 
+            # Estimate statistics of the replay buffer contents.
             if (episode > 1) and (episode % 500 == 0):
-                # Estimate statistics of the replay buffer contents.
                 replay_buffer_counts.append(self.agent.get_replay_buffer_counts())
 
-            if # TODO
+            # Execute evaluation rollouts.
+            if episode % rollouts_period == 0:
+                print('Executing evaluation rollouts...')
+
+                self.base_env.set_phi(rollouts_phi)
+
+                r_rewards = []
+                for i in range(num_rollouts):
+                    r_rewards.append(self._execute_rollout())
+
+                rollouts_episodes.append(episode)
+                rollouts_rewards.append(r_rewards)
+
+                self.base_env.set_phi(phi)
 
         data = {}
         data['episode_rewards'] = episode_rewards
@@ -142,10 +152,12 @@ class FQI(object):
         data['max_Q_vals'] = np.max(Q_vals[-1], axis=1)
         data['policy'] = np.argmax(Q_vals[-1], axis=1)
         data['replay_buffer_counts'] = replay_buffer_counts
+        data['rollouts_episodes'] = rollouts_episodes
+        data['rollouts_rewards'] = rollouts_rewards
 
         return data
 
-    def create_static_uniform_dataset(self):
+    def _create_static_uniform_dataset(self):
         print('Creating static dataset with uniformly sampled transitions...')
 
         static_dataset = []
@@ -182,3 +194,20 @@ class FQI(object):
         print(f'Static uniform dataset created containing {len(static_dataset)} transitions.')
 
         return static_dataset
+
+    def _execute_rollout(self):
+
+        timestep = self.env.reset()
+
+        episode_cumulative_reward = 0
+        while not timestep.last():
+
+            action = self.agent.select_action(timestep.observation)
+            timestep = self.env.step(action)
+            episode_cumulative_reward += timestep.reward
+
+        return episode_cumulative_reward
+
+
+
+

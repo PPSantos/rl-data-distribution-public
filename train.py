@@ -28,9 +28,9 @@ DEFAULT_TRAIN_ARGS = {
     'gamma': 0.9,
     'phi': 0.0,
 
-    'rollouts_period': 2_000,
+    'rollouts_period': 500,
     'num_rollouts': 5,
-    'rollouts_phi': 0.2,
+    'rollouts_phi': 0.0,
 
     # Env. arguments.
     'env_args': {
@@ -71,7 +71,7 @@ DEFAULT_TRAIN_ARGS = {
         'epsilon_final': 0.0,
         'epsilon_schedule_timesteps': 450_000,
         'learning_rate': 1e-03,
-        'hidden_layers': [10,10],
+        'hidden_layers': [20,40,20],
     },
 
     # FQI arguments.
@@ -80,13 +80,13 @@ DEFAULT_TRAIN_ARGS = {
         'prefetch_size': 4,
         'num_sampling_steps': 1_000,
         'num_gradient_steps': 20,
-        'max_replay_size': 500_000,
+        'max_replay_size': 1_000_000,
         'n_step': 1,
         'epsilon_init': 0.9,
         'epsilon_final': 0.0,
-        'epsilon_schedule_timesteps': 225_000,
+        'epsilon_schedule_timesteps': 450_000,
         'learning_rate': 1e-03,
-        'hidden_layers': [10,10],
+        'hidden_layers': [20,40,20],
         'reweighting_type': 'default', # default, actions or full.
         'uniform_replay_buffer': False,
     },
@@ -104,7 +104,7 @@ DEFAULT_TRAIN_ARGS = {
         'epsilon_final': 0.0,
         'epsilon_schedule_timesteps': 225_000,
         'learning_rate': 1e-03,
-        'hidden_layers': [10,10],
+        'hidden_layers': [20,40,20],
         'reweighting_type': 'default', # default, actions or full.
     }
 
@@ -170,8 +170,11 @@ def train_run(run_args):
         raise ValueError("Unknown algorithm.")
 
     # Train agent.
-    train_data = agent.train(num_episodes=args['num_episodes'], num_rollouts=args['num_rollouts'],
-                            rollouts_period=args['rollouts_period'], rollouts_phi=args['rollouts_phi'])
+    train_data = agent.train(num_episodes=args['num_episodes'],
+                             rollouts_period=args['rollouts_period'],
+                             num_rollouts=args['num_rollouts'],
+                             phi=args['phi'],
+                             rollouts_phi=args['rollouts_phi'])
 
     return train_data
 

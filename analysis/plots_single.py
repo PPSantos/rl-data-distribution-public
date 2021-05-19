@@ -143,6 +143,8 @@ def main(exp_id, val_iter_exp):
     # Parse data for each train run.
     data = {}
 
+    print(exp_data[0].keys())
+
     # episode_rewards field.
     data['episode_rewards'] = np.array([e['episode_rewards'] for e in exp_data]) # [R,E]
 
@@ -160,6 +162,12 @@ def main(exp_id, val_iter_exp):
 
     # replay_buffer_counts field.
     data['replay_buffer_counts'] = np.array([e['replay_buffer_counts'] for e in exp_data]) # [R,(E),S,A]
+
+    # rollouts_episodes field.
+    data['rollouts_episodes'] = exp_data[0]['rollouts_episodes'] # [R]
+
+    # rollouts_rewards field.
+    data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts]
 
     """
         Print policies.
@@ -210,6 +218,27 @@ def main(exp_id, val_iter_exp):
 
     plt.savefig('{0}/episode_rewards_avg.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/episode_rewards_avg.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    """
+        Plot evaluation rollouts rewards.
+    """
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    for (i, run_rollouts) in enumerate(data['rollouts_rewards']): #  run_rollouts = [(E),num_rollouts]
+        X = data['rollouts_episodes'] # [(E)]
+        Y = np.mean(run_rollouts, axis=1) # [(E)]
+
+        plt.plot(X, Y, label=f'Run {i}')
+
+    plt.xlabel('Episode')
+    plt.ylabel('Rollouts average reward')
+
+    plt.legend()
+
+    plt.savefig('{0}/rollouts_rewards.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/rollouts_rewards.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
 
     """

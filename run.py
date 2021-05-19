@@ -19,12 +19,12 @@ if __name__ == "__main__":
     """
         One-hot observations.
     """
-    args = DEFAULT_TRAIN_ARGS
+    """ args = DEFAULT_TRAIN_ARGS
     args['env_args']['smooth_obs'] = False
     args['env_args']['one_hot_obs'] = True
 
-    #max_replay_sizes = [1_000_000, 750_000, 500_000, 300_000, 200_000, 100_000, 50_000]
-    max_replay_sizes = [500_000, 300_000, 200_000, 100_000, 50_000] # gridEnv5
+    max_replay_sizes = [1_000_000, 750_000, 500_000, 300_000, 200_000, 100_000, 50_000]
+    # max_replay_sizes = [500_000, 300_000, 200_000, 100_000, 50_000] # gridEnv5
 
     for size in max_replay_sizes:
         print(f'One-hot observation, max_replay_size={size}')
@@ -35,7 +35,7 @@ if __name__ == "__main__":
             plots(exp_id, VAL_ITER_DATA)
             Qvalplots(exp_id, VAL_ITER_DATA)
 
-    print('Exp. ids:', exp_ids)
+    print('Exp. ids:', exp_ids) """
 
     """
         Smoothed observations.
@@ -44,8 +44,8 @@ if __name__ == "__main__":
     args['env_args']['smooth_obs'] = True
     args['env_args']['one_hot_obs'] = False
 
-    #max_replay_sizes = [1_000_000, 750_000, 500_000, 300_000, 200_000, 100_000, 50_000]
-    max_replay_sizes = [500_000, 300_000, 200_000, 100_000, 50_000] # gridEnv5
+    max_replay_sizes = [1_000_000, 750_000, 500_000, 300_000, 200_000, 100_000, 50_000]
+    # max_replay_sizes = [500_000, 300_000, 200_000, 100_000, 50_000] # gridEnv5
 
     for size in max_replay_sizes:
         print(f'Smoothed observation, max_replay_size={size}')
