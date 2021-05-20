@@ -169,6 +169,9 @@ def main(exp_id, val_iter_exp):
     # rollouts_rewards field.
     data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts]
 
+    # Scalar metrics dict.
+    scalar_metrics = {}
+
     """
         Print policies.
     """
@@ -220,6 +223,11 @@ def main(exp_id, val_iter_exp):
     plt.savefig('{0}/episode_rewards_avg.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
 
+    # Scalar train rewards metrics.
+    scalar_metrics['train_rewards_total'] = np.mean(data['episode_rewards'])
+    half_split = data['episode_rewards'].shape[1] // 2
+    scalar_metrics['train_rewards_second_half'] = np.mean(data['episode_rewards'][:,half_split:])
+
     """
         Plot evaluation rollouts rewards.
     """
@@ -240,6 +248,11 @@ def main(exp_id, val_iter_exp):
     plt.savefig('{0}/rollouts_rewards.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/rollouts_rewards.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
+
+    # Scalar evaluation rewards metrics.
+    scalar_metrics['evaluation_rewards_total'] = np.mean(data['rollouts_rewards'])
+    half_split = data['rollouts_rewards'].shape[1] // 2
+    scalar_metrics['evaluation_rewards_second_half'] = np.mean(data['rollouts_rewards'][:,half_split:,:])
 
     """
         Maximizing action.
@@ -299,6 +312,13 @@ def main(exp_id, val_iter_exp):
     plt.savefig('{0}/q_values_summed_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/q_values_summed_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
+
+    # Scalar q-values metrics.
+    errors = np.abs(val_iter_data['Q_vals'] - data['Q_vals']) # [R,E,S,A]
+    errors = np.sum(errors, axis=(2,3)) # [R,E]
+    scalar_metrics['train_qvals_summed_error_total'] = np.mean(errors)
+    half_split = data['Q_vals'].shape[1] // 2
+    scalar_metrics['train_qvals_summed_error_second_half'] = np.mean(errors[:,half_split:])
 
     # Mean + std/CI plot.
     num_cols = 3
@@ -581,6 +601,11 @@ def main(exp_id, val_iter_exp):
 
     plt.savefig(f'{replay_buffer_plots_path}/P_s_entropy.png', bbox_inches='tight', pad_inches=0)
     plt.close()
+
+    # Store scalars dict.
+    with open(output_folder + "scalar_metrics.json", 'w') as f:
+        json.dump(scalar_metrics, f)
+        f.close()
 
 if __name__ == "__main__":
     main(exp_id=None,val_iter_exp=None)
