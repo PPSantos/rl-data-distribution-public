@@ -30,11 +30,11 @@ DEFAULT_TRAIN_ARGS = {
 
     'rollouts_period': 500,
     'num_rollouts': 5,
-    'rollouts_phi': 0.0,
+    'rollouts_phi': 0.3,
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'gridEnv1',
+        'env_name': 'gridEnv4',
         'dim_obs': 8,
         'time_limit': 50,
         'tabular': False,
@@ -88,7 +88,7 @@ DEFAULT_TRAIN_ARGS = {
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
         'reweighting_type': 'default', # default, actions or full.
-        'uniform_replay_buffer': False,
+        'uniform_replay_buffer': True,
     },
 
     # Oracle FQI arguments.
@@ -215,7 +215,7 @@ def train(train_args=None):
     json.dump(dumped, f)
     f.close()
 
-    return exp_name
+    return exp_path, exp_name
 
 if __name__ == "__main__":
     train() # Uses DEFAULT_TRAIN_ARGS.

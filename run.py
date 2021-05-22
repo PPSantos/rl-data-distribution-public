@@ -1,3 +1,6 @@
+import os
+import shutil
+
 from train import train
 from train import DEFAULT_TRAIN_ARGS
 from analysis.plots_single import main as plots
@@ -28,19 +31,29 @@ if __name__ == "__main__":
 
     for size in max_replay_sizes:
         print(f'One-hot observation, max_replay_size={size}')
+
         args['fqi_args']['max_replay_size'] = size
-        exp_id = train(args)
+        exp_path, exp_id = train(args)
         exp_ids.append(exp_id)
+
+        # Compute plots.
         if COMPUTE_PLOTS:
             plots(exp_id, VAL_ITER_DATA)
             Qvalplots(exp_id, VAL_ITER_DATA)
+
+        # Compress and cleanup.
+        shutil.make_archive(exp_path,
+                        'gztar',
+                        os.path.dirname(exp_path),
+                        exp_id)
+        shutil.rmtree(exp_path)
 
     print('Exp. ids:', exp_ids) """
 
     """
         Smoothed observations.
     """
-    """ args = DEFAULT_TRAIN_ARGS
+    args = DEFAULT_TRAIN_ARGS
     args['env_args']['smooth_obs'] = True
     args['env_args']['one_hot_obs'] = False
 
@@ -49,14 +62,24 @@ if __name__ == "__main__":
 
     for size in max_replay_sizes:
         print(f'Smoothed observation, max_replay_size={size}')
+
         args['fqi_args']['max_replay_size'] = size
-        exp_id = train(args)
+        exp_path, exp_id = train(args)
         exp_ids.append(exp_id)
+
+        # Compute plots.
         if COMPUTE_PLOTS:
             plots(exp_id, VAL_ITER_DATA)
             Qvalplots(exp_id, VAL_ITER_DATA)
 
-    print('Exp. ids:', exp_ids) """
+        # Compress and cleanup.
+        shutil.make_archive(exp_path,
+                        'gztar',
+                        os.path.dirname(exp_path),
+                        exp_id)
+        shutil.rmtree(exp_path)
+
+    print('Exp. ids:', exp_ids)
 
     """
         Random observations.
@@ -70,11 +93,21 @@ if __name__ == "__main__":
 
     for size in max_replay_sizes:
         print(f'Random observation, max_replay_size={size}')
+
         args['fqi_args']['max_replay_size'] = size
-        exp_id = train(args)
+        exp_path, exp_id = train(args)
         exp_ids.append(exp_id)
+
+        # Compute plots.
         if COMPUTE_PLOTS:
             plots(exp_id, VAL_ITER_DATA)
             Qvalplots(exp_id, VAL_ITER_DATA)
+
+        # Compress and cleanup.
+        shutil.make_archive(exp_path,
+                        'gztar',
+                        os.path.dirname(exp_path),
+                        exp_id)
+        shutil.rmtree(exp_path)
 
     print('Exp. ids:', exp_ids)
