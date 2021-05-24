@@ -117,10 +117,15 @@ class FQI(object):
 
             # Store current Q-values (filters wall states).
             for state in range(self.base_env.num_states):
-                xy = self.env_grid_spec.idx_to_xy(state)
-                tile_type = self.env_grid_spec.get_value(xy)
-                if tile_type == TileType.WALL:
-                    Q_vals[episode,state,:] = 0
+                if self.env_grid_spec:
+                    xy = self.env_grid_spec.idx_to_xy(state)
+                    tile_type = self.env_grid_spec.get_value(xy)
+                    if tile_type == TileType.WALL:
+                        Q_vals[episode,state,:] = 0
+                    else:
+                        obs = self.base_env.observation(state)
+                        qvs = self.agent.get_Q_vals(obs)
+                        Q_vals[episode,state,:] = qvs
                 else:
                     obs = self.base_env.observation(state)
                     qvs = self.agent.get_Q_vals(obs)
@@ -134,7 +139,8 @@ class FQI(object):
             if episode % rollouts_period == 0:
                 print('Executing evaluation rollouts...')
 
-                self.base_env.set_phi(rollouts_phi)
+                if self.env_grid_spec:
+                    self.base_env.set_phi(rollouts_phi)
 
                 r_rewards = []
                 for i in range(num_rollouts):
@@ -143,7 +149,8 @@ class FQI(object):
                 rollouts_episodes.append(episode)
                 rollouts_rewards.append(r_rewards)
 
-                self.base_env.set_phi(phi)
+                if self.env_grid_spec:
+                    self.base_env.set_phi(phi)
 
         data = {}
         data['episode_rewards'] = episode_rewards
@@ -166,11 +173,14 @@ class FQI(object):
         for _ in range(dataset_size):
 
             # Randomly uniform sample state.
-            tile_type = TileType.WALL
-            while tile_type == TileType.WALL:
+            if self.env_grid_spec:
+                tile_type = TileType.WALL
+                while tile_type == TileType.WALL:
+                    state = np.random.randint(self.base_env.num_states)
+                    xy = self.env_grid_spec.idx_to_xy(state)
+                    tile_type = self.env_grid_spec.get_value(xy)
+            else:
                 state = np.random.randint(self.base_env.num_states)
-                xy = self.env_grid_spec.idx_to_xy(state)
-                tile_type = self.env_grid_spec.get_value(xy)
 
             observation = self.base_env.observation(state)
 

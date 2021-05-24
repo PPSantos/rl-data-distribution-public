@@ -5,6 +5,7 @@ import json
 import random
 import numpy as np
 import pathlib
+import argparse
 
 import matplotlib
 matplotlib.use('agg')
@@ -14,71 +15,36 @@ plt.style.use('ggplot')
 
 import statsmodels.api as sm
 
+from envs import env_suite
+
 FIGURE_X = 6.0
 FIGURE_Y = 4.0
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
-# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-55-56' # gridEnv1
-# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-17-27-39' # gridEnv2
-# VAL_ITER_DATA = '8_8_val_iter_2021-04-13-22-56-57' # gridEnv3
-VAL_ITER_DATA = 'gridEnv4_val_iter_2021-04-28-09-54-18' # gridEnv4
-#VAL_ITER_DATA = 'LavaEnv1_val_iter_2021-04-27-19-08-17' # lavaEnv1
+def get_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--exp', help='Experiments id.', required=True)
+    parser.add_argument('--val_iter_exp', help='Value iteration experiments id.', required=True)
 
-EXPS_DATA = [
-            # {'id': 'LavaEnv1_q_learning_2021-04-27-19-07-31', 'label': 'Q-learning'},
+    return parser.parse_args()
 
-            {'id': 'gridEnv4_oracle_fqi_2021-04-28-23-55-32', 'label': 'OracleFQI'}, # Env-8,8-1
-            # {'id': '8_8_oracle_fqi_2021-04-25-13-58-37', 'label': 'OracleFQI-1k'}, # Env-8,8-1
-
-            #{'id': '8_8_dqn_2021-04-13-18-52-45', 'label': 'DQN+1hot+400k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-13-19-15-32', 'label': 'DQN+1hot+300k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-13-19-38-17', 'label': 'DQN+1hot+200k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-13-20-01-22', 'label': 'DQN+1hot+100k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-13-20-24-30', 'label': 'DQN+1hot+50k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-13-20-48-35', 'label': 'DQN+1hot+25k'}, # Env-8,8-1
-
-            #{'id': '8_8_dqn_2021-04-13-21-12-55', 'label': 'DQN+smooth+500k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-13-21-36-27', 'label': 'DQN+smooth+400k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-13-21-59-39', 'label': 'DQN+smooth+300k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-13-22-22-29', 'label': 'DQN+smooth+200k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-13-22-45-18', 'label': 'DQN+smooth+100k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-13-23-08-11', 'label': 'DQN+smooth+50k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-13-23-31-12', 'label': 'DQN+smooth+25k'}, # Env-8,8-1
-
-            #{'id': '8_8_dqn_2021-04-13-23-54-09', 'label': 'DQN+rand+500k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-14-00-16-45', 'label': 'DQN+rand+400k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-14-00-39-22', 'label': 'DQN+rand+300k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-14-01-02-03', 'label': 'DQN+rand+200k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-14-01-24-01', 'label': 'DQN+rand+100k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-14-01-45-49', 'label': 'DQN+rand+50k'}, # Env-8,8-1
-            #{'id': '8_8_dqn_2021-04-14-02-07-55', 'label': 'DQN+rand+25k'}, # Env-8,8-1
-
-            #################################################################################
-            # {'id': '8_8_q_learning_2021-04-23-09-54-34', 'label': 'Q-learning'}, # Env-8,8-2
-
-            #################################################################################
-            # {'id': '8_8_q_learning_2021-04-13-23-39-31', 'label': 'Q-learning'}, # Env-8,8-3 (20k episodes)
-
-            ]
-
-
-def calculate_CI_bootstrap(x_hat, samples, num_resamples=20000):
-    """
-        Calculates 95 % interval using bootstrap.
-        REF: https://ocw.mit.edu/courses/mathematics/
-            18-05-introduction-to-probability-and-statistics-spring-2014/
-            readings/MIT18_05S14_Reading24.pdf
-    """
-    resampled = np.random.choice(samples,
-                                size=(len(samples), num_resamples),
-                                replace=True)
-    means = np.mean(resampled, axis=0)
-    diffs = means - x_hat
-    bounds = [x_hat - np.percentile(diffs, 5), x_hat - np.percentile(diffs, 95)]
-
-    return bounds
+# def calculate_CI_bootstrap(x_hat, samples, num_resamples=20000):
+#     """
+#         Calculates 95 % interval using bootstrap.
+#         REF: https://ocw.mit.edu/courses/mathematics/
+#             18-05-introduction-to-probability-and-statistics-spring-2014/
+#             readings/MIT18_05S14_Reading24.pdf
+#     """
+#     resampled = np.random.choice(samples,
+#                                 size=(len(samples), num_resamples),
+#                                 replace=True)
+#     means = np.mean(resampled, axis=0)
+#     diffs = means - x_hat
+#     bounds = [x_hat - np.percentile(diffs, 5), x_hat - np.percentile(diffs, 95)]
+#
+#     return bounds
 
 def get_args_json_file(path):
     with open(path + "/args.json", 'r') as f:
@@ -108,18 +74,59 @@ def print_env(data, sizes, float_format=None):
         sys.stdout.write('|\n')
     sys.stdout.write('-' * (size_x + 2)+'\n')
 
+""" def ridgeline(x, data, ax, overlap=0, fill=True, labels=None, n_points=150):
+    if overlap > 1 or overlap < 0:
+        raise ValueError('overlap must be in [0 1]')
+    # xx = np.linspace(np.min(np.concatenate(data)),
+    #                  np.max(np.concatenate(data)), n_points)
+    # curves = []
+    # ys = []
+    for i, d in enumerate(data):
+        # pdf = gaussian_kde(d)
+        y = i*(1.0-overlap)
+        # ys.append(y)
+        # curve = pdf(xx)
+        # if fill:
+        #     ax.fill_between(xx, np.ones(n_points)*y, 
+        #                      curve+y, zorder=len(data)-i+1, color=fill)
+        ax.plot(x, d+y, c='k', zorder=len(data)-i+1)
+    # if labels:
+    #     ax.yticks(ys, labels) """
 
-if __name__ == "__main__":
+
+def main(exp_id, val_iter_exp):
+
+    # Parse arguments if needed.
+    if (exp_id is None) or (val_iter_exp is None):
+        c_args = get_arguments()
+        exp_id = c_args.exp
+        val_iter_exp = c_args.val_iter_exp
+
+    print('Arguments (analysis/plots_single.py):')
+    print('Exp. id: {0}'.format(exp_id))
+    print('Val. iter. exp. id: {0}\n'.format(val_iter_exp))
 
     # Prepare plots output folder.
-    os.makedirs(PLOTS_FOLDER_PATH, exist_ok=True)
+    output_folder = PLOTS_FOLDER_PATH + exp_id + '/'
+    os.makedirs(output_folder, exist_ok=True)
+    replay_buffer_plots_path = f'{output_folder}/replay_buffer'
+    os.makedirs(replay_buffer_plots_path, exist_ok=True)
+    q_vals_folder_path = PLOTS_FOLDER_PATH + exp_id + '/Q-values'
+    os.makedirs(q_vals_folder_path, exist_ok=True)
 
     # Get args file (assumes all experiments share the same arguments).
-    args = get_args_json_file(DATA_FOLDER_PATH + EXPS_DATA[0]['id'])
+    exp_args = get_args_json_file(DATA_FOLDER_PATH + exp_id)
+    print('Exp. args:')
+    print(exp_args)
+
+    # Store a copy of the args.json file inside plots folder.
+    with open(output_folder + "args.json", 'w') as f:
+        json.dump(exp_args, f)
+        f.close()
 
     # Load optimal policy/Q-values.
-    val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA
-    print(f"Opening experiment {VAL_ITER_DATA}")
+    val_iter_path = DATA_FOLDER_PATH + val_iter_exp
+    print(f"Opening experiment {val_iter_exp}")
     with open(val_iter_path + "/train_data.json", 'r') as f:
         val_iter_data = json.load(f)
         val_iter_data = json.loads(val_iter_data)
@@ -127,135 +134,187 @@ if __name__ == "__main__":
     f.close()
     val_iter_data['Q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
 
-    # Load and parse data.
+    # Open data.
+    print(f"Opening experiment {exp_id}")
+    exp_path = DATA_FOLDER_PATH + exp_id
+    with open(exp_path + "/train_data.json", 'r') as f:
+        exp_data = json.load(f)
+        exp_data = json.loads(exp_data)
+    f.close()
+
+    # Parse data for each train run.
     data = {}
-    for exp in EXPS_DATA:
 
-        # Open data.
-        print(f"Opening experiment {exp['id']}")
-        exp_path = DATA_FOLDER_PATH + exp['id']
-        with open(exp_path + "/train_data.json", 'r') as f:
-            exp_data = json.load(f)
-            exp_data = json.loads(exp_data)
-        f.close()
+    # episode_rewards field.
+    data['episode_rewards'] = np.array([e['episode_rewards'] for e in exp_data]) # [R,E]
 
-        # Parse data for each train run.
-        parsed_data = {}
+    # Q_vals field.
+    data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,E,S,A]
+    
+    # max_Q_vals field.
+    data['max_Q_vals'] = np.array([e['max_Q_vals'] for e in exp_data]) # [R,S]
 
-        # episode_rewards field.
-        parsed_data['episode_rewards'] = np.array([e['episode_rewards'] for e in exp_data]) # [R,E]
+    # policy field.
+    data['policies'] = np.array([e['policy'] for e in exp_data]) # [R,S]
 
-        # Q_vals field.
-        parsed_data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,E,S,A]
-        
-        # max_Q_vals field.
-        parsed_data['max_Q_vals'] = np.array([e['max_Q_vals'] for e in exp_data]) # [R,S]
+    # states_counts field.
+    data['states_counts'] = np.array([e['states_counts'] for e in exp_data]) # [R,S]
 
-        # policy field.
-        parsed_data['policies'] = np.array([e['policy'] for e in exp_data]) # [R,S]
+    # replay_buffer_counts field.
+    data['replay_buffer_counts'] = np.array([e['replay_buffer_counts'] for e in exp_data]) # [R,(E),S,A]
 
-        # states_counts field.
-        parsed_data['states_counts'] = np.array([e['states_counts'] for e in exp_data]) # [R,S]
+    # rollouts_episodes field.
+    data['rollouts_episodes'] = exp_data[0]['rollouts_episodes'] # [R]
 
-        data[exp['id']] = parsed_data
+    # rollouts_rewards field.
+    data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts]
+
+    # Scalar metrics dict.
+    scalar_metrics = {}
+
+    is_grid_env = exp_args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys()
+    print('is_grid_env:', is_grid_env)
+
+    if is_grid_env:
+        lateral_size = int(np.sqrt(len(val_iter_data['policy']))) # Assumes env. is a square.
 
     """
         Print policies.
     """
-    lateral_size = int(np.sqrt(len(val_iter_data['policy']))) # Assumes env. is a square.
-    print(f'{VAL_ITER_DATA} policy:')
-    print_env(val_iter_data['policy'], (lateral_size, lateral_size))
-    for exp in EXPS_DATA:
-        for (i, policy) in enumerate(data[exp['id']]['policies']):
-            print(f"{exp['label']} policy (run {i}):")
+    if is_grid_env:
+        print(f'{val_iter_exp} policy:')
+        print_env(val_iter_data['policy'], (lateral_size, lateral_size))
+        for (i, policy) in enumerate(data['policies']):
+            print(f"{exp_id} policy (run {i}):")
             print_env(policy, (lateral_size, lateral_size))
 
     """
         Print max Q-values.
     """
-    print('\n')
-    print(f'{VAL_ITER_DATA} max Q-values:')
-    print_env(val_iter_data['max_Q_vals'], (lateral_size, lateral_size), float_format="{:.1f} ")
-    for exp in EXPS_DATA:
-        for i, qs in enumerate(data[exp['id']]['max_Q_vals']):
-            print(f"{exp['label']} max Q-values (run {i}):")
+    if is_grid_env:
+        print('\n')
+        print(f'{val_iter_exp} max Q-values:')
+        print_env(val_iter_data['max_Q_vals'], (lateral_size, lateral_size), float_format="{:.1f} ")
+        for i, qs in enumerate(data['max_Q_vals']):
+            print(f"{exp_id} max Q-values (run {i}):")
             print_env(qs, (lateral_size, lateral_size), float_format="{:.1f} ")
 
     """
         Print states counts.
     """
-    print('\n')
-    for exp in EXPS_DATA:
-        for i, counts in enumerate(data[exp['id']]['states_counts']):
-            print(f"{exp['label']} states_counts (run {i}):")
+    if is_grid_env:
+        print('\n')
+        for i, counts in enumerate(data['states_counts']):
+            print(f"{exp_id} states_counts (run {i}):")
             print_env(counts, (lateral_size, lateral_size), float_format="{:.0f} ")
 
     """
-        Plot episode rewards (averaged over all runs).
+        Plot episode rewards.
     """
+    print('Computing `episode_rewards_avg` plot.')
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-    for exp in EXPS_DATA:
-        rewards = data[exp['id']]['episode_rewards'] # [R,E]
-        Y = np.mean(rewards, axis=0) # [E]
+    for (i, run_rewards) in enumerate(data['episode_rewards']):
+        Y = run_rewards # [E]
         X = np.linspace(1, len(Y), len(Y))
         lowess = sm.nonparametric.lowess(Y, X, frac=0.10, is_sorted=True, it=0)
 
         p = plt.plot(X, Y, alpha=0.20)
-        plt.plot(X, lowess[:,1], color=p[0].get_color(), label=exp['label'], zorder=10)
+        plt.plot(X, lowess[:,1], color=p[0].get_color(), label=f'Run {i}', zorder=10)
 
     plt.xlabel('Episode')
     plt.ylabel('Reward')
 
     plt.legend()
 
-    plt.savefig('{0}/episode_rewards_avg.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/episode_rewards_avg.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/episode_rewards_avg.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/episode_rewards_avg.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
 
+    # Scalar train rewards metrics.
+    scalar_metrics['train_rewards_total'] = np.mean(data['episode_rewards'])
+    half_split = data['episode_rewards'].shape[1] // 2
+    scalar_metrics['train_rewards_second_half'] = np.mean(data['episode_rewards'][:,half_split:])
+
     """
-        Episode rewards (for each experiment and run).
+        Plot evaluation rollouts rewards.
     """
-    num_cols = 3
-    num_rows = math.ceil(len(EXPS_DATA) / num_cols)
-    fig, axs = plt.subplots(num_rows, num_cols)
-    fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
-    fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
+    print('Computing `rollouts_rewards` plot.')
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-    for (ax, exp) in zip(axs.flat, EXPS_DATA):
+    for (i, run_rollouts) in enumerate(data['rollouts_rewards']): #  run_rollouts = [(E),num_rollouts]
+        X = data['rollouts_episodes'] # [(E)]
+        Y = np.mean(run_rollouts, axis=1) # [(E)]
 
-        for (i, run_data) in enumerate(data[exp['id']]['episode_rewards']):
-            Y = run_data # [E]
-            X = np.linspace(1, len(Y), len(Y))
-            lowess = sm.nonparametric.lowess(Y, X, frac=0.10, is_sorted=True, it=0)
+        plt.plot(X, Y, label=f'Run {i}')
 
-            p = ax.plot(X, Y, alpha=0.20)
-            ax.plot(X, lowess[:,1], color=p[0].get_color(), label=f"{i}", zorder=10)
+    plt.xlabel('Episode')
+    plt.ylabel('Rollouts average reward')
 
-        ax.legend()
-        ax.set_ylabel('Reward')
-        ax.set_xlabel('Episode')
-        ax.set_title(exp['label'])
+    plt.legend()
 
-    plt.savefig('{0}/episode_rewards.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/episode_rewards.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/rollouts_rewards.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/rollouts_rewards.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
+
+    # Scalar evaluation rewards metrics.
+    scalar_metrics['evaluation_rewards_total'] = np.mean(data['rollouts_rewards'])
+    half_split = data['rollouts_rewards'].shape[1] // 2
+    scalar_metrics['evaluation_rewards_second_half'] = np.mean(data['rollouts_rewards'][:,half_split:,:])
+
+    """
+        Maximizing action.
+    """
+    if is_grid_env:
+        print('Computing `maximizing_action_s_*` plots.')
+        for state in range(data['Q_vals'].shape[2]):
+
+            line = state // lateral_size 
+            col = state % lateral_size
+
+            num_cols = 3
+            num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
+            fig, axs = plt.subplots(num_rows, num_cols)
+            fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
+            fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
+
+            i = 0
+            for (ax, run_data) in zip(axs.flat, data['Q_vals']): # run_data = [E,S,A]
+
+                state_data = run_data[:,state,:] # [E,A]
+                Y = np.argmax(state_data, axis=1) # [E]
+                X = np.linspace(1, len(Y), len(Y))
+
+                ax.plot(X, Y)
+
+                ax.set_ylim([-0.1,5.1])
+                ax.set_ylabel('Maximizing action')
+                ax.set_xlabel('Episode')
+                ax.set_title(f'Run {i}')
+
+                i += 1
+
+            fig.suptitle(f'Maximizing actions: state {state}; line {line}, col {col}')
+
+            plt.savefig(f'{q_vals_folder_path}/maximizing_action_s_{state}.png', bbox_inches='tight', pad_inches=0)
+            plt.close()
 
     """
         Q-values plots.
     """
+    print('Computing `q_values_summed_error` plot.')
     # Sum plot.
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
-
-    for exp in EXPS_DATA:
-        errors = np.abs(val_iter_data['Q_vals'] - data[exp['id']]['Q_vals']) # [R,E,S,A]
-        errors = np.mean(errors, axis=0) # [E,S,A]
+    
+    for (i, run_Q_vals) in enumerate(data['Q_vals']):
+        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
         Y = np.sum(errors, axis=(1,2)) # [E]
         X = np.linspace(1, len(Y), len(Y))
 
-        plt.plot(X, Y, label=exp['label'])
+        plt.plot(X, Y, label=f'Run {i}')
 
     plt.xlabel('Episode')
     plt.ylabel('Q-values error')
@@ -263,82 +322,90 @@ if __name__ == "__main__":
 
     plt.legend()
 
-    plt.savefig('{0}/q_values_summed_error.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/q_values_summed_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/q_values_summed_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/q_values_summed_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
 
+    # Scalar q-values metrics.
+    errors = np.abs(val_iter_data['Q_vals'] - data['Q_vals']) # [R,E,S,A]
+    errors = np.sum(errors, axis=(2,3)) # [R,E]
+    scalar_metrics['train_qvals_summed_error_total'] = np.mean(errors)
+    half_split = data['Q_vals'].shape[1] // 2
+    scalar_metrics['train_qvals_summed_error_second_half'] = np.mean(errors[:,half_split:])
+
     # Mean + std/CI plot.
+    print('Computing `q_values_mean_error` plot.')
     num_cols = 3
     y_axis_range = [0,6]
-    num_rows = math.ceil(len(EXPS_DATA) / num_cols)
+    num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
     fig, axs = plt.subplots(num_rows, num_cols)
     fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
     fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
-    for (ax, exp) in zip(axs.flat, EXPS_DATA):
+    i = 0
+    for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [E,S,A]
 
-        errors = np.abs(val_iter_data['Q_vals'] - data[exp['id']]['Q_vals']) # [R,E,S,A]
-        errors = np.mean(errors, axis=0) # [E,S,A]
+        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
         Y = np.mean(errors, axis=(1,2)) # [E]
         X = np.linspace(1, len(Y), len(Y))
         # Y_std = np.std(errors, axis=(1,2))
 
         # CI calculation.
-        errors_flatten = errors.reshape(len(Y), -1) # [E,S*A]
-        X_CI = np.arange(0, len(Y), 100)
-        CI_bootstrap = [calculate_CI_bootstrap(Y[x], errors_flatten[x,:]) for x in X_CI]
-        CI_bootstrap = np.array(CI_bootstrap).T
-        CI_bootstrap = np.flip(CI_bootstrap, axis=0)
-        CI_lengths = np.abs(np.subtract(CI_bootstrap,Y[X_CI]))
+        # errors_flatten = errors.reshape(len(Y), -1) # [E,S*A]
+        # X_CI = np.arange(0, len(Y), 100)
+        # CI_bootstrap = [calculate_CI_bootstrap(Y[x], errors_flatten[x,:]) for x in X_CI]
+        # CI_bootstrap = np.array(CI_bootstrap).T
+        # CI_bootstrap = np.flip(CI_bootstrap, axis=0)
+        # CI_lengths = np.abs(np.subtract(CI_bootstrap,Y[X_CI]))
 
         p = ax.plot(X,Y,label='Q-vals')
-        ax.fill_between(X_CI, Y[X_CI]-CI_lengths[0], Y[X_CI]+CI_lengths[1], color=p[0].get_color(), alpha=0.15)
+        # ax.fill_between(X_CI, Y[X_CI]-CI_lengths[0], Y[X_CI]+CI_lengths[1], color=p[0].get_color(), alpha=0.15)
         # ax.fill_between(X, Y-Y_std, Y+Y_std, color=p[0].get_color(), alpha=0.15)
 
         # Max Q-values.
-        errors = np.abs(val_iter_data['Q_vals'] - data[exp['id']]['Q_vals']) # [R,E,S,A]
-        maximizing_actions = np.argmax(data[exp['id']]['Q_vals'], axis=3) # [R,E,S]
-        x, y, z = np.indices(maximizing_actions.shape)
-        errors = errors[x,y,z,maximizing_actions] # [R,E,S]
-        errors = np.mean(errors, axis=0) # [E,S]
+        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
+        maximizing_actions = np.argmax(run_Q_vals, axis=2) # [E,S]
+        x, y = np.indices(maximizing_actions.shape)
+        errors = errors[x,y,maximizing_actions] # [E,S]
+
         Y = np.mean(errors, axis=1) # [E]
         X = np.linspace(1, len(Y), len(Y))
         # CI calculation.
-        X_CI = np.arange(0, len(Y), 100)
-        CI_bootstrap = [calculate_CI_bootstrap(Y[x], errors[x,:]) for x in X_CI]
-        CI_bootstrap = np.array(CI_bootstrap).T
-        CI_bootstrap = np.flip(CI_bootstrap, axis=0)
-        CI_lengths = np.abs(np.subtract(CI_bootstrap,Y[X_CI]))
+        # X_CI = np.arange(0, len(Y), 100)
+        # CI_bootstrap = [calculate_CI_bootstrap(Y[x], errors[x,:]) for x in X_CI]
+        # CI_bootstrap = np.array(CI_bootstrap).T
+        # CI_bootstrap = np.flip(CI_bootstrap, axis=0)
+        # CI_lengths = np.abs(np.subtract(CI_bootstrap,Y[X_CI]))
 
         p = ax.plot(X, Y, label='Max Q-vals')
-        ax.fill_between(X_CI, Y[X_CI]-CI_lengths[0], Y[X_CI]+CI_lengths[1], color=p[0].get_color(), alpha=0.15)
+        # ax.fill_between(X_CI, Y[X_CI]-CI_lengths[0], Y[X_CI]+CI_lengths[1], color=p[0].get_color(), alpha=0.15)
 
-        ax.legend()
         ax.set_ylim(y_axis_range)
         ax.set_ylabel('Q-values error')
         ax.set_xlabel('Episode')
-        ax.set_title(exp['label'])
+        ax.set_title(f'Run {i}')
 
-    fig.suptitle('mean(abs(val_iter_Q_vals - Q_vals))')
+        i += 1
 
     plt.legend()
 
-    plt.savefig('{0}/q_values_mean_error.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/q_values_mean_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/q_values_mean_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/q_values_mean_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
 
     # Distribution plot.
+    print('Computing `q_values_violinplot_error` plot.')
     num_cols = 3
     y_axis_range = [0,11]
-    num_rows = math.ceil(len(EXPS_DATA) / num_cols)
+    num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
     fig, axs = plt.subplots(num_rows, num_cols)
     fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
     fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
-    for (ax, exp) in zip(axs.flat, EXPS_DATA):
+    i = 0
+    for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [E,S,A]
 
-        errors = np.abs(val_iter_data['Q_vals'] - data[exp['id']]['Q_vals']) # [R,E,S,A]
-        errors = np.mean(errors, axis=0) # [E,S,A]
+        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
         errors = errors.reshape(errors.shape[0], -1) # [E,S*A]
 
         X = np.arange(0, len(errors), 500)
@@ -348,35 +415,37 @@ if __name__ == "__main__":
         violin = ax.violinplot(abs_diff_list, positions=X,
                                 showextrema=True, widths=350)
 
-        ax.scatter(X, abs_diff_mean, label=exp['label'], s=12)
+        ax.scatter(X, abs_diff_mean, s=12)
 
         ax.set_ylim(y_axis_range)
         ax.set_xlabel('Episode')
         ax.set_ylabel('Q-values error')
-        ax.set_title(exp['label'])
-        #ax.legend()
+        ax.set_title(label=f"Run {i}")
+
+        i += 1
 
     fig.suptitle('Dist. of abs(val_iter_Q_vals - Q_vals)')
 
-    plt.savefig('{0}/q_values_violinplot_error.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/q_values_violinplot_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/q_values_violinplot_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/q_values_violinplot_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
 
     # Distribution plot for max Q-values.
+    print('Computing `q_values_violinplot_maxQ_error` plot.')
     num_cols = 3
     y_axis_range = [0,11]
-    num_rows = math.ceil(len(EXPS_DATA) / num_cols)
+    num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
     fig, axs = plt.subplots(num_rows, num_cols)
     fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
     fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
-    for (ax, exp) in zip(axs.flat, EXPS_DATA):
+    i = 0
+    for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [E,S,A]
 
-        errors = np.abs(val_iter_data['Q_vals'] - data[exp['id']]['Q_vals']) # [R,E,S,A]
-        maximizing_actions = np.argmax(data[exp['id']]['Q_vals'], axis=3) # [R,E,S]
-        x, y, z = np.indices(maximizing_actions.shape)
-        errors = errors[x,y,z,maximizing_actions] # [R,E,S]
-        errors = np.mean(errors, axis=0) # [E,S]
+        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
+        maximizing_actions = np.argmax(run_Q_vals, axis=2) # [E,S]
+        x, y = np.indices(maximizing_actions.shape)
+        errors = errors[x,y,maximizing_actions] # [E,S]
 
         X = np.arange(0, len(errors), 500)
         abs_diff_list = errors[X,:].tolist() # Sub-sample.
@@ -385,18 +454,225 @@ if __name__ == "__main__":
         violin = ax.violinplot(abs_diff_list, positions=X,
                                 showextrema=True, widths=350)
 
-        ax.scatter(X, abs_diff_mean, label=exp['label'], s=12)
+        ax.scatter(X, abs_diff_mean, s=12)
 
         ax.set_ylim(y_axis_range)
         ax.set_xlabel('Episode')
         ax.set_ylabel('Q-values error')
-        ax.set_title(exp['label'])
-        #ax.legend()
+        ax.set_title(label=f"Run {i}")
 
-    fig.suptitle('Dist. of abs(max(val_iter_Q_vals) - max(Q_vals))')
+        i += 1
+
+    fig.suptitle('Dist. of abs(val_iter_Q_vals - Q_vals) for a=argmax(Q_vals)')
 
     plt.legend()
 
-    plt.savefig('{0}/q_values_violinplot_maxQ_error.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/q_values_violinplot_maxQ_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/q_values_violinplot_maxQ_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/q_values_violinplot_maxQ_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
+
+    print('Computing `Q_values_s*-*-*` plots.')
+    if is_grid_env:
+        for state_to_plot in range(data['Q_vals'].shape[2]):
+
+            line = state_to_plot // lateral_size 
+            col = state_to_plot % lateral_size
+
+            # Display val. iter. Q-values.
+            # print('Value iteration Q-values:')
+            # for action in range(val_iter_data['Q_vals'].shape[-1]):
+            #     print(f"Q({state_to_plot},{action})={val_iter_data['Q_vals'][state_to_plot,action]}")
+
+            # Plot.
+            num_cols = 3
+            y_axis_range = [0,11]
+            num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
+            fig, axs = plt.subplots(num_rows, num_cols)
+            fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
+            fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
+
+            i = 0
+            for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [E,S,A]
+
+                for action in range(run_Q_vals.shape[-1]):
+                    
+                    # Plot predicted Q-values.
+                    Y = run_Q_vals[:,state_to_plot,action]
+                    X = np.linspace(1, len(Y), len(Y))
+                    l = ax.plot(X, Y, label=f'Action {action}')
+
+                    # Plot true Q-values.
+                    ax.hlines(val_iter_data['Q_vals'][state_to_plot,action],
+                            xmin=0, xmax=run_Q_vals.shape[0], linestyles='--', color=l[0].get_color())
+
+                ax.legend()
+                ax.set_ylim(y_axis_range)
+                ax.set_xlabel('Episode')
+                ax.set_ylabel('Q-value')
+                ax.set_title(label=f"Run {i}")
+
+                i += 1
+
+            fig.suptitle(f'Q-values, state {state_to_plot}; line {line}, col {col}')
+
+            #plt.savefig(f'{q_vals_folder_path}/Q_values_s{state_to_plot}-{line}-{col}.pdf', bbox_inches='tight', pad_inches=0)
+            plt.savefig(f'{q_vals_folder_path}/Q_values_s{state_to_plot}-{line}-{col}.png', bbox_inches='tight', pad_inches=0)
+
+            plt.close()
+
+    """
+        Replay buffer statistics: P(a|s).
+    """
+    if is_grid_env:
+        print('Computing `Replay buffer: P(a|s)` plots.')
+
+        for state in range(data['Q_vals'].shape[2]):
+
+            line = state // lateral_size 
+            col = state % lateral_size
+
+            num_cols = 3
+            y_axis_range = [0, 1.1]
+            num_rows = math.ceil(data['replay_buffer_counts'].shape[0] / num_cols)
+            fig, axs = plt.subplots(num_rows, num_cols)
+            fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
+            fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
+
+            i = 0
+            for (ax, run_data) in zip(axs.flat, data['replay_buffer_counts']): # run_data = [(E),S,A]
+
+                state_data = run_data[:,state,:] # [(E),A]
+
+                row_sums = np.sum(state_data, axis=1) # [(E)]
+                action_probs = state_data / (row_sums[:, np.newaxis] + 1e-05) # [(E), A]
+
+                for a in range(action_probs.shape[1]):
+                    Y = action_probs[:,a]
+                    X = np.arange(500, 20_000, 500)
+                    ax.plot(X, Y, label=f'Action {a}')
+
+                ax.set_ylim(y_axis_range)
+                ax.set_ylabel('P(a|s)')
+                ax.set_xlabel('Episode')
+                ax.set_title(f'Run {i}')
+
+                ax.legend()
+
+                i += 1
+
+            fig.suptitle(f'Replay buffer: P(a|s), state {state}; line {line}, col {col}')
+
+            plt.savefig(f'{replay_buffer_plots_path}/P_a_{state}.png', bbox_inches='tight', pad_inches=0)
+            plt.close()
+
+    """
+        Replay buffer statistics: H[P(a|s)].
+    """
+    if is_grid_env:
+        print('Computing `Replay buffer: P(a|s) entropy` plots.')
+
+        for state in range(data['Q_vals'].shape[2]):
+
+            line = state // lateral_size 
+            col = state % lateral_size
+
+            num_cols = 3
+            #y_axis_range = [0, 1.1]
+            num_rows = math.ceil(data['replay_buffer_counts'].shape[0] / num_cols)
+            fig, axs = plt.subplots(num_rows, num_cols)
+            fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
+            fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
+
+            i = 0
+            for (ax, run_data) in zip(axs.flat, data['replay_buffer_counts']): # run_data = [(E),S,A]
+
+                state_data = run_data[:,state,:] # [(E),A]
+
+                row_sums = np.sum(state_data, axis=1) # [(E)]
+                action_probs = state_data / (row_sums[:, np.newaxis] + 1e-05) # [(E), A]
+
+                Y = -np.sum(action_probs * np.log(action_probs+1e-8), axis=1)
+                X = np.arange(500, 20_000, 500)
+                ax.plot(X, Y)
+
+                #ax.set_ylim(y_axis_range)
+                ax.set_ylabel('H[P(a|s)]')
+                ax.set_xlabel('Episode')
+                ax.set_title(f'Run {i}')
+
+                i += 1
+
+            fig.suptitle(f'Replay buffer: H[P(a|s)], state {state}; line {line}, col {col}')
+
+            plt.savefig(f'{replay_buffer_plots_path}/P_a_entropy_{state}.png', bbox_inches='tight', pad_inches=0)
+            plt.close()
+
+    """
+        Replay buffer statistics: H[P(s)].
+    """
+    print('Computing `Replay buffer: H[P(s)]` plots.')
+
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    for i, run_data in enumerate(data['replay_buffer_counts']): # run_data = [(E),S,A]
+
+        aggregated_data = np.sum(run_data, axis=2) # [(E),S]
+        row_sums = np.sum(aggregated_data, axis=1) # [(E)]
+        state_probs = aggregated_data / (row_sums[:, np.newaxis] + 1e-05) # [(E), S]
+
+        Y = -np.sum(state_probs * np.log(state_probs+1e-8), axis=1)
+        X = np.arange(500, 20_000, 500) # TODO
+        plt.plot(X, Y, label=f'Run {i}')
+
+    plt.ylabel('H[P(s)]')
+    plt.xlabel('Episode')
+
+    plt.legend()
+
+    plt.title(f'Replay buffer: H[P(s)]')
+
+    plt.savefig(f'{replay_buffer_plots_path}/P_s_entropy.png', bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    """
+        Replay buffer statistics: P(s).
+    """
+    """ print('Computing `Replay buffer: P(s)` plots.')
+
+    num_cols = 3
+    num_rows = math.ceil(data['replay_buffer_counts'].shape[0] / num_cols)
+    fig, axs = plt.subplots(num_rows, num_cols)
+    fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
+    fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
+
+    i = 0
+    for (ax, run_data) in zip(axs.flat, data['replay_buffer_counts']): # run_data = [(E),S,A]
+
+        aggregated_data = np.sum(run_data, axis=2) # [(E),S]
+        row_sums = np.sum(aggregated_data, axis=1) # [(E)]
+        state_probs = aggregated_data / row_sums[:, np.newaxis] # [(E), S]
+
+        ridgeline(x=np.arange(0, state_probs.shape[1]), data=state_probs, ax=ax)
+        # joypy.joyplot(state_probs.tolist(), ax=ax)
+
+        ax.set_ylabel('P(s)')
+        ax.set_xlabel('Episode')
+        ax.set_title(f'Run {i}')
+
+        ax.legend()
+
+        i += 1
+
+    fig.suptitle(f'Replay buffer: P(s)')
+
+    plt.savefig(f'{replay_buffer_plots_path}/P_s.png', bbox_inches='tight', pad_inches=0)
+    plt.close() """
+
+    # Store scalars dict.
+    with open(output_folder + "scalar_metrics.json", 'w') as f:
+        json.dump(scalar_metrics, f)
+        f.close()
+
+if __name__ == "__main__":
+    main(exp_id=None,val_iter_exp=None)

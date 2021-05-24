@@ -88,7 +88,7 @@ DEFAULT_TRAIN_ARGS = {
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
         'reweighting_type': 'default', # default, actions or full.
-        'uniform_replay_buffer': True,
+        'uniform_replay_buffer': False,
     },
 
     # Oracle FQI arguments.
@@ -122,17 +122,21 @@ def train_run(run_args):
     time.sleep(time_delay)
 
     # Load environment.
-    env, env_grid_spec = env_suite.get_custom_env(**args['env_args'],
-                                                phi=args['phi'], absorb=False)
+    if args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys():
+        env, env_grid_spec = env_suite.get_custom_grid_env(**args['env_args'],
+                                                    phi=args['phi'], absorb=False)
+    else:
+        env = env_suite.get_env(args['env_args']['env_name'])
+        env_grid_spec = None
 
     # print('Env num states:', env.num_states)
     # print('Env num actions:', env.num_actions)
     # print('Env transition matrix shape:', env.transition_matrix().shape)
     # print('Env initial state distribution:', env.initial_state_distribution)
-    print('Env render:')
-    env.reset()
-    env.render()
-    print('\n')
+    # print('Env render:')
+    # env.reset()
+    # env.render()
+    # print('\n')
 
     # Instantiate algorithm.
     if args['algo'] == 'val_iter':
@@ -140,10 +144,16 @@ def train_run(run_args):
         agent = ValueIteration(env, **args['val_iter_args'])
 
     elif args['algo'] == 'q_learning':
+
+        raise ValueError('Not implemented')
+
         args['q_learning_args']['gamma'] = args['gamma']
         agent = QLearning(env, **args['q_learning_args'])
 
     elif args['algo'] == 'dqn':
+
+        raise ValueError('Not implemented')
+
         args['dqn_args']['discount'] = args['gamma']
         agent = DQN(env, env_grid_spec, args['dqn_args'])
 
@@ -152,6 +162,8 @@ def train_run(run_args):
         agent = FQI(env, env_grid_spec, args['fqi_args'])
 
     elif args['algo'] == 'oracle_fqi':
+
+        raise ValueError('Not implemented')
 
         # Load optimal (oracle) policy/Q-values.
         val_iter_path = DATA_FOLDER_PATH + args['oracle_fqi_args']['oracle_q_vals']

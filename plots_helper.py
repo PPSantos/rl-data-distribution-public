@@ -1,7 +1,6 @@
 from train import train
 from train import DEFAULT_TRAIN_ARGS
 from analysis.plots_single import main as plots
-from analysis.plot_state_qval import main as Qvalplots
 
 
 # `VAL_ITER_DATA` must be set if `COMPUTE_PLOTS` is True.
@@ -32,4 +31,3 @@ if __name__ == "__main__":
     for exp_id in EXP_IDS:
         print(exp_id)
         plots(exp_id, VAL_ITER_DATA)
-        Qvalplots(exp_id, VAL_ITER_DATA)

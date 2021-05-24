@@ -10,8 +10,8 @@ from rlutil import math_utils
 from rlutil.envs.gridcraft.grid_spec_cy import TileType
 
 
-# WARNING: Custom envs must be square.
-CUSTOM_ENVS = {
+# WARNING: Custom grid envs must be square.
+CUSTOM_GRID_ENVS = {
     'gridEnv1': grid_spec_cy.spec_from_sparse_locations(8, 8,
                     {TileType.START: [(0, 7)],
                     TileType.WALL: [],
@@ -53,13 +53,13 @@ CUSTOM_ENVS = {
                     TileType.REWARD: [(7, 4)]}),
 }
 
-def get_custom_env(env_name, dim_obs=8, time_limit=50, tabular=False,
+def get_custom_grid_env(env_name, dim_obs=8, time_limit=50, tabular=False,
     smooth_obs=False, one_hot_obs=False, absorb=False, phi=0.0):
 
-    if env_name not in CUSTOM_ENVS.keys():
+    if env_name not in CUSTOM_GRID_ENVS.keys():
         raise KeyError('Unknown env. name.')
     
-    gs = CUSTOM_ENVS[env_name]
+    gs = CUSTOM_GRID_ENVS[env_name]
     env = grid_env_cy.GridEnv(gs, phi=phi)
 
     if absorb:

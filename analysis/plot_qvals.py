@@ -15,6 +15,8 @@ plt.style.use('ggplot')
 
 import statsmodels.api as sm
 
+from envs import env_suite
+
 FIGURE_X = 6.0
 FIGURE_Y = 4.0
 
@@ -82,8 +84,8 @@ def main(exp_id, val_iter_exp):
         val_iter_exp = c_args.val_iter_exp
         
     print('Arguments (analysis/plot_state_qval.py):')
-    print('\tExp. id: {0}'.format(exp_id))
-    print('\tVal. iter. exp. id: {0}\n'.format(val_iter_exp))
+    print('Exp. id: {0}'.format(exp_id))
+    print('Val. iter. exp. id: {0}\n'.format(val_iter_exp))
 
     # Prepare plots output folder.
     output_folder = PLOTS_FOLDER_PATH + exp_id + '/Q-values/'
@@ -108,9 +110,6 @@ def main(exp_id, val_iter_exp):
         val_iter_data = val_iter_data[0]
     f.close()
     val_iter_data['Q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
-
-    # Load and parse data.
-    data = {}
 
     # Open data.
     print(f"Opening experiment {exp_id}")
@@ -138,44 +137,22 @@ def main(exp_id, val_iter_exp):
     # states_counts field.
     data['states_counts'] = np.array([e['states_counts'] for e in exp_data]) # [R,S]
 
+    is_grid_env = exp_args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys()
+    print('is_grid_env:', is_grid_env)
 
-    """
-        Print policies.
-    """
-    lateral_size = int(np.sqrt(len(val_iter_data['policy']))) # Assumes env. is a square.
-    print(f'{val_iter_exp} policy:')
-    print_env(val_iter_data['policy'], (lateral_size, lateral_size))
-    for (i, policy) in enumerate(data['policies']):
-        print(f"{exp_id} policy (run {i}):")
-        print_env(policy, (lateral_size, lateral_size))
-
-    """
-        Print max Q-values.
-    """
-    print('\n')
-    print(f'{val_iter_exp} max Q-values:')
-    print_env(val_iter_data['max_Q_vals'], (lateral_size, lateral_size), float_format="{:.1f} ")
-    for i, qs in enumerate(data['max_Q_vals']):
-        print(f"{exp_id} max Q-values (run {i}):")
-        print_env(qs, (lateral_size, lateral_size), float_format="{:.1f} ")
-
-    """
-        Print states counts.
-    """
-    print('\n')
-    for i, counts in enumerate(data['states_counts']):
-        print(f"{exp_id} states_counts (run {i}):")
-        print_env(counts, (lateral_size, lateral_size), float_format="{:.0f} ")
+    if is_grid_env:
+        lateral_size = int(np.sqrt(len(val_iter_data['policy']))) # Assumes env. is a square.
 
     """
         Q-values plots.
     """
-    for line in range(lateral_size):
-        for col in range(lateral_size):
+    if is_grid_env:
 
-            # print("\nEnter state to plot Q-val")
-            # line = int(input("\tline: "))
-            # col = int(input("\tcolumn: "))
+        while True:
+
+            print("\nEnter state to plot Q-val")
+            line = int(input("\tline: "))
+            col = int(input("\tcolumn: "))
             state_to_plot = lateral_size*line+col
             print(f'line={line}, col={col}: state={state_to_plot}')
 
@@ -216,9 +193,9 @@ def main(exp_id, val_iter_exp):
 
             fig.suptitle(f'Q-values, state {state_to_plot}; line {line}, col {col}')
 
-            #plt.show()
             #plt.savefig('{0}/Q_values_s{1}-{2}-{3}.pdf'.format(output_folder, state_to_plot, line, col), bbox_inches='tight', pad_inches=0)
             plt.savefig('{0}/Q_values_s{1}-{2}-{3}.png'.format(output_folder, state_to_plot, line, col), bbox_inches='tight', pad_inches=0)
+
             plt.close()
 
 if __name__ == "__main__":
