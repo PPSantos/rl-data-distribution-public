@@ -70,11 +70,17 @@ class FQI(object):
         self.uniform_replay_buffer = fqi_args['uniform_replay_buffer']
         self.uniform_static_dataset_size = 500 # in episodes.
 
-    def train(self, num_episodes, num_rollouts, rollouts_period, phi, rollouts_phi):
+    def train(self, num_episodes, q_vals_period, num_rollouts,
+                rollouts_period, phi, rollouts_phi):
 
         states_counts = np.zeros((self.env.num_states))
         episode_rewards = []
-        Q_vals = np.zeros((num_episodes, self.base_env.num_states, self.base_env.num_actions))
+
+        Q_vals = np.zeros((num_episodes//q_vals_period,
+                self.base_env.num_states, self.base_env.num_actions))
+        Q_vals_episodes = []
+        Q_vals_ep = 0
+
         replay_buffer_counts = []
 
         rollouts_episodes = []
@@ -82,8 +88,9 @@ class FQI(object):
 
         for episode in tqdm(range(num_episodes)):
 
-            if self.uniform_replay_buffer and (episode % self.uniform_static_dataset_size == 0):
-                # Create dataset with size = self.uniform_static_dataset_size * self.base_env.time_limit
+            if self.uniform_replay_buffer and \
+                (episode % self.uniform_static_dataset_size == 0):
+                # Create dataset with size = self.uniform_static_dataset_size*self.base_env.time_limit
                 static_dataset = self._create_static_uniform_dataset()
                 static_dataset_iterator = iter(static_dataset)
 
@@ -98,7 +105,8 @@ class FQI(object):
                 timestep = self.env.step(action)
 
                 env_state = np.int32(env_state)
-                self.agent.observe_with_extras(action, next_timestep=timestep, extras=(env_state,))
+                self.agent.observe_with_extras(action,
+                    next_timestep=timestep, extras=(env_state,))
 
                 if self.uniform_replay_buffer:
                     # Insert transition from the static dataset.
@@ -116,20 +124,23 @@ class FQI(object):
             episode_rewards.append(episode_cumulative_reward)
 
             # Store current Q-values (filters wall states).
-            for state in range(self.base_env.num_states):
-                if self.env_grid_spec:
-                    xy = self.env_grid_spec.idx_to_xy(state)
-                    tile_type = self.env_grid_spec.get_value(xy)
-                    if tile_type == TileType.WALL:
-                        Q_vals[episode,state,:] = 0
+            if episode % q_vals_period == 0:
+                Q_vals_episodes.append(episode)
+                for state in range(self.base_env.num_states):
+                    if self.env_grid_spec:
+                        xy = self.env_grid_spec.idx_to_xy(state)
+                        tile_type = self.env_grid_spec.get_value(xy)
+                        if tile_type == TileType.WALL:
+                            Q_vals[Q_vals_ep,state,:] = 0
+                        else:
+                            obs = self.base_env.observation(state)
+                            qvs = self.agent.get_Q_vals(obs)
+                            Q_vals[Q_vals_ep,state,:] = qvs
                     else:
                         obs = self.base_env.observation(state)
                         qvs = self.agent.get_Q_vals(obs)
-                        Q_vals[episode,state,:] = qvs
-                else:
-                    obs = self.base_env.observation(state)
-                    qvs = self.agent.get_Q_vals(obs)
-                    Q_vals[episode,state,:] = qvs
+                        Q_vals[Q_vals_ep,state,:] = qvs
+                Q_vals_ep += 1
 
             # Estimate statistics of the replay buffer contents.
             if (episode > 1) and (episode % 500 == 0):
@@ -155,6 +166,7 @@ class FQI(object):
         data = {}
         data['episode_rewards'] = episode_rewards
         data['states_counts'] = states_counts
+        data['Q_vals_episodes'] = Q_vals_episodes
         data['Q_vals'] = Q_vals
         data['max_Q_vals'] = np.max(Q_vals[-1], axis=1)
         data['policy'] = np.argmax(Q_vals[-1], axis=1)

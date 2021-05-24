@@ -148,6 +148,9 @@ def main(exp_id, val_iter_exp):
     # episode_rewards field.
     data['episode_rewards'] = np.array([e['episode_rewards'] for e in exp_data]) # [R,E]
 
+    # Q_vals_episodes field.
+    data['Q_vals_episodes'] = exp_data[0]['Q_vals_episodes'] # [(E)]
+
     # Q_vals field.
     data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,E,S,A]
     
@@ -164,7 +167,7 @@ def main(exp_id, val_iter_exp):
     data['replay_buffer_counts'] = np.array([e['replay_buffer_counts'] for e in exp_data]) # [R,(E),S,A]
 
     # rollouts_episodes field.
-    data['rollouts_episodes'] = exp_data[0]['rollouts_episodes'] # [R]
+    data['rollouts_episodes'] = exp_data[0]['rollouts_episodes'] # [(E)]
 
     # rollouts_rewards field.
     data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts]
@@ -285,7 +288,7 @@ def main(exp_id, val_iter_exp):
 
                 state_data = run_data[:,state,:] # [E,A]
                 Y = np.argmax(state_data, axis=1) # [E]
-                X = np.linspace(1, len(Y), len(Y))
+                X = data['Q_vals_episodes']
 
                 ax.plot(X, Y)
 
@@ -312,7 +315,7 @@ def main(exp_id, val_iter_exp):
     for (i, run_Q_vals) in enumerate(data['Q_vals']):
         errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
         Y = np.sum(errors, axis=(1,2)) # [E]
-        X = np.linspace(1, len(Y), len(Y))
+        X = data['Q_vals_episodes']
 
         plt.plot(X, Y, label=f'Run {i}')
 
@@ -347,7 +350,7 @@ def main(exp_id, val_iter_exp):
 
         errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
         Y = np.mean(errors, axis=(1,2)) # [E]
-        X = np.linspace(1, len(Y), len(Y))
+        X = data['Q_vals_episodes']
         # Y_std = np.std(errors, axis=(1,2))
 
         # CI calculation.
@@ -369,7 +372,7 @@ def main(exp_id, val_iter_exp):
         errors = errors[x,y,maximizing_actions] # [E,S]
 
         Y = np.mean(errors, axis=1) # [E]
-        X = np.linspace(1, len(Y), len(Y))
+        X = data['Q_vals_episodes']
         # CI calculation.
         # X_CI = np.arange(0, len(Y), 100)
         # CI_bootstrap = [calculate_CI_bootstrap(Y[x], errors[x,:]) for x in X_CI]
@@ -395,7 +398,7 @@ def main(exp_id, val_iter_exp):
 
     # Distribution plot.
     print('Computing `q_values_violinplot_error` plot.')
-    num_cols = 3
+    """ num_cols = 3
     y_axis_range = [0,11]
     num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
     fig, axs = plt.subplots(num_rows, num_cols)
@@ -428,11 +431,11 @@ def main(exp_id, val_iter_exp):
 
     plt.savefig('{0}/q_values_violinplot_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/q_values_violinplot_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.close()
+    plt.close() """
 
     # Distribution plot for max Q-values.
     print('Computing `q_values_violinplot_maxQ_error` plot.')
-    num_cols = 3
+    """ num_cols = 3
     y_axis_range = [0,11]
     num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
     fig, axs = plt.subplots(num_rows, num_cols)
@@ -469,7 +472,7 @@ def main(exp_id, val_iter_exp):
 
     plt.savefig('{0}/q_values_violinplot_maxQ_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/q_values_violinplot_maxQ_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.close()
+    plt.close() """
 
     print('Computing `Q_values_s*-*-*` plots.')
     if is_grid_env:
@@ -498,7 +501,7 @@ def main(exp_id, val_iter_exp):
                     
                     # Plot predicted Q-values.
                     Y = run_Q_vals[:,state_to_plot,action]
-                    X = np.linspace(1, len(Y), len(Y))
+                    X = data['Q_vals_episodes']
                     l = ax.plot(X, Y, label=f'Action {action}')
 
                     # Plot true Q-values.

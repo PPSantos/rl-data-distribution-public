@@ -28,13 +28,14 @@ DEFAULT_TRAIN_ARGS = {
     'gamma': 0.9,
     'phi': 0.0,
 
+    'q_vals_period': 20,
     'rollouts_period': 500,
     'num_rollouts': 5,
     'rollouts_phi': 0.3,
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'gridEnv4',
+        'env_name': 'pendulum',
         'dim_obs': 8,
         'time_limit': 50,
         'tabular': False,
@@ -183,8 +184,9 @@ def train_run(run_args):
 
     # Train agent.
     train_data = agent.train(num_episodes=args['num_episodes'],
-                             rollouts_period=args['rollouts_period'],
+                             q_vals_period=args['q_vals_period'],
                              num_rollouts=args['num_rollouts'],
+                             rollouts_period=args['rollouts_period'],
                              phi=args['phi'],
                              rollouts_phi=args['rollouts_phi'])
 
