@@ -69,6 +69,7 @@ class FQI(object):
 
         self.uniform_replay_buffer = fqi_args['uniform_replay_buffer']
         self.uniform_static_dataset_size = 500 # in episodes.
+        self.alpha_dirichlet_param = fqi_args['alpha_dirichlet_param']
 
     def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
             num_rollouts, rollouts_period, phi, rollouts_phi):
@@ -185,6 +186,9 @@ class FQI(object):
         static_dataset = []
         dataset_size = self.uniform_static_dataset_size * self.base_env.time_limit
 
+        sampling_dist = np.random.dirichlet([self.alpha_dirichlet_param]*self.base_env.num_states)
+        print('sampling_dist', sampling_dist)
+
         for _ in range(dataset_size):
 
             # Randomly uniform sample state.
@@ -195,7 +199,7 @@ class FQI(object):
                     xy = self.env_grid_spec.idx_to_xy(state)
                     tile_type = self.env_grid_spec.get_value(xy)
             else:
-                state = np.random.randint(self.base_env.num_states)
+                state = np.random.choice(np.arange(self.base_env.num_states), p=sampling_dist)
 
             observation = self.base_env.observation(state)
 
