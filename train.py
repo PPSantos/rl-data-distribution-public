@@ -25,10 +25,11 @@ DEFAULT_TRAIN_ARGS = {
     'num_processors': 5,
     'algo': 'fqi',
     'num_episodes': 20_000,
-    'gamma': 0.9,
-    'phi': 0.0,
+    'gamma': 0.9, # discount factor.
+    'phi': 0.0, # actions stochasticity (grid env.).
 
     'q_vals_period': 20,
+    'replay_buffer_counts_period': 500,
     'rollouts_period': 500,
     'num_rollouts': 5,
     'rollouts_phi': 0.3,
@@ -185,6 +186,7 @@ def train_run(run_args):
     # Train agent.
     train_data = agent.train(num_episodes=args['num_episodes'],
                              q_vals_period=args['q_vals_period'],
+                             replay_buffer_counts_period=args['replay_buffer_counts_period'],
                              num_rollouts=args['num_rollouts'],
                              rollouts_period=args['rollouts_period'],
                              phi=args['phi'],

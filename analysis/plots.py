@@ -163,6 +163,9 @@ def main(exp_id, val_iter_exp):
     # states_counts field.
     data['states_counts'] = np.array([e['states_counts'] for e in exp_data]) # [R,S]
 
+    # replay_buffer_counts_episodes field.
+    data['replay_buffer_counts_episodes'] = exp_data[0]['replay_buffer_counts_episodes'] # [(E)]
+
     # replay_buffer_counts field.
     data['replay_buffer_counts'] = np.array([e['replay_buffer_counts'] for e in exp_data]) # [R,(E),S,A]
 
@@ -398,7 +401,7 @@ def main(exp_id, val_iter_exp):
 
     # Distribution plot.
     print('Computing `q_values_violinplot_error` plot.')
-    """ num_cols = 3
+    num_cols = 3
     y_axis_range = [0,11]
     num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
     fig, axs = plt.subplots(num_rows, num_cols)
@@ -411,9 +414,10 @@ def main(exp_id, val_iter_exp):
         errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
         errors = errors.reshape(errors.shape[0], -1) # [E,S*A]
 
-        X = np.arange(0, len(errors), 500)
-        abs_diff_list = errors[X,:].tolist() # Sub-sample.
-        abs_diff_mean = np.mean(errors[X,:], axis=1) # Sub-sample.
+        X = np.arange(0, data['Q_vals_episodes'][-1], 500)
+        idxs = np.searchsorted(data['Q_vals_episodes'], X)
+        abs_diff_list = errors[idxs,:].tolist() # Sub-sample.
+        abs_diff_mean = np.mean(errors[idxs,:], axis=1) # Sub-sample.
 
         violin = ax.violinplot(abs_diff_list, positions=X,
                                 showextrema=True, widths=350)
@@ -431,11 +435,11 @@ def main(exp_id, val_iter_exp):
 
     plt.savefig('{0}/q_values_violinplot_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/q_values_violinplot_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.close() """
+    plt.close()
 
     # Distribution plot for max Q-values.
     print('Computing `q_values_violinplot_maxQ_error` plot.')
-    """ num_cols = 3
+    num_cols = 3
     y_axis_range = [0,11]
     num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
     fig, axs = plt.subplots(num_rows, num_cols)
@@ -450,9 +454,10 @@ def main(exp_id, val_iter_exp):
         x, y = np.indices(maximizing_actions.shape)
         errors = errors[x,y,maximizing_actions] # [E,S]
 
-        X = np.arange(0, len(errors), 500)
-        abs_diff_list = errors[X,:].tolist() # Sub-sample.
-        abs_diff_mean = np.mean(errors[X,:], axis=1) # Sub-sample.
+        X = np.arange(0, data['Q_vals_episodes'][-1], 500)
+        idxs = np.searchsorted(data['Q_vals_episodes'], X)
+        abs_diff_list = errors[idxs,:].tolist() # Sub-sample.
+        abs_diff_mean = np.mean(errors[idxs,:], axis=1) # Sub-sample.
 
         violin = ax.violinplot(abs_diff_list, positions=X,
                                 showextrema=True, widths=350)
@@ -472,7 +477,7 @@ def main(exp_id, val_iter_exp):
 
     plt.savefig('{0}/q_values_violinplot_maxQ_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/q_values_violinplot_maxQ_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.close() """
+    plt.close()
 
     print('Computing `Q_values_s*-*-*` plots.')
     if is_grid_env:
@@ -551,7 +556,7 @@ def main(exp_id, val_iter_exp):
 
                 for a in range(action_probs.shape[1]):
                     Y = action_probs[:,a]
-                    X = np.arange(500, 20_000, 500)
+                    X = data['replay_buffer_counts_episodes']
                     ax.plot(X, Y, label=f'Action {a}')
 
                 ax.set_ylim(y_axis_range)
@@ -595,7 +600,7 @@ def main(exp_id, val_iter_exp):
                 action_probs = state_data / (row_sums[:, np.newaxis] + 1e-05) # [(E), A]
 
                 Y = -np.sum(action_probs * np.log(action_probs+1e-8), axis=1)
-                X = np.arange(500, 20_000, 500)
+                X = data['replay_buffer_counts_episodes']
                 ax.plot(X, Y)
 
                 #ax.set_ylim(y_axis_range)
@@ -625,7 +630,7 @@ def main(exp_id, val_iter_exp):
         state_probs = aggregated_data / (row_sums[:, np.newaxis] + 1e-05) # [(E), S]
 
         Y = -np.sum(state_probs * np.log(state_probs+1e-8), axis=1)
-        X = np.arange(500, 20_000, 500) # TODO
+        X = data['replay_buffer_counts_episodes'] 
         plt.plot(X, Y, label=f'Run {i}')
 
     plt.ylabel('H[P(s)]')

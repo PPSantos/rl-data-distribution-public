@@ -6,104 +6,138 @@ from train import DEFAULT_TRAIN_ARGS
 from analysis.plots import main as plots
 
 
-# `VAL_ITER_DATA` must be set if `COMPUTE_PLOTS` is True.
-COMPUTE_PLOTS = True
-VAL_ITER_DATA = 'pendulum_val_iter_2021-05-24-11-48-50'
+VAL_ITER_DATA = {
+    'gridEnv1': 'gridEnv1_val_iter_2021-05-14-15-54-10',
+    'gridEnv4': 'gridEnv4_val_iter_2021-04-28-09-54-18',
+    'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
+} 
 
 
 if __name__ == "__main__":
 
     exp_ids = []
 
-    """
-        One-hot observations.
-    """
-    """ args = DEFAULT_TRAIN_ARGS
-    args['env_args']['smooth_obs'] = False
-    args['env_args']['one_hot_obs'] = True
-    dict_key = args['algo'] + '_args'
-
-    max_replay_sizes = [1_000_000, 750_000, 500_000, 250_000, 100_000]
-    # max_replay_sizes = [500_000, 300_000, 200_000, 100_000, 50_000] # gridEnv5
-
-    for size in max_replay_sizes:
-        print(f'One-hot observation, max_replay_size={size}')
-
-        args[dict_key]['max_replay_size'] = size
-        exp_path, exp_id = train(args)
-        exp_ids.append(exp_id)
-
-        # Compute plots.
-        if COMPUTE_PLOTS:
-            plots(exp_id, VAL_ITER_DATA)
-
-        # Compress and cleanup.
-        shutil.make_archive(exp_path,
-                        'gztar',
-                        os.path.dirname(exp_path),
-                        exp_id)
-        shutil.rmtree(exp_path)
-
-    print('Exp. ids:', exp_ids) """
-
-    """
-        Smoothed observations.
-    """
+    # Load args.
     args = DEFAULT_TRAIN_ARGS
-    args['env_args']['smooth_obs'] = True
-    args['env_args']['one_hot_obs'] = False
-    dict_key = args['algo'] + '_args'
+    algo_dict_key = args['algo'] + '_args'
+    env_name = args['env_args']['env_name']
+    val_iter_data = VAL_ITER_DATA[env_name]
+    print('val_iter_data', val_iter_data)
 
-    max_replay_sizes = [1_000_000, 750_000, 500_000, 250_000, 100_000]
-    # max_replay_sizes = [500_000, 300_000, 200_000, 100_000, 50_000] # gridEnv5
+    # Setup max_replay_sizes variable.
+    if env_name in ['gridEnv1', 'gridEnv2', 'gridEnv3', 'gridEnv4', 'pendulum']:
+        max_replay_sizes = [1_000_000, 750_000, 500_000, 250_000, 100_000]
+    elif env_name in ['gridEnv5']:
+        max_replay_sizes = [500_000, 375_000, 250_000, 125_000, 50_000]
+    else:
+        raise ValueError('Error.')
+    print('max_replay_sizes', max_replay_sizes)
 
-    for size in max_replay_sizes:
-        print(f'Smoothed observation, max_replay_size={size}')
+    if env_name in ['gridEnv1', 'gridEnv2', 'gridEnv3', 'gridEnv4', 'gridEnv5']:
 
-        args[dict_key]['max_replay_size'] = size
-        exp_path, exp_id = train(args)
-        exp_ids.append(exp_id)
+        """
+            GridEnv + One-hot observations.
+        """
+        """ args['env_args']['smooth_obs'] = False
+        args['env_args']['one_hot_obs'] = True
 
-        # Compute plots.
-        if COMPUTE_PLOTS:
-            plots(exp_id, VAL_ITER_DATA)
+        for size in max_replay_sizes:
+            print(f'GridEnv + One-hot observation, max_replay_size={size}')
 
-        # Compress and cleanup.
-        shutil.make_archive(exp_path,
-                        'gztar',
-                        os.path.dirname(exp_path),
-                        exp_id)
-        shutil.rmtree(exp_path)
+            # Run.
+            args[algo_dict_key]['max_replay_size'] = size
+            exp_path, exp_id = train(args)
+            exp_ids.append(exp_id)
 
-    print('Exp. ids:', exp_ids)
+            # Compute plots.
+            plots(exp_id, val_iter_data)
 
-    """
-        Random observations.
-    """
-    args = DEFAULT_TRAIN_ARGS
-    args['env_args']['smooth_obs'] = False
-    args['env_args']['one_hot_obs'] = False
-    dict_key = args['algo'] + '_args'
+            # Compress and cleanup.
+            shutil.make_archive(exp_path,
+                            'gztar',
+                            os.path.dirname(exp_path),
+                            exp_id)
+            shutil.rmtree(exp_path)
 
-    max_replay_sizes = [1_000_000, 750_000, 500_000, 250_000, 100_000]
-    # max_replay_sizes = [500_000, 300_000, 200_000, 100_000, 50_000] # gridEnv5
+        print('Exp. ids:', exp_ids) """
 
-    for size in max_replay_sizes:
-        print(f'Random observation, max_replay_size={size}')
+        """
+            GridEnv + Smoothed observations.
+        """
+        args['env_args']['smooth_obs'] = True
+        args['env_args']['one_hot_obs'] = False
 
-        args[dict_key]['max_replay_size'] = size
-        exp_path, exp_id = train(args)
-        exp_ids.append(exp_id)
+        for size in max_replay_sizes:
+            print(f'GridEnv + Smoothed observation, max_replay_size={size}')
 
-        # Compute plots.
-        if COMPUTE_PLOTS:
-            plots(exp_id, VAL_ITER_DATA)
+            # Run.
+            args[algo_dict_key]['max_replay_size'] = size
+            exp_path, exp_id = train(args)
+            exp_ids.append(exp_id)
 
-        # Compress and cleanup.
-        shutil.make_archive(exp_path,
-                        'gztar',
-                        os.path.dirname(exp_path),
-                        exp_id)
-        shutil.rmtree(exp_path)
+            # Compute plots.
+            plots(exp_id, val_iter_data)
 
-    print('Exp. ids:', exp_ids)
+            # Compress and cleanup.
+            shutil.make_archive(exp_path,
+                            'gztar',
+                            os.path.dirname(exp_path),
+                            exp_id)
+            shutil.rmtree(exp_path)
+
+        print('Exp. ids:', exp_ids)
+
+        """
+            GridEnv + Random observations.
+        """
+        args['env_args']['smooth_obs'] = False
+        args['env_args']['one_hot_obs'] = False
+
+        for size in max_replay_sizes:
+            print(f'GridEnv + Random observation, max_replay_size={size}')
+            
+            # Run.
+            args[algo_dict_key]['max_replay_size'] = size
+            exp_path, exp_id = train(args)
+            exp_ids.append(exp_id)
+
+            # Compute plots.
+            plots(exp_id, val_iter_data)
+
+            # Compress and cleanup.
+            shutil.make_archive(exp_path,
+                            'gztar',
+                            os.path.dirname(exp_path),
+                            exp_id)
+            shutil.rmtree(exp_path)
+
+        print('Exp. ids:', exp_ids)
+
+
+    elif env_name in ['pendulum']:
+
+        """
+            Pendulum env.
+        """
+        for size in max_replay_sizes:
+            print(f'Pendulum env., max_replay_size={size}')
+
+            # Run.
+            args[algo_dict_key]['max_replay_size'] = size
+            exp_path, exp_id = train(args)
+            exp_ids.append(exp_id)
+
+            # Compute plots.
+            plots(exp_id, val_iter_data)
+
+            # Compress and cleanup.
+            shutil.make_archive(exp_path,
+                            'gztar',
+                            os.path.dirname(exp_path),
+                            exp_id)
+            shutil.rmtree(exp_path)
+
+        print('Exp. ids:', exp_ids)
+
+    else:
+        raise ValueError('Error.')

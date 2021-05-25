@@ -8,7 +8,8 @@ class ValueIteration(object):
         self.gamma = gamma
         self.epsilon = epsilon
 
-    def train(self, num_episodes, rollouts_period, num_rollouts, phi, rollouts_phi):
+    def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
+            num_rollouts, rollouts_period, phi, rollouts_phi):
 
         Q_vals = np.zeros((self.env.num_states, self.env.num_actions))
 

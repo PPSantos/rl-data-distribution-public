@@ -70,8 +70,8 @@ class FQI(object):
         self.uniform_replay_buffer = fqi_args['uniform_replay_buffer']
         self.uniform_static_dataset_size = 500 # in episodes.
 
-    def train(self, num_episodes, q_vals_period, num_rollouts,
-                rollouts_period, phi, rollouts_phi):
+    def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
+            num_rollouts, rollouts_period, phi, rollouts_phi):
 
         states_counts = np.zeros((self.env.num_states))
         episode_rewards = []
@@ -81,6 +81,7 @@ class FQI(object):
         Q_vals_episodes = []
         Q_vals_ep = 0
 
+        replay_buffer_counts_episodes = []
         replay_buffer_counts = []
 
         rollouts_episodes = []
@@ -143,7 +144,8 @@ class FQI(object):
                 Q_vals_ep += 1
 
             # Estimate statistics of the replay buffer contents.
-            if (episode > 1) and (episode % 500 == 0):
+            if (episode > 1) and (episode % replay_buffer_counts_period == 0):
+                replay_buffer_counts_episodes.append(episode)
                 replay_buffer_counts.append(self.agent.get_replay_buffer_counts())
 
             # Execute evaluation rollouts.
@@ -170,6 +172,7 @@ class FQI(object):
         data['Q_vals'] = Q_vals
         data['max_Q_vals'] = np.max(Q_vals[-1], axis=1)
         data['policy'] = np.argmax(Q_vals[-1], axis=1)
+        data['replay_buffer_counts_episodes'] = replay_buffer_counts_episodes
         data['replay_buffer_counts'] = replay_buffer_counts
         data['rollouts_episodes'] = rollouts_episodes
         data['rollouts_rewards'] = rollouts_rewards
@@ -229,7 +232,3 @@ class FQI(object):
             episode_cumulative_reward += timestep.reward
 
         return episode_cumulative_reward
-
-
-
-
