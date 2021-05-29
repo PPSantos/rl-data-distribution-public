@@ -36,7 +36,7 @@ DEFAULT_TRAIN_ARGS = {
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'gridEnv1',
+        'env_name': 'mountaincar',
         'dim_obs': 8,
         'time_limit': 50,
         'tabular': False,
@@ -90,7 +90,7 @@ DEFAULT_TRAIN_ARGS = {
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
         'reweighting_type': 'default', # default, actions or full.
-        'uniform_replay_buffer': True,
+        'uniform_replay_buffer': False,
         'alpha_dirichlet_param': 10,
     },
 
