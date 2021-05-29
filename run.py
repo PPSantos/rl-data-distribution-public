@@ -10,7 +10,7 @@ VAL_ITER_DATA = {
     'gridEnv1': 'gridEnv1_val_iter_2021-05-14-15-54-10',
     'gridEnv4': 'gridEnv4_val_iter_2021-04-28-09-54-18',
     'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
-    'mountaincar': 'TODO',
+    'mountaincar': 'mountaincar_val_iter_2021-05-29-19-15-34',
 } 
 
 
@@ -26,10 +26,12 @@ if __name__ == "__main__":
     print('val_iter_data', val_iter_data)
 
     # Setup max_replay_sizes variable.
-    if env_name in ['gridEnv1', 'gridEnv2', 'gridEnv3', 'gridEnv4', 'pendulum', 'mountaincar']:
+    if env_name in ['gridEnv1', 'gridEnv2', 'gridEnv3', 'gridEnv4', 'pendulum']:
         max_replay_sizes = [1_000_000, 750_000, 500_000, 250_000, 100_000]
     elif env_name in ['gridEnv5']:
         max_replay_sizes = [500_000, 375_000, 250_000, 125_000, 50_000]
+    elif env_name in ['mountaincar']:
+        max_replay_sizes = [2_000_000]
     else:
         raise ValueError('Error.')
     print('max_replay_sizes', max_replay_sizes)
