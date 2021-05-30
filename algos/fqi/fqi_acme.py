@@ -23,6 +23,7 @@ from algos.utils.tf2_layers import EpsilonGreedyExploration
 from algos.fqi.fqi_acme_learning import FQILearner
 from algos.tf_adder import TFAdder
 
+
 class FQI(agent.Agent):
     """
         FQI agent.
@@ -46,7 +47,7 @@ class FQI(agent.Agent):
             max_gradient_norm: Optional[float] = None,
             logger: loggers.Logger = None,
             reweighting_type: str = 'default',
-            uniform_replay_buffer: bool = False,
+            synthetic_replay_buffer: bool = False,
             num_states: int = None,
             num_actions: int = None,
         ):
@@ -69,7 +70,7 @@ class FQI(agent.Agent):
         logger: logger object to be used by learner.
         max_gradient_norm: used for gradient clipping.
         reweighting_type: loss importance sampling reweighting type.
-        uniform_replay_buffer: whether to use a uniform replay buffer (if True, transitions are
+        synthetic_replay_buffer: whether to use a synthetic replay buffer (if True, transitions are
         'manually' added to the replay buffer from a previously calculated static dataset).
         """
 
@@ -105,7 +106,7 @@ class FQI(agent.Agent):
         tf2_utils.create_variables(target_network, [environment_spec.observations])
 
         # Create the actor which defines how we take actions.
-        if uniform_replay_buffer:
+        if synthetic_replay_buffer:
             actor = actors.FeedForwardActor(policy_network)
         else:
             actor = actors.FeedForwardActor(policy_network, self.adder)

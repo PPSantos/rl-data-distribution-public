@@ -63,15 +63,16 @@ class FQI(object):
                                     learning_rate=fqi_args['learning_rate'],
                                     discount=fqi_args['discount'],
                                     reweighting_type=fqi_args['reweighting_type'],
-                                    uniform_replay_buffer=fqi_args['uniform_replay_buffer'],
+                                    synthetic_replay_buffer=fqi_args['synthetic_replay_buffer'],
                                     num_states=self.base_env.num_states,
                                     num_actions=self.base_env.num_actions)
 
-        self.uniform_replay_buffer = fqi_args['uniform_replay_buffer']
-        self.uniform_static_dataset_size = 500 # in episodes.
-        self.alpha_dirichlet_param = fqi_args['alpha_dirichlet_param']
-        self.sampling_dist = np.random.dirichlet([self.alpha_dirichlet_param]*self.base_env.num_states)
-        print('self.sampling_dist', self.sampling_dist)
+        self.synthetic_replay_buffer = fqi_args['synthetic_replay_buffer']
+        self.synthetic_static_dataset_size = 500 # in episodes.
+        self.synthetic_replay_buffer_alpha = fqi_args['synthetic_replay_buffer_alpha']
+        self.sampling_dist = np.random.dirichlet([self.synthetic_replay_buffer_alpha]*self.base_env.num_states)
+        if self.synthetic_replay_buffer:
+            print('self.sampling_dist (synthetic replay buffer dataset):', self.sampling_dist)
 
     def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
             num_rollouts, rollouts_period, phi, rollouts_phi):
@@ -92,10 +93,10 @@ class FQI(object):
 
         for episode in tqdm(range(num_episodes)):
 
-            if self.uniform_replay_buffer and \
-                (episode % self.uniform_static_dataset_size == 0):
-                # Create dataset with size = self.uniform_static_dataset_size*self.base_env.time_limit
-                static_dataset = self._create_static_uniform_dataset()
+            if self.synthetic_replay_buffer and \
+                (episode % self.synthetic_static_dataset_size == 0):
+                # Create dataset with size = self.synthetic_static_dataset_size*self.base_env.time_limit
+                static_dataset = self._create_dataset()
                 static_dataset_iterator = iter(static_dataset)
 
             timestep = self.env.reset()
@@ -112,7 +113,7 @@ class FQI(object):
                 self.agent.observe_with_extras(action,
                     next_timestep=timestep, extras=(env_state,))
 
-                if self.uniform_replay_buffer:
+                if self.synthetic_replay_buffer:
                     # Insert transition from the static dataset.
                     transition, extras = next(static_dataset_iterator)
                     self.agent.add_to_replay_buffer(transition, extras)
@@ -127,7 +128,7 @@ class FQI(object):
 
             episode_rewards.append(episode_cumulative_reward)
 
-            # Store current Q-values (filters wall states).
+            # Store current Q-values.
             if episode % q_vals_period == 0:
                 Q_vals_episodes.append(episode)
                 for state in range(self.base_env.num_states):
@@ -182,15 +183,15 @@ class FQI(object):
 
         return data
 
-    def _create_static_uniform_dataset(self):
-        print('Creating static dataset with uniformly sampled transitions...')
+    def _create_dataset(self):
+        print('Creating static dataset of transitions...')
 
         static_dataset = []
-        dataset_size = self.uniform_static_dataset_size * self.base_env.time_limit
+        dataset_size = self.synthetic_static_dataset_size * self.base_env.time_limit
 
         for _ in range(dataset_size):
 
-            # Randomly uniform sample state.
+            # Randomly sample state.
             if self.env_grid_spec:
                 tile_type = TileType.WALL
                 while tile_type == TileType.WALL:
@@ -202,7 +203,7 @@ class FQI(object):
 
             observation = self.base_env.observation(state)
 
-            # Randomly uniform sample action.
+            # Randomly sample action.
             action = np.random.randint(self.base_env.num_actions)
 
             # Sample next state, observation and reward.
@@ -219,7 +220,7 @@ class FQI(object):
 
             self.base_env.reset()
 
-        print(f'Static uniform dataset created containing {len(static_dataset)} transitions.')
+        print(f'Static dataset created containing {len(static_dataset)} transitions.')
 
         return static_dataset
 

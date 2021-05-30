@@ -2,16 +2,8 @@ import os
 import shutil
 
 from train import train
-from train import DEFAULT_TRAIN_ARGS
+from train import DEFAULT_TRAIN_ARGS, VAL_ITER_DATA
 from analysis.plots import main as plots
-
-
-VAL_ITER_DATA = {
-    'gridEnv1': 'gridEnv1_val_iter_2021-05-14-15-54-10',
-    'gridEnv4': 'gridEnv4_val_iter_2021-04-28-09-54-18',
-    'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
-    'mountaincar': 'mountaincar_val_iter_2021-05-29-19-15-34',
-} 
 
 
 if __name__ == "__main__":

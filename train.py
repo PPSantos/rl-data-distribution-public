@@ -18,6 +18,13 @@ from algos.fqi.fqi import FQI
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 
+VAL_ITER_DATA = {
+    'gridEnv1': 'gridEnv1_val_iter_2021-05-14-15-54-10',
+    'gridEnv4': 'gridEnv4_val_iter_2021-04-28-09-54-18',
+    'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
+    'mountaincar': 'mountaincar_val_iter_2021-05-29-19-15-34',
+} 
+
 DEFAULT_TRAIN_ARGS = {
 
     # General arguments.
@@ -90,13 +97,12 @@ DEFAULT_TRAIN_ARGS = {
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
         'reweighting_type': 'default', # default, actions or full.
-        'uniform_replay_buffer': False,
-        'alpha_dirichlet_param': 10,
+        'synthetic_replay_buffer': False,
+        'synthetic_replay_buffer_alpha': 10,
     },
 
     # Oracle FQI arguments.
     'oracle_fqi_args': {
-        'oracle_q_vals': 'gridEnv5_val_iter_2021-05-03-15-52-24', # exp. id of val-iter/oracle Q-vals.
         'batch_size': 100,
         'prefetch_size': 4,
         'num_sampling_steps': 1_000,
@@ -109,6 +115,8 @@ DEFAULT_TRAIN_ARGS = {
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
         'reweighting_type': 'default', # default, actions or full.
+        'synthetic_replay_buffer': False,
+        'synthetic_replay_buffer_alpha': 10,
     }
 
 }
@@ -166,11 +174,9 @@ def train_run(run_args):
 
     elif args['algo'] == 'oracle_fqi':
 
-        raise ValueError('Not implemented')
-
         # Load optimal (oracle) policy/Q-values.
-        val_iter_path = DATA_FOLDER_PATH + args['oracle_fqi_args']['oracle_q_vals']
-        print(f"Opening experiment {args['oracle_fqi_args']['oracle_q_vals']} to get oracle Q-vals")
+        val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA[args['env_args']['env_name']]
+        print(f"Opening experiment {VAL_ITER_DATA[args['env_args']['env_name']]} to get oracle Q-vals")
         with open(val_iter_path + "/train_data.json", 'r') as f:
             val_iter_data = json.load(f)
             val_iter_data = json.loads(val_iter_data)

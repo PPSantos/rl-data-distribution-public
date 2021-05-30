@@ -47,6 +47,7 @@ class OracleFQI(agent.Agent):
             max_gradient_norm: Optional[float] = None,
             logger: loggers.Logger = None,
             reweighting_type: str = 'default',
+            synthetic_replay_buffer: bool = False,
             num_states: int = None,
             num_actions: int = None,
         ):
@@ -69,6 +70,8 @@ class OracleFQI(agent.Agent):
         logger: logger object to be used by learner.
         max_gradient_norm: used for gradient clipping.
         reweighting_type: loss importance sampling reweighting type.
+        synthetic_replay_buffer: whether to use a synthetic replay buffer (if True, transitions are
+        'manually' added to the replay buffer from a previously calculated static dataset).
         """
 
         self.num_states = num_states
@@ -89,7 +92,7 @@ class OracleFQI(agent.Agent):
                                                     statistics_table_shape=(self.num_states,
                                                                             self.num_actions))
         dataset = self.replay_buffer.as_dataset(sample_batch_size=batch_size)
-        adder = TFAdder(self.replay_buffer, transition_spec)
+        self.adder = TFAdder(self.replay_buffer, transition_spec)
 
         policy_network = snt.Sequential([
             network,
@@ -106,7 +109,10 @@ class OracleFQI(agent.Agent):
         tf2_utils.create_variables(target_network, [environment_spec.observations])
 
         # Create the actor which defines how we take actions.
-        actor = actors.FeedForwardActor(policy_network, adder)
+        if synthetic_replay_buffer:
+            actor = actors.FeedForwardActor(policy_network)
+        else:
+            actor = actors.FeedForwardActor(policy_network, self.adder)
 
         # The learner updates the parameters (and initializes them).
         learner = OracleFQILearner(
@@ -155,3 +161,6 @@ class OracleFQI(agent.Agent):
     def get_replay_buffer_counts(self):
         print('Getting replay buffer counts...')
         return self.replay_buffer.get_statistics()
+
+    def add_to_replay_buffer(self, transition, extras=None):
+        self.adder.add_op(transition, extras)
