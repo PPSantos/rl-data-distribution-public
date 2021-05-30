@@ -210,7 +210,7 @@ class OracleFQI(object):
             self.base_env.set_state(state)
             next_observation, reward, done, info = self.base_env.step(action)
 
-            oracle_q_val = self.oracle_q_vals[env_state,action]
+            oracle_q_val = self.oracle_q_vals[state,action]
 
             transition = (observation, np.array(action, dtype=np.int32),
                             np.array(reward, dtype=np.float32),
