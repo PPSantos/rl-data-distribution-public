@@ -72,6 +72,7 @@ class OracleFQI(object):
         self.sampling_dist = np.random.dirichlet([self.synthetic_replay_buffer_alpha]*self.sampling_dist_size)
         if self.synthetic_replay_buffer:
             print('self.sampling_dist (synthetic replay buffer dataset):', self.sampling_dist)
+            print('self.sampling_dist_size:', self.sampling_dist_size)
 
     def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
             num_rollouts, rollouts_period, phi, rollouts_phi):
