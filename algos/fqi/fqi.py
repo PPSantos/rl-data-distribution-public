@@ -68,7 +68,9 @@ class FQI(object):
         self.synthetic_replay_buffer = fqi_args['synthetic_replay_buffer']
         self.synthetic_static_dataset_size = 500 # in episodes.
         self.synthetic_replay_buffer_alpha = fqi_args['synthetic_replay_buffer_alpha']
-        self.sampling_dist = np.random.dirichlet([self.synthetic_replay_buffer_alpha]*self.base_env.num_states)
+        self.sampling_dist_size = self.base_env.num_states * self.base_env.num_actions
+        self.sampling_dist = np.random.dirichlet([self.synthetic_replay_buffer_alpha]*self.sampling_dist_size)
+        print(self.sampling_dist_size)
         if self.synthetic_replay_buffer:
             print('self.sampling_dist (synthetic replay buffer dataset):', self.sampling_dist)
 
@@ -186,23 +188,25 @@ class FQI(object):
 
         static_dataset = []
         dataset_size = self.synthetic_static_dataset_size * self.base_env.time_limit
+        mesh = np.array(np.meshgrid(np.arange(self.base_env.num_states),
+                                    np.arange(self.base_env.num_actions)))
+        sa_combinations = mesh.T.reshape(-1, 2)
 
         for _ in range(dataset_size):
 
-            # Randomly sample state.
+            # Randomly sample (state, action) pair.
             if self.env_grid_spec:
                 tile_type = TileType.WALL
                 while tile_type == TileType.WALL:
-                    state = np.random.choice(np.arange(self.base_env.num_states), p=self.sampling_dist)
+                    sampled_idx = np.random.choice(np.arange(self.sampling_dist_size), p=self.sampling_dist)
+                    state, action = sa_combinations[sampled_idx]
                     xy = self.env_grid_spec.idx_to_xy(state)
                     tile_type = self.env_grid_spec.get_value(xy)
             else:
-                state = np.random.choice(np.arange(self.base_env.num_states), p=self.sampling_dist)
+                sampled_idx = np.random.choice(np.arange(self.sampling_dist_size), p=self.sampling_dist)
+                state, action = sa_combinations[sampled_idx]
 
             observation = self.base_env.observation(state)
-
-            # Randomly sample action.
-            action = np.random.randint(self.base_env.num_actions)
 
             # Sample next state, observation and reward.
             self.base_env.set_state(state)

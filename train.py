@@ -43,12 +43,12 @@ DEFAULT_TRAIN_ARGS = {
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'mountaincar',
+        'env_name': 'gridEnv1',
         'dim_obs': 8,
         'time_limit': 50,
         'tabular': False,
-        'smooth_obs': False,
-        'one_hot_obs': True,
+        'smooth_obs': True,
+        'one_hot_obs': False,
     },
 
     # Value iteration arguments.
@@ -93,7 +93,7 @@ DEFAULT_TRAIN_ARGS = {
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
         'reweighting_type': 'default', # default, actions or full.
-        'synthetic_replay_buffer': False,
+        'synthetic_replay_buffer': True,
         'synthetic_replay_buffer_alpha': 10,
     },
 
