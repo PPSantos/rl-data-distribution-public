@@ -67,7 +67,6 @@ DEFAULT_TRAIN_ARGS = {
     # DQN arguments.
     'dqn_args': {
         'batch_size': 10,
-        'prefetch_size': 4,
         'target_update_period': 5_000,
         'samples_per_insert': 10.0,
         'min_replay_size': 10,
@@ -75,7 +74,6 @@ DEFAULT_TRAIN_ARGS = {
         'prioritized_replay': False,
         'importance_sampling_exponent': 0.9,
         'priority_exponent': 0.6,
-        'n_step': 1,
         'epsilon_init': 0.9,
         'epsilon_final': 0.0,
         'epsilon_schedule_timesteps': 450_000,
@@ -86,11 +84,9 @@ DEFAULT_TRAIN_ARGS = {
     # FQI arguments.
     'fqi_args': {
         'batch_size': 100,
-        'prefetch_size': 4,
         'num_sampling_steps': 1_000,
         'num_gradient_steps': 20,
         'max_replay_size': 1_000_000,
-        'n_step': 1,
         'epsilon_init': 0.9,
         'epsilon_final': 0.0,
         'epsilon_schedule_timesteps': 450_000,
@@ -104,11 +100,9 @@ DEFAULT_TRAIN_ARGS = {
     # Oracle FQI arguments.
     'oracle_fqi_args': {
         'batch_size': 100,
-        'prefetch_size': 4,
         'num_sampling_steps': 1_000,
         'num_gradient_steps': 20,
         'max_replay_size': 500_000,
-        'n_step': 1,
         'epsilon_init': 0.9,
         'epsilon_final': 0.0,
         'epsilon_schedule_timesteps': 225_000,

@@ -34,11 +34,9 @@ class OracleFQI(agent.Agent):
             environment_spec: specs.EnvironmentSpec,
             network: snt.Module,
             batch_size: int = 256,
-            prefetch_size: int = 4,
             num_sampling_steps: int = 1000,
             num_gradient_steps: int = 10,
             max_replay_size: int = 10000,
-            n_step: int = 1,
             epsilon_init: float = 1.0,
             epsilon_final: float = 0.01,
             epsilon_schedule_timesteps: int = 20000,
@@ -56,11 +54,9 @@ class OracleFQI(agent.Agent):
         environment_spec: description of the actions, observations, etc.
         network: the online Q network (the one being optimized).
         batch_size: batch size for updates.
-        prefetch_size: size to prefetch from replay.
         num_sampling_steps: number of sampling steps to perform.
         num_gradient_steps: number of gradient descent steps to perform.
         max_replay_size: maximum size of replay buffer.
-        n_step: number of steps to squash into a single transition.
         epsilon_init: Initial epsilon value (probability of taking a random action)
         epsilon_final: Final epsilon value (probability of taking a random action)
         epsilon_schedule_timesteps: timesteps to decay epsilon from 'epsilon_init'

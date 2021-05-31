@@ -32,7 +32,6 @@ class DQN(agent.Agent):
             environment_spec: specs.EnvironmentSpec,
             network: snt.Module,
             batch_size: int = 256,
-            prefetch_size: int = 4,
             target_update_period: int = 100,
             samples_per_insert: float = 32.0,
             min_replay_size: int = 20,
@@ -40,7 +39,6 @@ class DQN(agent.Agent):
             prioritized_replay: bool = True,
             importance_sampling_exponent: float = 0.2,
             priority_exponent: float = 0.6,
-            n_step: int = 5,
             epsilon_init: float = 1.0,
             epsilon_final: float = 0.01,
             epsilon_schedule_timesteps: int = 20000,
@@ -54,7 +52,6 @@ class DQN(agent.Agent):
         environment_spec: description of the actions, observations, etc.
         network: the online Q network (the one being optimized)
         batch_size: batch size for updates.
-        prefetch_size: size to prefetch from replay.
         target_update_period: number of learner steps to perform before updating
             the target networks.
         samples_per_insert: number of samples to take from replay for every insert
@@ -68,7 +65,6 @@ class DQN(agent.Agent):
             before normalizing (beta). See https://arxiv.org/pdf/1710.02298.pdf
         priority_exponent: exponent used in prioritized sampling (omega).
             See https://arxiv.org/pdf/1710.02298.pdf
-        n_step: number of steps to squash into a single transition.
         epsilon_init: Initial epsilon value (probability of taking a random action)
         epsilon_final: Final epsilon value (probability of taking a random action)
         epsilon_schedule_timesteps: timesteps to decay epsilon from 'epsilon_init'
