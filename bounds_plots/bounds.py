@@ -35,20 +35,27 @@ if __name__ == '__main__':
     output_folder = PLOTS_FOLDER_PATH
     os.makedirs(output_folder, exist_ok=True)
 
-
     # Entropy plot.
     entropies = []
     sampled_entropies = []
+    coverages_1 = []
+    coverages_2 = []
     for alpha in args['mu_dirichlet_alphas']:
         expected_entropy = scipy.special.digamma(args['num_states']*alpha + 1) - scipy.special.digamma(alpha + 1)
         entropies.append(expected_entropy)
 
         samples = np.zeros(1_000)
+        covs_1 = np.zeros(1_000)
+        covs_2 = np.zeros(1_000)
         for s in range(1_000):
             dist = np.random.dirichlet([alpha]*args['num_states'])
             samples[s] = scipy.stats.entropy(dist)
+            covs_1[s] = np.sum(dist > 1e-02)
+            covs_2[s] = np.sum(dist > 1e-03)
 
         sampled_entropies.append(np.mean(samples))
+        coverages_1.append(np.mean(covs_1))
+        coverages_2.append(np.mean(covs_2))
 
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
@@ -59,6 +66,27 @@ if __name__ == '__main__':
     plt.legend()
     plt.savefig('{0}/entropy.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/entropy.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+
+    # Coverage plot.
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+    plt.plot(args['mu_dirichlet_alphas'], np.array(coverages_1) / args['num_states'], label='1e-02 threshold')
+    plt.plot(args['mu_dirichlet_alphas'], np.array(coverages_2) / args['num_states'], label='1e-03 threshold')
+    plt.xlabel('Alpha (Dirichlet parameter)')
+    plt.ylabel('Coverage')
+    plt.legend()
+    plt.savefig('{0}/coverage_1.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/coverage_1.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+    plt.plot(entropies, np.array(coverages_1) / args['num_states'], label='1e-02 threshold')
+    plt.plot(entropies, np.array(coverages_2) / args['num_states'], label='1e-03 threshold')
+    plt.xlabel('Entropy')
+    plt.ylabel('Coverage')
+    plt.legend()
+    plt.savefig('{0}/coverage_2.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/coverage_2.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
 
 
     print('Calculating bounds values...')
