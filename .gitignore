@@ -3,6 +3,7 @@
 data/
 analysis/plots
 gen_errors/plots
+bounds_plots/plots
 
 # cython
 *.c
