@@ -80,7 +80,9 @@ class OracleFQI(object):
         states_counts = np.zeros((self.env.num_states))
         episode_rewards = []
 
-        Q_vals = np.zeros((num_episodes, self.base_env.num_states, self.base_env.num_actions))
+        Q_vals = np.zeros((num_episodes//q_vals_period,
+                self.base_env.num_states, self.base_env.num_actions))
+        
         Q_vals_episodes = []
         Q_vals_ep = 0
         

@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import time
+import shutil
 import numpy as np
 import pathlib
 from datetime import datetime
@@ -10,15 +11,19 @@ import multiprocessing as mp
 from rlutil.json_utils import NumpyEncoder
 from envs import env_suite
 
+# Import algorithms.
 from algos.value_iteration import ValueIteration
 from algos.q_learning import QLearning
 from algos.dqn.dqn import DQN
 from algos.oracle_fqi.oracle_fqi import OracleFQI
 from algos.fqi.fqi import FQI
+from algos.linear_approximator import LinearApproximator
+
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 
 VAL_ITER_DATA = {
+    'mdp1': 'mdp1_val_iter_2021-06-10-15-55-52',
     'gridEnv1': 'gridEnv1_val_iter_2021-05-14-15-54-10',
     'gridEnv4': 'gridEnv4_val_iter_2021-04-28-09-54-18',
     'multiPathsEnv': 'multiPathsEnv_val_iter_2021-06-04-19-31-25',
@@ -27,13 +32,15 @@ VAL_ITER_DATA = {
 } 
 
 DEFAULT_TRAIN_ARGS = {
+    # WARNING: 'mdp1' only works with the 'linear_approximator'
+    #           and 'val_iter' algorithms.
 
     # General arguments.
     'num_runs': 1,
     'num_processors': 1,
-    'algo': 'fqi',
-    'num_episodes': 20_000,
-    'gamma': 0.9, # discount factor.
+    'algo': 'linear_approximator',
+    'num_episodes': 4_000,
+    'gamma': 1.0, # discount factor.
     'phi': 0.0, # actions stochasticity (for grid env. only).
 
     'q_vals_period': 20,
@@ -44,7 +51,7 @@ DEFAULT_TRAIN_ARGS = {
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'multiPathsEnv',
+        'env_name': 'mdp1',
         'dim_obs': 8, # (for grid env. only).
         'time_limit': 50, # (for grid env. only).
         'tabular': False, # (for grid env. only).
@@ -63,6 +70,18 @@ DEFAULT_TRAIN_ARGS = {
         'expl_eps_init': 0.9,
         'expl_eps_final': 0.01,
         'expl_eps_episodes': 9_000,
+    },
+
+    # Linear function approximator arguments.
+    'linear_approximator_args': {
+        'alpha': 1e-04,
+        'expl_eps_init': 0.9,
+        'expl_eps_final': 0.0,
+        'expl_eps_episodes': 3_500,
+        'synthetic_replay_buffer': True,
+        'synthetic_replay_buffer_alpha': 1_000,
+        'replay_size': 20_000,
+        'batch_size': 100,
     },
 
     # DQN arguments.
@@ -155,6 +174,10 @@ def train_run(run_args):
 
         args['q_learning_args']['gamma'] = args['gamma']
         agent = QLearning(env, **args['q_learning_args'])
+
+    elif args['algo'] == 'linear_approximator':
+        args['linear_approximator_args']['gamma'] = args['gamma']
+        agent = LinearApproximator(env, env_grid_spec, **args['linear_approximator_args'])
 
     elif args['algo'] == 'dqn':
 

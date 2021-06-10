@@ -78,3 +78,7 @@ cdef class MountainCar(TabularEnv):
 
 cdef class MultiPathsEnv(TabularEnv):
     cdef int[:] _correct_actions
+
+cdef class MDP1(TabularEnv):
+    cdef double[:,:,:] _transition_matrix
+    cdef double[:,:] _reward_matrix

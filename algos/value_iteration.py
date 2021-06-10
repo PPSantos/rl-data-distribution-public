@@ -35,4 +35,7 @@ class ValueIteration(object):
         data['max_Q_vals'] = np.max(Q_vals, axis=1)
         data['policy'] = np.argmax(Q_vals, axis=1)
 
+        print('Value iteration solution:')
+        print(Q_vals)
+
         return data

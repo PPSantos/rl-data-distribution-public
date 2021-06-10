@@ -74,24 +74,24 @@ def print_env(data, sizes, float_format=None):
         sys.stdout.write('|\n')
     sys.stdout.write('-' * (size_x + 2)+'\n')
 
-""" def ridgeline(x, data, ax, overlap=0, fill=True, labels=None, n_points=150):
-    if overlap > 1 or overlap < 0:
-        raise ValueError('overlap must be in [0 1]')
-    # xx = np.linspace(np.min(np.concatenate(data)),
-    #                  np.max(np.concatenate(data)), n_points)
-    # curves = []
-    # ys = []
-    for i, d in enumerate(data):
-        # pdf = gaussian_kde(d)
-        y = i*(1.0-overlap)
-        # ys.append(y)
-        # curve = pdf(xx)
-        # if fill:
-        #     ax.fill_between(xx, np.ones(n_points)*y, 
-        #                      curve+y, zorder=len(data)-i+1, color=fill)
-        ax.plot(x, d+y, c='k', zorder=len(data)-i+1)
-    # if labels:
-    #     ax.yticks(ys, labels) """
+# def ridgeline(x, data, ax, overlap=0, fill=True, labels=None, n_points=150):
+#     if overlap > 1 or overlap < 0:
+#         raise ValueError('overlap must be in [0 1]')
+#     # xx = np.linspace(np.min(np.concatenate(data)),
+#     #                  np.max(np.concatenate(data)), n_points)
+#     # curves = []
+#     # ys = []
+#     for i, d in enumerate(data):
+#         # pdf = gaussian_kde(d)
+#         y = i*(1.0-overlap)
+#         # ys.append(y)
+#         # curve = pdf(xx)
+#         # if fill:
+#         #     ax.fill_between(xx, np.ones(n_points)*y, 
+#         #                      curve+y, zorder=len(data)-i+1, color=fill)
+#         ax.plot(x, d+y, c='k', zorder=len(data)-i+1)
+#     # if labels:
+#     #     ax.yticks(ys, labels)
 
 
 def main(exp_id, val_iter_exp):
@@ -142,7 +142,7 @@ def main(exp_id, val_iter_exp):
         exp_data = json.loads(exp_data)
     f.close()
 
-    # Parse data for each train run.
+    # Parse data.
     data = {}
 
     # episode_rewards field.
@@ -180,7 +180,6 @@ def main(exp_id, val_iter_exp):
 
     is_grid_env = exp_args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys()
     print('is_grid_env:', is_grid_env)
-
     if is_grid_env:
         lateral_size = int(np.sqrt(len(val_iter_data['policy']))) # Assumes env. is a square.
 
@@ -215,7 +214,7 @@ def main(exp_id, val_iter_exp):
             print_env(counts, (lateral_size, lateral_size), float_format="{:.0f} ")
 
     """
-        Plot episode rewards.
+        `episode_rewards_avg` plot.
     """
     print('Computing `episode_rewards_avg` plot.')
     fig = plt.figure()
@@ -231,20 +230,20 @@ def main(exp_id, val_iter_exp):
 
     plt.xlabel('Episode')
     plt.ylabel('Reward')
-
     plt.legend()
 
-    plt.savefig('{0}/episode_rewards_avg.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/episode_rewards_avg.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
 
-    # Scalar train rewards metrics.
+    """
+        Scalar train rewards metrics.
+    """
     scalar_metrics['train_rewards_total'] = np.mean(data['episode_rewards'])
     half_split = data['episode_rewards'].shape[1] // 2
     scalar_metrics['train_rewards_second_half'] = np.mean(data['episode_rewards'][:,half_split:])
 
     """
-        Plot evaluation rollouts rewards.
+        `rollouts_rewards` plot.
     """
     print('Computing `rollouts_rewards` plot.')
     fig = plt.figure()
@@ -258,27 +257,25 @@ def main(exp_id, val_iter_exp):
 
     plt.xlabel('Episode')
     plt.ylabel('Rollouts average reward')
-
     plt.legend()
 
-    plt.savefig('{0}/rollouts_rewards.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/rollouts_rewards.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
 
-    # Scalar evaluation rewards metrics.
+    """
+        Scalar evaluation rewards metrics.
+    """
     scalar_metrics['evaluation_rewards_total'] = np.mean(data['rollouts_rewards'])
     half_split = data['rollouts_rewards'].shape[1] // 2
     scalar_metrics['evaluation_rewards_second_half'] = np.mean(data['rollouts_rewards'][:,half_split:,:])
 
     """
-        Maximizing action.
+        `maximizing_action_s_*` plots.
     """
-    if is_grid_env:
+    if exp_args['env_args']['env_name'] not in ('pendulum', 'mountaincar'):
         print('Computing `maximizing_action_s_*` plots.')
-        for state in range(data['Q_vals'].shape[2]):
 
-            line = state // lateral_size 
-            col = state % lateral_size
+        for state in range(data['Q_vals'].shape[2]):
 
             num_cols = 3
             num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
@@ -295,23 +292,25 @@ def main(exp_id, val_iter_exp):
 
                 ax.plot(X, Y)
 
-                ax.set_ylim([-0.1,5.1])
+                ax.set_ylim([-0.1,data['Q_vals'].shape[-1]+0.1])
                 ax.set_ylabel('Maximizing action')
                 ax.set_xlabel('Episode')
                 ax.set_title(f'Run {i}')
 
                 i += 1
 
-            fig.suptitle(f'Maximizing actions: state {state}; line {line}, col {col}')
+            if is_grid_env:
+                fig.suptitle(f'Maximizing actions: state {state}; line {state // lateral_size }, col {state % lateral_size}')
+            else:
+                fig.suptitle(f'Maximizing actions: state {state}')
 
             plt.savefig(f'{q_vals_folder_path}/maximizing_action_s_{state}.png', bbox_inches='tight', pad_inches=0)
             plt.close()
 
     """
-        Q-values plots.
+        `q_values_summed_error` plot.
     """
     print('Computing `q_values_summed_error` plot.')
-    # Sum plot.
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
     
@@ -325,24 +324,25 @@ def main(exp_id, val_iter_exp):
     plt.xlabel('Episode')
     plt.ylabel('Q-values error')
     plt.title('sum(abs(val_iter_Q_vals - Q_vals))')
-
     plt.legend()
 
-    plt.savefig('{0}/q_values_summed_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/q_values_summed_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
 
-    # Scalar q-values metrics.
+    """
+        Scalar q-values metrics.
+    """
     errors = np.abs(val_iter_data['Q_vals'] - data['Q_vals']) # [R,E,S,A]
     errors = np.sum(errors, axis=(2,3)) # [R,E]
     scalar_metrics['train_qvals_summed_error_total'] = np.mean(errors)
     half_split = data['Q_vals'].shape[1] // 2
     scalar_metrics['train_qvals_summed_error_second_half'] = np.mean(errors[:,half_split:])
 
-    # Mean + std/CI plot.
+    """
+        `q_values_mean_error` plot.
+    """
     print('Computing `q_values_mean_error` plot.')
     num_cols = 3
-    y_axis_range = [0,6]
     num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
     fig, axs = plt.subplots(num_rows, num_cols)
     fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
@@ -386,7 +386,7 @@ def main(exp_id, val_iter_exp):
         p = ax.plot(X, Y, label='Max Q-vals')
         # ax.fill_between(X_CI, Y[X_CI]-CI_lengths[0], Y[X_CI]+CI_lengths[1], color=p[0].get_color(), alpha=0.15)
 
-        ax.set_ylim(y_axis_range)
+        #ax.set_ylim(y_axis_range)
         ax.set_ylabel('Q-values error')
         ax.set_xlabel('Episode')
         ax.set_title(f'Run {i}')
@@ -395,14 +395,14 @@ def main(exp_id, val_iter_exp):
 
     plt.legend()
 
-    plt.savefig('{0}/q_values_mean_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/q_values_mean_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
 
-    # Distribution plot.
+    """
+        `q_values_violinplot_error` plot.
+    """
     print('Computing `q_values_violinplot_error` plot.')
     num_cols = 3
-    y_axis_range = [0,11]
     num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
     fig, axs = plt.subplots(num_rows, num_cols)
     fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
@@ -424,7 +424,7 @@ def main(exp_id, val_iter_exp):
 
         ax.scatter(X, abs_diff_mean, s=12)
 
-        ax.set_ylim(y_axis_range)
+        #ax.set_ylim(y_axis_range)
         ax.set_xlabel('Episode')
         ax.set_ylabel('Q-values error')
         ax.set_title(label=f"Run {i}")
@@ -433,14 +433,14 @@ def main(exp_id, val_iter_exp):
 
     fig.suptitle('Dist. of abs(val_iter_Q_vals - Q_vals)')
 
-    plt.savefig('{0}/q_values_violinplot_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/q_values_violinplot_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
 
-    # Distribution plot for max Q-values.
+    """
+        `q_values_violinplot_maxQ_error` plot.
+    """
     print('Computing `q_values_violinplot_maxQ_error` plot.')
     num_cols = 3
-    y_axis_range = [0,11]
     num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
     fig, axs = plt.subplots(num_rows, num_cols)
     fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
@@ -464,7 +464,7 @@ def main(exp_id, val_iter_exp):
 
         ax.scatter(X, abs_diff_mean, s=12)
 
-        ax.set_ylim(y_axis_range)
+        #ax.set_ylim(y_axis_range)
         ax.set_xlabel('Episode')
         ax.set_ylabel('Q-values error')
         ax.set_title(label=f"Run {i}")
@@ -472,28 +472,20 @@ def main(exp_id, val_iter_exp):
         i += 1
 
     fig.suptitle('Dist. of abs(val_iter_Q_vals - Q_vals) for a=argmax(Q_vals)')
-
     plt.legend()
 
-    plt.savefig('{0}/q_values_violinplot_maxQ_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/q_values_violinplot_maxQ_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.close()
 
+    """
+        `Q_values_s*-*-*` plots.
+    """
     print('Computing `Q_values_s*-*-*` plots.')
-    if is_grid_env:
+    if exp_args['env_args']['env_name'] not in ('pendulum', 'mountaincar'):
         for state_to_plot in range(data['Q_vals'].shape[2]):
-
-            line = state_to_plot // lateral_size 
-            col = state_to_plot % lateral_size
-
-            # Display val. iter. Q-values.
-            # print('Value iteration Q-values:')
-            # for action in range(val_iter_data['Q_vals'].shape[-1]):
-            #     print(f"Q({state_to_plot},{action})={val_iter_data['Q_vals'][state_to_plot,action]}")
 
             # Plot.
             num_cols = 3
-            y_axis_range = [0,11]
             num_rows = math.ceil(data['Q_vals'].shape[0] / num_cols)
             fig, axs = plt.subplots(num_rows, num_cols)
             fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
@@ -511,36 +503,34 @@ def main(exp_id, val_iter_exp):
 
                     # Plot true Q-values.
                     ax.hlines(val_iter_data['Q_vals'][state_to_plot,action],
-                            xmin=0, xmax=run_Q_vals.shape[0], linestyles='--', color=l[0].get_color())
+                            xmin=0, xmax=max(data['Q_vals_episodes']), linestyles='--', color=l[0].get_color())
 
-                ax.legend()
-                ax.set_ylim(y_axis_range)
+                #ax.set_ylim(y_axis_range)
                 ax.set_xlabel('Episode')
                 ax.set_ylabel('Q-value')
                 ax.set_title(label=f"Run {i}")
+                ax.legend()
 
                 i += 1
 
-            fig.suptitle(f'Q-values, state {state_to_plot}; line {line}, col {col}')
+            if is_grid_env:
+                fig.suptitle(f'Q-values: state {state}; line {state // lateral_size }, col {state % lateral_size}')
+            else:
+                fig.suptitle(f'Q-values: state {state}')
 
-            #plt.savefig(f'{q_vals_folder_path}/Q_values_s{state_to_plot}-{line}-{col}.pdf', bbox_inches='tight', pad_inches=0)
-            plt.savefig(f'{q_vals_folder_path}/Q_values_s{state_to_plot}-{line}-{col}.png', bbox_inches='tight', pad_inches=0)
+            plt.savefig(f'{q_vals_folder_path}/Q_values_s{state_to_plot}.png', bbox_inches='tight', pad_inches=0)
 
             plt.close()
 
     """
         Replay buffer statistics: P(a|s).
     """
-    if is_grid_env:
+    if exp_args['env_args']['env_name'] not in ('pendulum', 'mountaincar'):
         print('Computing `Replay buffer: P(a|s)` plots.')
 
         for state in range(data['Q_vals'].shape[2]):
 
-            line = state // lateral_size 
-            col = state % lateral_size
-
             num_cols = 3
-            y_axis_range = [0, 1.1]
             num_rows = math.ceil(data['replay_buffer_counts'].shape[0] / num_cols)
             fig, axs = plt.subplots(num_rows, num_cols)
             fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
@@ -559,7 +549,7 @@ def main(exp_id, val_iter_exp):
                     X = data['replay_buffer_counts_episodes']
                     ax.plot(X, Y, label=f'Action {a}')
 
-                ax.set_ylim(y_axis_range)
+                ax.set_ylim([0, 1.1])
                 ax.set_ylabel('P(a|s)')
                 ax.set_xlabel('Episode')
                 ax.set_title(f'Run {i}')
@@ -568,7 +558,10 @@ def main(exp_id, val_iter_exp):
 
                 i += 1
 
-            fig.suptitle(f'Replay buffer: P(a|s), state {state}; line {line}, col {col}')
+            if is_grid_env:
+                fig.suptitle(f'Replay buffer: P(a|s): state {state}; line {state // lateral_size }, col {state % lateral_size}')
+            else:
+                fig.suptitle(f'Replay buffer: P(a|s): state {state}')
 
             plt.savefig(f'{replay_buffer_plots_path}/P_a_{state}.png', bbox_inches='tight', pad_inches=0)
             plt.close()
@@ -576,16 +569,12 @@ def main(exp_id, val_iter_exp):
     """
         Replay buffer statistics: H[P(a|s)].
     """
-    if is_grid_env:
+    if exp_args['env_args']['env_name'] not in ('pendulum', 'mountaincar'):
         print('Computing `Replay buffer: P(a|s) entropy` plots.')
 
         for state in range(data['Q_vals'].shape[2]):
 
-            line = state // lateral_size 
-            col = state % lateral_size
-
             num_cols = 3
-            #y_axis_range = [0, 1.1]
             num_rows = math.ceil(data['replay_buffer_counts'].shape[0] / num_cols)
             fig, axs = plt.subplots(num_rows, num_cols)
             fig.subplots_adjust(top=0.92, wspace=0.18, hspace=0.3)
@@ -610,7 +599,10 @@ def main(exp_id, val_iter_exp):
 
                 i += 1
 
-            fig.suptitle(f'Replay buffer: H[P(a|s)], state {state}; line {line}, col {col}')
+            if is_grid_env:
+                fig.suptitle(f'Replay buffer: H[P(a|s)]: state {state}; line {state // lateral_size }, col {state % lateral_size}')
+            else:
+                fig.suptitle(f'Replay buffer: H[P(a|s)]: state {state}')
 
             plt.savefig(f'{replay_buffer_plots_path}/P_a_entropy_{state}.png', bbox_inches='tight', pad_inches=0)
             plt.close()
@@ -676,6 +668,81 @@ def main(exp_id, val_iter_exp):
 
     plt.savefig(f'{replay_buffer_plots_path}/P_s.png', bbox_inches='tight', pad_inches=0)
     plt.close() """
+
+    """
+        Replay buffer statistics: H[P(s,a)].
+    """
+    print('Computing `Replay buffer: H[P(s,a)]` plot.')
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    for i, run_data in enumerate(data['replay_buffer_counts']): # run_data = [(E),S,A]
+
+        total_sum = np.sum(run_data, axis=(1,2)) # [(E)]
+        sa_probs = run_data / (total_sum[:, np.newaxis, np.newaxis] + 1e-05) # [(E), S]
+
+        Y = -np.sum(sa_probs * np.log(sa_probs+1e-8), axis=(1,2))
+        X = data['replay_buffer_counts_episodes']
+        plt.plot(X, Y, label=f'Run {i}')
+
+    plt.ylabel('H[P(s,a)]')
+    plt.xlabel('Episode')
+
+    plt.legend()
+
+    plt.title(f'Replay buffer: H[P(s,a)]')
+
+    plt.savefig(f'{replay_buffer_plots_path}/P_sa_entropy.png', bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    """
+        Replay buffer statistics: P(s) coverage.
+    """
+    print('Computing `Replay buffer: P(s) coverage` plot.')
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    for i, run_data in enumerate(data['replay_buffer_counts']): # run_data = [(E),S,A]
+
+        aggregated_data = np.sum(run_data, axis=2) # [(E),S]
+        masked = (aggregated_data > 0)
+        Y = np.sum(masked, axis=1) / masked.shape[1] # [(E)]
+        X = data['replay_buffer_counts_episodes']
+        plt.plot(X, Y, label=f'Run {i}')
+
+    plt.ylabel('Coverage')
+    plt.xlabel('Episode')
+    plt.legend()
+
+    plt.title(f'Replay buffer: P(s) coverage')
+
+    plt.savefig(f'{replay_buffer_plots_path}/P_s_coverage.png', bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    """
+        Replay buffer statistics: P(s,a) coverage.
+    """
+    print('Computing `Replay buffer: P(s,a) coverage` plot.')
+
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    for i, run_data in enumerate(data['replay_buffer_counts']): # run_data = [(E),S,A]
+
+        masked = (run_data > 0) # [(E),S,A]
+        Y = np.sum(masked, axis=(1,2)) / (masked.shape[1]*masked.shape[2]) # [(E)]
+        X = data['replay_buffer_counts_episodes'] 
+        plt.plot(X, Y, label=f'Run {i}')
+
+    plt.ylabel('Coverage')
+    plt.xlabel('Episode')
+    plt.legend()
+
+    plt.title(f'Replay buffer: P(s,a) coverage')
+
+    plt.savefig(f'{replay_buffer_plots_path}/P_s_a_coverage.png', bbox_inches='tight', pad_inches=0)
+    plt.close()
+
 
     # Store scalars dict.
     with open(output_folder + "scalar_metrics.json", 'w') as f:

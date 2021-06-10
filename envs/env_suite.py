@@ -171,6 +171,9 @@ def get_env(name):
         # env = random_obs_wrapper.MultiPathsEnvObsWrapper(env, dim_obs=5)
         env = random_obs_wrapper.MultiPathsEnvObsWrapper1Hot(env)
         env = time_limit_wrapper.TimeLimitWrapper(env, time_limit=10)
+    elif name == 'mdp1':
+        env = tabular_env.MDP1()
+        env = time_limit_wrapper.TimeLimitWrapper(env, time_limit=5)
     else:
         raise NotImplementedError('Unknown env id: %s' % name)
     return env
