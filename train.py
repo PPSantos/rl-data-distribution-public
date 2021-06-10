@@ -36,11 +36,11 @@ DEFAULT_TRAIN_ARGS = {
     #           and 'val_iter' algorithms.
 
     # General arguments.
-    'num_runs': 1,
-    'num_processors': 1,
-    'algo': 'linear_approximator',
-    'num_episodes': 4_000,
-    'gamma': 1.0, # discount factor.
+    'num_runs': 5,
+    'num_processors': 5,
+    'algo': 'oracle_fqi',
+    'num_episodes': 20_000,
+    'gamma': 0.9, # discount factor.
     'phi': 0.0, # actions stochasticity (for grid env. only).
 
     'q_vals_period': 20,
@@ -51,7 +51,7 @@ DEFAULT_TRAIN_ARGS = {
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'mdp1',
+        'env_name': 'gridEnv1',
         'dim_obs': 8, # (for grid env. only).
         'time_limit': 50, # (for grid env. only).
         'tabular': False, # (for grid env. only).
@@ -109,12 +109,12 @@ DEFAULT_TRAIN_ARGS = {
         'max_replay_size': 1_000_000,
         'epsilon_init': 0.9,
         'epsilon_final': 0.0,
-        'epsilon_schedule_timesteps': 450_000,
+        'epsilon_schedule_timesteps': 500_000,
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
         'reweighting_type': 'default', # default, actions or full.
         'synthetic_replay_buffer': True,
-        'synthetic_replay_buffer_alpha': 10,
+        'synthetic_replay_buffer_alpha': 1_000,
     },
 
     # Oracle FQI arguments.
@@ -122,15 +122,15 @@ DEFAULT_TRAIN_ARGS = {
         'batch_size': 100,
         'num_sampling_steps': 1_000,
         'num_gradient_steps': 20,
-        'max_replay_size': 500_000,
+        'max_replay_size': 1_000_000,
         'epsilon_init': 0.9,
         'epsilon_final': 0.0,
-        'epsilon_schedule_timesteps': 225_000,
+        'epsilon_schedule_timesteps': 500_000,
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
         'reweighting_type': 'default', # default, actions or full.
-        'synthetic_replay_buffer': False,
-        'synthetic_replay_buffer_alpha': 10,
+        'synthetic_replay_buffer': True,
+        'synthetic_replay_buffer_alpha': 1_000,
     }
 
 }
