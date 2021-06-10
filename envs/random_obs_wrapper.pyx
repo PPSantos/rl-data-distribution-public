@@ -53,3 +53,42 @@ cdef class OneHotObsWrapper(env_wrapper.TabularEnvWrapper):
         obs[state % self.dim] = 1.0
         obs[self.dim + (state // self.dim)] = 1.0
         return obs
+
+
+cdef class MultiPathsEnvObsWrapper(env_wrapper.TabularEnvWrapper):
+    def __init__(self, tabular_env.TabularEnv env, int dim_obs):
+        super(MultiPathsEnvObsWrapper, self).__init__(env)
+
+        self._observations = np.random.random((env.num_states, dim_obs)).astype(np.float32)*2 - 1
+        self.observation_space = gym.spaces.Box(low=np.min(self._observations),
+                                                high=np.max(self._observations),
+                                                shape=(dim_obs+1,),
+                                                dtype=np.float32)
+
+    cpdef observation(self, int state):
+        obs = self._observations[state]
+
+        # Append state indicator flag.
+        if state == 0:
+            return np.append(obs, -0.75).astype(np.float32)
+        elif state == 26:
+            return np.append(obs, -0.25).astype(np.float32)
+        elif state in [5,10,15,20,25]:
+            return np.append(obs, 0.25).astype(np.float32)
+        else:
+            return np.append(obs, 0.75).astype(np.float32)
+
+
+cdef class MultiPathsEnvObsWrapper1Hot(env_wrapper.TabularEnvWrapper):
+    def __init__(self, tabular_env.TabularEnv env):
+        super(MultiPathsEnvObsWrapper1Hot, self).__init__(env)
+        self.dim = 27
+        self.observation_space = gym.spaces.Box(low=0.,
+                                                high=1.,
+                                                shape=(self.dim,),
+                                                dtype=np.float32)
+
+    cpdef observation(self, int state):
+        obs = np.zeros(self.dim, dtype=np.float32)
+        obs[state] = 1.0
+        return obs

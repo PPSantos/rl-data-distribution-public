@@ -166,6 +166,11 @@ def get_env(name):
             env = tabular_env.RandomTabularEnv(num_states=500, num_actions=3, transitions_per_action=1, self_loop=True)
             env = env_wrapper.AbsorbingStateWrapper(env, absorb_reward=10.0)
             env = wrap_obs_time(env, dim_obs=4, time_limit=10)
+    elif name == 'multiPathsEnv':
+        env = tabular_env.MultiPathsEnv()
+        # env = random_obs_wrapper.MultiPathsEnvObsWrapper(env, dim_obs=5)
+        env = random_obs_wrapper.MultiPathsEnvObsWrapper1Hot(env)
+        env = time_limit_wrapper.TimeLimitWrapper(env, time_limit=10)
     else:
         raise NotImplementedError('Unknown env id: %s' % name)
     return env

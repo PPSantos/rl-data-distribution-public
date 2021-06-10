@@ -447,3 +447,40 @@ cdef class MountainCar(TabularEnv):
         x1 = state_vec.pos
         x2 = state_vec.vel
         print('(%f, %f) = %d' % (x1, x2, self.get_state()))
+
+cdef class MultiPathsEnv(TabularEnv):
+    def __init__(self):
+        super(MultiPathsEnv, self).__init__(5*5+2, 5, {0: 1.0})
+
+        with np_seed(999):
+            self._correct_actions = np.random.randint(low=0, high=5, size=5*5+2, dtype=np.int32)
+
+    cdef map[int, double] transitions_cy(self, int state, int action):
+        self._transition_map.clear()
+
+        if state == 0: # Start state.
+            probs = [0.01, 0.01, 0.01, 0.01, 0.01]
+            probs[action] = 0.96
+            for (next_state, p) in zip([1,6,11,16,21], probs):
+                self._transition_map.insert(pair[int, double](next_state, p))
+
+        elif state == 26: # Terminal (dead) state.
+            self._transition_map.insert(pair[int, double](state, 1.0))
+
+        elif state in [5,10,15,20,25]: # Terminal (win) state.
+            self._transition_map.insert(pair[int, double](state, 1.0))
+
+        else:
+            good_action_idx = self._correct_actions[state]
+            if action == good_action_idx:
+                self._transition_map.insert(pair[int, double](state + 1, 1.0)) # Move one step forward.
+            else:
+                self._transition_map.insert(pair[int, double](26, 1.0)) # Move to dead state.
+
+        return self._transition_map
+
+    cpdef double reward(self, int state, int action, int next_state):
+        if state in [5,10,15,20,25]:
+            return 1.0
+        else:
+            return 0.0

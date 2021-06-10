@@ -20,7 +20,7 @@ class ValueIteration(object):
             for state in range(self.env.num_states):
                 for action in range(self.env.num_actions):
 
-                    Q_vals[state][action] = self.env.reward(state, 0, 0) + \
+                    Q_vals[state][action] = self.env.reward(state, action, 0) + \
                         self.gamma * np.dot(self.env.transition_matrix()[state][action], \
                         np.max(Q_vals, axis=1))
 

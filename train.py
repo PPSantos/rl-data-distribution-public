@@ -21,6 +21,7 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 VAL_ITER_DATA = {
     'gridEnv1': 'gridEnv1_val_iter_2021-05-14-15-54-10',
     'gridEnv4': 'gridEnv4_val_iter_2021-04-28-09-54-18',
+    'multiPathsEnv': 'multiPathsEnv_val_iter_2021-06-04-19-31-25',
     'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
     'mountaincar': 'mountaincar_val_iter_2021-05-29-19-15-34',
 } 
@@ -28,27 +29,27 @@ VAL_ITER_DATA = {
 DEFAULT_TRAIN_ARGS = {
 
     # General arguments.
-    'num_runs': 5,
-    'num_processors': 5,
+    'num_runs': 1,
+    'num_processors': 1,
     'algo': 'fqi',
     'num_episodes': 20_000,
     'gamma': 0.9, # discount factor.
-    'phi': 0.0, # actions stochasticity (grid env.).
+    'phi': 0.0, # actions stochasticity (for grid env. only).
 
     'q_vals_period': 20,
     'replay_buffer_counts_period': 500,
     'rollouts_period': 500,
     'num_rollouts': 5,
-    'rollouts_phi': 0.3,
+    'rollouts_phi': 0.3, # (for grid env. only).
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'gridEnv1',
-        'dim_obs': 8,
-        'time_limit': 50,
-        'tabular': False,
-        'smooth_obs': True,
-        'one_hot_obs': False,
+        'env_name': 'multiPathsEnv',
+        'dim_obs': 8, # (for grid env. only).
+        'time_limit': 50, # (for grid env. only).
+        'tabular': False, # (for grid env. only).
+        'smooth_obs': True, # (for grid env. only).
+        'one_hot_obs': False, # (for grid env. only).
     },
 
     # Value iteration arguments.
@@ -235,4 +236,22 @@ def train(train_args=None):
     return exp_path, exp_name
 
 if __name__ == "__main__":
-    train() # Uses DEFAULT_TRAIN_ARGS.
+
+    # Train (uses DEFAULT_TRAIN_ARGS).
+    exp_path, exp_id = train()
+
+    if DEFAULT_TRAIN_ARGS['algo'] != 'val_iter':
+
+        from analysis.plots import main as plots
+        env_name = DEFAULT_TRAIN_ARGS['env_args']['env_name']
+        val_iter_data = VAL_ITER_DATA[env_name]
+
+        # Compute plots.
+        plots(exp_id, val_iter_data)
+
+        # Compress and cleanup.
+        shutil.make_archive(exp_path,
+                        'gztar',
+                        os.path.dirname(exp_path),
+                        exp_id)
+        shutil.rmtree(exp_path)
