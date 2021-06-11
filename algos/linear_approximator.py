@@ -119,6 +119,7 @@ class LinearApproximator(object):
 
             # Estimate statistics of the replay buffer contents.
             if (episode > 1) and (episode % replay_buffer_counts_period == 0):
+                print('Appending replay buffer info...')
                 replay_buffer_counts_episodes.append(episode)
                 replay_buffer_counts.append(self.replay.get_replay_buffer_counts())
 
@@ -280,4 +281,4 @@ class ReplayBuffer(object):
         return self._encode_sample(idxes)
     
     def get_replay_buffer_counts(self):
-        return self.statistics_table
+        return self.statistics_table.copy()
