@@ -36,9 +36,9 @@ DEFAULT_TRAIN_ARGS = {
     #           and 'val_iter' algorithms.
 
     # General arguments.
-    'num_runs': 5,
-    'num_processors': 5,
-    'algo': 'oracle_fqi',
+    'num_runs': 10,
+    'num_processors': 10,
+    'algo': 'dqn',
     'num_episodes': 20_000,
     'gamma': 0.9, # discount factor.
     'phi': 0.0, # actions stochasticity (for grid env. only).
@@ -86,19 +86,21 @@ DEFAULT_TRAIN_ARGS = {
 
     # DQN arguments.
     'dqn_args': {
-        'batch_size': 10,
-        'target_update_period': 5_000,
-        'samples_per_insert': 10.0,
-        'min_replay_size': 10,
-        'max_replay_size': 500_000,
+        'batch_size': 100,
+        'target_update_period': 10_000,
+        'samples_per_insert': 50.0,
+        'min_replay_size': 50_000,
+        'max_replay_size': 1_000_000,
         'prioritized_replay': False,
         'importance_sampling_exponent': 0.9,
         'priority_exponent': 0.6,
         'epsilon_init': 0.9,
         'epsilon_final': 0.0,
-        'epsilon_schedule_timesteps': 450_000,
+        'epsilon_schedule_timesteps': 500_000,
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
+        'synthetic_replay_buffer': False,
+        'synthetic_replay_buffer_alpha': 1_000,
     },
 
     # FQI arguments.
@@ -180,9 +182,6 @@ def train_run(run_args):
         agent = LinearApproximator(env, env_grid_spec, **args['linear_approximator_args'])
 
     elif args['algo'] == 'dqn':
-
-        raise ValueError('Not implemented')
-
         args['dqn_args']['discount'] = args['gamma']
         agent = DQN(env, env_grid_spec, args['dqn_args'])
 
@@ -230,11 +229,13 @@ def train(train_args=None):
 
     # Setup experiment data folder.
     exp_name = create_exp_name(args)
+    exp_path = DATA_FOLDER_PATH + exp_name
+    os.makedirs(exp_path, exist_ok=True)
     print('\nExperiment ID:', exp_name)
     print('train.py arguments:')
     print(args)
-    exp_path = DATA_FOLDER_PATH + exp_name
-    os.makedirs(exp_path, exist_ok=True)
+
+    # Store args copy. 
     f = open(exp_path + "/args.json", "w")
     json.dump(args, f)
     f.close()
