@@ -29,7 +29,7 @@ VAL_ITER_DATA = {
     'multiPathsEnv': 'multiPathsEnv_val_iter_2021-06-04-19-31-25',
     'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
     'mountaincar': 'mountaincar_val_iter_2021-05-29-19-15-34',
-} 
+}
 
 DEFAULT_TRAIN_ARGS = {
     # WARNING: 'mdp1' only works with the 'linear_approximator'
@@ -55,7 +55,7 @@ DEFAULT_TRAIN_ARGS = {
         'one_hot_obs': False, # (for grid env. only).
     },
 
-    # Evaluation rollouts arguments. 
+    # Evaluation rollouts arguments.
     'rollouts_period': 500,
     'num_rollouts': 5,
     'rollouts_types': ['default', 'stochastic_actions_1',

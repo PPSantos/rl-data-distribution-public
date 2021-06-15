@@ -18,15 +18,15 @@ if __name__ == "__main__":
     print('val_iter_data', val_iter_data)
 
     # Setup max_replay_sizes variable.
-    """ if env_name in ['gridEnv1', 'gridEnv2', 'gridEnv3', 'gridEnv4', 'pendulum']:
-        max_replay_sizes = [1_000_000] #, 750_000, 500_000, 250_000, 100_000]
+    if env_name in ['gridEnv1', 'gridEnv2', 'gridEnv3', 'gridEnv4', 'pendulum']:
+        max_replay_sizes = [1_000_000, 750_000, 500_000, 250_000, 100_000]
     elif env_name in ['gridEnv5']:
         max_replay_sizes = [500_000, 375_000, 250_000, 125_000, 50_000]
     elif env_name in ['mountaincar']:
         max_replay_sizes = [2_000_000]
     else:
         raise ValueError('Error.')
-    print('max_replay_sizes', max_replay_sizes) """
+    print('max_replay_sizes', max_replay_sizes)
 
     if env_name in ['gridEnv1', 'gridEnv2', 'gridEnv3', 'gridEnv4', 'gridEnv5']:
 
@@ -62,19 +62,16 @@ if __name__ == "__main__":
         args['env_args']['smooth_obs'] = True
         args['env_args']['one_hot_obs'] = False
 
-        alphas = [10.0, 5.0, 2.0, 0.5, 0.25, 0.05]
+        args[algo_dict_key]['synthetic_replay_buffer'] = False
 
-        for alpha in alphas:
-            print(f'GridEnv + Smoothed observation, alpha={alpha}')
+        for size in max_replay_sizes:
 
             # Run.
-            args[algo_dict_key]['synthetic_replay_buffer_alpha'] = alpha
+            args[algo_dict_key]['max_replay_size'] = size
             exp_path, exp_id = train(args)
             exp_ids.append(exp_id)
-
             # Compute plots.
             plots(exp_id, val_iter_data)
-
             # Compress and cleanup.
             shutil.make_archive(exp_path,
                             'gztar',
@@ -83,6 +80,26 @@ if __name__ == "__main__":
             shutil.rmtree(exp_path)
 
         print('Exp. ids:', exp_ids)
+
+        args[algo_dict_key]['synthetic_replay_buffer'] = True
+
+        for size in max_replay_sizes:
+
+            # Run.
+            args[algo_dict_key]['max_replay_size'] = size
+            exp_path, exp_id = train(args)
+            exp_ids.append(exp_id)
+            # Compute plots.
+            plots(exp_id, val_iter_data)
+            # Compress and cleanup.
+            shutil.make_archive(exp_path,
+                            'gztar',
+                            os.path.dirname(exp_path),
+                            exp_id)
+            shutil.rmtree(exp_path)
+
+        print('Exp. ids:', exp_ids)
+
 
         """
             GridEnv + Random observations.
