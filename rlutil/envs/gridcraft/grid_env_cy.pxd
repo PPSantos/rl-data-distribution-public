@@ -7,7 +7,6 @@ cdef class GridEnv(tabular_env.TabularEnv):
     cdef double phi
     cdef map[int, double] _deterministic_transition_map
     cdef map[int, double] _transitions_cy(self, int state, int action)
-    cpdef set_phi(self, double phi)
 
 cdef class DistanceRewardGridEnv(GridEnv):
     cdef double start_dist

@@ -42,9 +42,6 @@ cdef class TabularEnvWrapper(tabular_env.TabularEnv):
     cpdef int get_state(self):
         return self.wrapped_env.get_state()
 
-    cpdef set_phi(self, double p):
-        return self.wrapped_env.set_phi(p)
-
     cpdef render(self):
         return self.wrapped_env.render()
 

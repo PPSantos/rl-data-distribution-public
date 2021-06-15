@@ -173,7 +173,7 @@ def main(exp_id, val_iter_exp):
     data['rollouts_episodes'] = exp_data[0]['rollouts_episodes'] # [(E)]
 
     # rollouts_rewards field.
-    data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts]
+    data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts_types,num_rollouts]
 
     # Scalar metrics dict.
     scalar_metrics = {}
@@ -245,29 +245,35 @@ def main(exp_id, val_iter_exp):
     """
         `rollouts_rewards` plot.
     """
-    print('Computing `rollouts_rewards` plot.')
-    fig = plt.figure()
-    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+    for t, rollout_type in enumerate(exp_args['rollouts_types']):
+        print(f'Computing `rollouts_rewards_{rollout_type}` plot.')
+        fig = plt.figure()
+        fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-    for (i, run_rollouts) in enumerate(data['rollouts_rewards']): #  run_rollouts = [(E),num_rollouts]
-        X = data['rollouts_episodes'] # [(E)]
-        Y = np.mean(run_rollouts, axis=1) # [(E)]
+        rollout_type_data = data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
 
-        plt.plot(X, Y, label=f'Run {i}')
+        for (i, run_rollouts) in enumerate(rollout_type_data): # run_rollouts = [(E),num_rollouts]
+            X = data['rollouts_episodes'] # [(E)]
+            Y = np.mean(run_rollouts, axis=1) # [(E)]
 
-    plt.xlabel('Episode')
-    plt.ylabel('Rollouts average reward')
-    plt.legend()
+            plt.plot(X, Y, label=f'Run {i}')
 
-    plt.savefig('{0}/rollouts_rewards.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.close()
+        plt.xlabel('Episode')
+        plt.ylabel('Rollouts average reward')
+        plt.legend()
+
+        plt.savefig('{0}/rollouts_rewards_{1}.png'.format(output_folder,rollout_type), bbox_inches='tight', pad_inches=0)
+        plt.close()
 
     """
         Scalar evaluation rewards metrics.
     """
-    scalar_metrics['evaluation_rewards_total'] = np.mean(data['rollouts_rewards'])
-    half_split = data['rollouts_rewards'].shape[1] // 2
-    scalar_metrics['evaluation_rewards_second_half'] = np.mean(data['rollouts_rewards'][:,half_split:,:])
+    for t, rollout_type in enumerate(exp_args['rollouts_types']):
+        rollout_type_data = data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
+
+        scalar_metrics[f'evaluation_rewards_total_{rollout_type}'] = np.mean(rollout_type_data)
+        half_split = data['rollouts_rewards'].shape[1] // 2
+        scalar_metrics[f'evaluation_rewards_second_half_{rollout_type}'] = np.mean(rollout_type_data[:,half_split:,:])
 
     """
         `maximizing_action_s_*` plots.

@@ -51,7 +51,7 @@ class LinearApproximator(object):
         self.env_grid_spec = env_grid_spec
 
     def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
-            num_rollouts, rollouts_period, phi, rollouts_phi):
+            num_rollouts, rollouts_period, rollouts_envs):
 
         if self.synthetic_replay_buffer:
             self._prefill_replay_buffer()
@@ -125,20 +125,14 @@ class LinearApproximator(object):
 
             # Execute evaluation rollouts.
             if episode % rollouts_period == 0:
-                print('Executing evaluation rollouts...')
-
-                if self.env_grid_spec:
-                    self.base_env.set_phi(rollouts_phi)
+                print('Executing evaluation rollouts.')
 
                 r_rewards = []
-                for i in range(num_rollouts):
-                    r_rewards.append(self._execute_rollout())
+                for r_env in rollouts_envs:
+                    r_rewards.append([self._execute_rollout(r_env) for _ in range(num_rollouts)])
 
                 rollouts_episodes.append(episode)
                 rollouts_rewards.append(r_rewards)
-
-                if self.env_grid_spec:
-                    self.base_env.set_phi(phi)
 
         data = {}
         data['episode_rewards'] = episode_rewards
@@ -189,20 +183,20 @@ class LinearApproximator(object):
 
             self.env.reset()
 
-    def _execute_rollout(self):
+    def _execute_rollout(self, r_env):
 
-        s_t = self.env.reset()
+        s_t = r_env.reset()
 
         episode_cumulative_reward = 0
         done = False
         while not done:
 
             # Pick action.
-            q_vals_pred = [np.dot(self.weights, self.feature_map[s_t,a]) for a in range(self.env.num_actions)]
+            q_vals_pred = [np.dot(self.weights, self.feature_map[s_t,a]) for a in range(r_env.num_actions)]
             a_t = choice_eps_greedy(q_vals_pred, epsilon=0.0)
 
             # Step.
-            s_t1, r_t1, done, info = self.env.step(a_t)
+            s_t1, r_t1, done, info = r_env.step(a_t)
 
             episode_cumulative_reward += r_t1
 

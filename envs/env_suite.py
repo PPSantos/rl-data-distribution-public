@@ -12,36 +12,154 @@ from rlutil.envs.gridcraft.grid_spec_cy import TileType
 
 # WARNING: Custom grid envs must be square.
 CUSTOM_GRID_ENVS = {
-    'gridEnv1': grid_spec_cy.spec_from_sparse_locations(8, 8,
-                    {TileType.START: [(0, 7)],
-                    TileType.WALL: [],
-                    TileType.REWARD: [(7, 0)]}),
 
-    'gridEnv2': grid_spec_cy.spec_from_sparse_locations(8, 8,
+    'gridEnv1': {
+        'default': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
+                            {TileType.START: [(0, 7)],
+                            TileType.WALL: [],
+                            TileType.REWARD: [(7, 0)]}),
+            'phi': 0.0,
+        },
+        'stochastic_actions_1': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
+                            {TileType.START: [(0, 7)],
+                            TileType.WALL: [],
+                            TileType.REWARD: [(7, 0)]}),
+            'phi': 0.1,
+        },
+        'stochastic_actions_2': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
+                            {TileType.START: [(0, 7)],
+                            TileType.WALL: [],
+                            TileType.REWARD: [(7, 0)]}),
+            'phi': 0.2,
+        },
+        'stochastic_actions_3': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
+                            {TileType.START: [(0, 7)],
+                            TileType.WALL: [],
+                            TileType.REWARD: [(7, 0)]}),
+            'phi': 0.3,
+        },
+        'stochastic_actions_4': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
+                            {TileType.START: [(0, 7)],
+                            TileType.WALL: [],
+                            TileType.REWARD: [(7, 0)]}),
+            'phi': 0.4,
+        },
+        'stochastic_actions_5': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
+                            {TileType.START: [(0, 7)],
+                            TileType.WALL: [],
+                            TileType.REWARD: [(7, 0)]}),
+            'phi': 0.5,
+        },
+        'uniform_init_state_dist': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
+                     {TileType.START: [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (1, 0), (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (2, 7), (3, 0), (3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (4, 0), (4, 1), (4, 2), (4, 3), (4, 4), (4, 5), (4, 6), (4, 7), (5, 0), (5, 1), (5, 2), (5, 3), (5, 4), (5, 5), (5, 6), (5, 7), (6, 0), (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6), (6, 7), (7, 0), (7, 1), (7, 2), (7, 3), (7, 4), (7, 5), (7, 6), (7, 7)],
+                     TileType.WALL: [],
+                     TileType.REWARD: [(7, 0)]}),
+            'phi': 0.0,
+        }
+    },
+
+    'gridEnv2': {
+        'default': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
                     {TileType.START: [(0, 7)],
                     TileType.WALL: [(7, 7), (5, 1), (2, 4), (5, 6), (6, 0),
                                 (0, 4), (3, 4), (3, 7), (2, 1), (7, 0), (4, 7), (5, 5)],
                     TileType.REWARD: [(7, 1)]}),
+            'phi': 0.0,
+        }
+    },
 
-    'gridEnv3': grid_spec_cy.spec_from_sparse_locations(8, 8,
-                    {TileType.START: [(0, 7)],
-                    TileType.WALL: [(5, 2), (5, 0), (7, 6), (2, 1), (7, 0),
-                                (7, 1), (4, 0), (5, 3), (7, 2), (2, 2),
-                                (2, 5), (4, 2), (3, 5), (3, 3), (4, 7), (2, 0)],
-                    TileType.REWARD: [(3, 0)]}),
+    'gridEnv3': {
+        'default': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
+                            {TileType.START: [(0, 7)],
+                            TileType.WALL: [(5, 2), (5, 0), (7, 6), (2, 1), (7, 0),
+                                        (7, 1), (4, 0), (5, 3), (7, 2), (2, 2),
+                                        (2, 5), (4, 2), (3, 5), (3, 3), (4, 7), (2, 0)],
+                            TileType.REWARD: [(3, 0)]}),
+            'phi': 0.0,
+        }
+    },
 
-    'gridEnv4': grid_spec_cy.spec_from_sparse_locations(8, 8,
+    'gridEnv4': {
+        'default': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
                     {TileType.START: [(0, 4)],
                     TileType.WALL: [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0),
                                 (1, 4), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4)],
                     TileType.REWARD: [(7, 4)]}),
+            'phi': 0.0,
+        },
+        'stochastic_actions_1': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
+                    {TileType.START: [(0, 4)],
+                    TileType.WALL: [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0),
+                                (1, 4), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4)],
+                    TileType.REWARD: [(7, 4)]}),
+            'phi': 0.1,
+        },
+        'stochastic_actions_2': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
+                    {TileType.START: [(0, 4)],
+                    TileType.WALL: [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0),
+                                (1, 4), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4)],
+                    TileType.REWARD: [(7, 4)]}),
+            'phi': 0.2,
+        },
+        'stochastic_actions_3': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
+                    {TileType.START: [(0, 4)],
+                    TileType.WALL: [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0),
+                                (1, 4), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4)],
+                    TileType.REWARD: [(7, 4)]}),
+            'phi': 0.3,
+        },
+            'stochastic_actions_4': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
+                    {TileType.START: [(0, 4)],
+                    TileType.WALL: [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0),
+                                (1, 4), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4)],
+                    TileType.REWARD: [(7, 4)]}),
+            'phi': 0.4,
+        },
+            'stochastic_actions_5': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
+                    {TileType.START: [(0, 4)],
+                    TileType.WALL: [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0),
+                                (1, 4), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4)],
+                    TileType.REWARD: [(7, 4)]}),
+            'phi': 0.5,
+        },
+        'uniform_init_state_dist': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
+                     {TileType.START: [(1, 0), (1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (2, 7), (3, 0), (3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (4, 0), (4, 7), (5, 0), (5, 1), (5, 2), (5, 3), (5, 4), (5, 5), (5, 6), (5, 7), (6, 0), (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6), (6, 7), (7, 0), (7, 1), (7, 2), (7, 3), (7, 4), (7, 5), (7, 6), (7, 7)],
+                     TileType.WALL: [(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0),
+                                 (1, 4), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4)],
+                     TileType.REWARD: [(7, 4)]}),
+            'phi': 0.0,
+        }
+    },  
 
-    'gridEnv5': grid_spec_cy.spec_from_sparse_locations(5, 5,
+    'gridEnv5': {
+        'default': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(5, 5,
                     {TileType.START: [(0, 4)],
                     TileType.WALL: [(1, 4), (2, 4), (3, 4)],
                     TileType.REWARD: [(4, 4)]}),
+            'phi': 0.0,
+        }
+    },
 
-    'lavaEnv1': grid_spec_cy.spec_from_sparse_locations(8, 8,
+    'lavaEnv1': {
+        'default': {
+            'grid_spec': grid_spec_cy.spec_from_sparse_locations(8, 8,
                     {TileType.START: [(0, 4)],
                     TileType.WALL: [(0, 0), (0, 1), (1, 0), (1, 1), (2, 0),
                                 (2, 1), (3, 0), (3, 1), (4, 0), (4, 1),
@@ -51,26 +169,36 @@ CUSTOM_GRID_ENVS = {
                     TileType.LAVA: [(0, 2), (1, 2), (2, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2),
                                 (0, 6), (1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6)],
                     TileType.REWARD: [(7, 4)]}),
+            'phi': 0.0,
+        }
+    },
+
 }
 
-def get_custom_grid_env(env_name, dim_obs=8, time_limit=50, tabular=False,
-    smooth_obs=False, one_hot_obs=False, absorb=False, phi=0.0):
+def get_custom_grid_env(env_name, env_type='default', dim_obs=8, time_limit=50, tabular=False,
+                        smooth_obs=False, one_hot_obs=False, absorb=False, seed=None):
 
     if env_name not in CUSTOM_GRID_ENVS.keys():
         raise KeyError('Unknown env. name.')
-    
-    gs = CUSTOM_GRID_ENVS[env_name]
-    env = grid_env_cy.GridEnv(gs, phi=phi)
 
-    if absorb:
-        env = env_wrapper.AbsorbingStateWrapper(env)
+    if env_type not in CUSTOM_GRID_ENVS[env_name].keys():
+        raise KeyError('Unknown env. type.')
 
-    if tabular:
-        env = wrap_time(env, time_limit=time_limit)
-    else:
-        env = wrap_obs_time(env, time_limit=time_limit, one_hot_obs=one_hot_obs,
-                            dim_obs=dim_obs, smooth_obs=smooth_obs)
-    return env, gs
+    env_params = CUSTOM_GRID_ENVS[env_name][env_type]
+
+    with math_utils.np_seed(seed):
+        env = grid_env_cy.GridEnv(env_params['grid_spec'], phi=env_params['phi'])
+
+        if absorb:
+            env = env_wrapper.AbsorbingStateWrapper(env)
+
+        if tabular:
+            env = wrap_time(env, time_limit=time_limit)
+        else:
+            env = wrap_obs_time(env, time_limit=time_limit, one_hot_obs=one_hot_obs,
+                                dim_obs=dim_obs, smooth_obs=smooth_obs)
+
+    return env, env_params['grid_spec']
 
 
 def random_grid_env(size_x, size_y, dim_obs=32, time_limit=50,

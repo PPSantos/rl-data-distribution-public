@@ -33,7 +33,7 @@ VAL_ITER_DATA = {
 
 DEFAULT_TRAIN_ARGS = {
     # WARNING: 'mdp1' only works with the 'linear_approximator'
-    #           and 'val_iter' algorithms.
+    #           (and vice versa) and 'val_iter' algorithms.
 
     # General arguments.
     'num_runs': 10,
@@ -41,13 +41,9 @@ DEFAULT_TRAIN_ARGS = {
     'algo': 'dqn',
     'num_episodes': 20_000,
     'gamma': 0.9, # discount factor.
-    'phi': 0.0, # actions stochasticity (for grid env. only).
 
     'q_vals_period': 20,
     'replay_buffer_counts_period': 500,
-    'rollouts_period': 500,
-    'num_rollouts': 5,
-    'rollouts_phi': 0.3, # (for grid env. only).
 
     # Env. arguments.
     'env_args': {
@@ -58,6 +54,14 @@ DEFAULT_TRAIN_ARGS = {
         'smooth_obs': True, # (for grid env. only).
         'one_hot_obs': False, # (for grid env. only).
     },
+
+    # Evaluation rollouts arguments. 
+    'rollouts_period': 500,
+    'num_rollouts': 5,
+    'rollouts_types': ['default', 'stochastic_actions_1',
+                    'stochastic_actions_2', 'stochastic_actions_3',
+                    'stochastic_actions_4', 'stochastic_actions_5',
+                    'uniform_init_state_dist'],
 
     # Value iteration arguments.
     'val_iter_args': {
@@ -87,7 +91,7 @@ DEFAULT_TRAIN_ARGS = {
     # DQN arguments.
     'dqn_args': {
         'batch_size': 100,
-        'target_update_period': 10_000,
+        'target_update_period': 1_000,
         'samples_per_insert': 50.0,
         'min_replay_size': 50_000,
         'max_replay_size': 1_000_000,
@@ -148,13 +152,18 @@ def train_run(run_args):
 
     time.sleep(time_delay)
 
-    # Load environment.
+    # Load train environment.
     if args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys():
-        env, env_grid_spec = env_suite.get_custom_grid_env(**args['env_args'],
-                                                    phi=args['phi'], absorb=False)
+        env, env_grid_spec = env_suite.get_custom_grid_env(**args['env_args'], env_type='default',
+                                                        absorb=False, seed=time_delay)
     else:
         env = env_suite.get_env(args['env_args']['env_name'])
         env_grid_spec = None
+
+    # Load rollouts environment(s).
+    rollouts_envs = [env_suite.get_custom_grid_env(**args['env_args'], env_type=t,
+                                                absorb=False, seed=time_delay)[0]
+                        for t in args['rollouts_types']]
 
     # print('Env num states:', env.num_states)
     # print('Env num actions:', env.num_actions)
@@ -213,8 +222,7 @@ def train_run(run_args):
                              replay_buffer_counts_period=args['replay_buffer_counts_period'],
                              num_rollouts=args['num_rollouts'],
                              rollouts_period=args['rollouts_period'],
-                             phi=args['phi'],
-                             rollouts_phi=args['rollouts_phi'])
+                             rollouts_envs=rollouts_envs)
 
     return train_data
 

@@ -68,7 +68,7 @@ cdef class GridEnv(tabular_env.TabularEnv):
         if self.phi == 0.0:
             return self._transitions_cy(state, action)
 
-        print('phi', self.phi)
+        # print('phi', self.phi)
         phi_new = self.phi / self.num_actions
         phi_old = 1.0 - self.phi
         self._transition_map.clear()
@@ -125,9 +125,6 @@ cdef class GridEnv(tabular_env.TabularEnv):
                     ostream.write(RENDER_DICT[val])
             ostream.write('|\n')
         ostream.write('-' * (self.gs.width + 2)+'\n')
-
-    cpdef set_phi(self, double p):
-        self.phi = p
 
 
 cdef class DistanceRewardGridEnv(GridEnv):

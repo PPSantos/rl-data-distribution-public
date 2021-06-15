@@ -2,7 +2,6 @@ from rlutil.envs.tabular_cy cimport tabular_env
 
 cdef class TabularEnvWrapper(tabular_env.TabularEnv):
     cdef public tabular_env.TabularEnv wrapped_env
-    cpdef set_phi(self, double p)
 
 cdef class AbsorbingStateWrapper(TabularEnvWrapper):
     cdef int absorb_state

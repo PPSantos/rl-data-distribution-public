@@ -9,7 +9,7 @@ class ValueIteration(object):
         self.epsilon = epsilon
 
     def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
-            num_rollouts, rollouts_period, phi, rollouts_phi):
+                num_rollouts, rollouts_period, rollouts_envs):
 
         Q_vals = np.zeros((self.env.num_states, self.env.num_actions))
 

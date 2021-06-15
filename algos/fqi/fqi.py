@@ -72,10 +72,12 @@ class FQI(object):
         self.sampling_dist = np.random.dirichlet([self.synthetic_replay_buffer_alpha]*self.sampling_dist_size)
         if self.synthetic_replay_buffer:
             print('self.sampling_dist (synthetic replay buffer dataset):', self.sampling_dist)
-            print('self.sampling_dist_size:', self.sampling_dist_size)
+            print('self.sampling_dist_size (S*A):', self.sampling_dist_size)
 
     def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
-            num_rollouts, rollouts_period, phi, rollouts_phi):
+            num_rollouts, rollouts_period, rollouts_envs):
+
+        rollouts_envs = [wrap_env(e) for e in rollouts_envs]
 
         states_counts = np.zeros((self.env.num_states))
         episode_rewards = []
@@ -147,27 +149,21 @@ class FQI(object):
                         Q_vals[Q_vals_ep,state,:] = qvs
                 Q_vals_ep += 1
 
-            # Estimate statistics of the replay buffer contents.
+            # Get replay buffer statistics.
             if (episode > 1) and (episode % replay_buffer_counts_period == 0):
                 replay_buffer_counts_episodes.append(episode)
                 replay_buffer_counts.append(self.agent.get_replay_buffer_counts())
 
             # Execute evaluation rollouts.
             if episode % rollouts_period == 0:
-                print('Executing evaluation rollouts...')
-
-                if self.env_grid_spec:
-                    self.base_env.set_phi(rollouts_phi)
+                print('Executing evaluation rollouts.')
 
                 r_rewards = []
-                for i in range(num_rollouts):
-                    r_rewards.append(self._execute_rollout())
+                for r_env in rollouts_envs:
+                    r_rewards.append([self._execute_rollout(r_env) for _ in range(num_rollouts)])
 
                 rollouts_episodes.append(episode)
                 rollouts_rewards.append(r_rewards)
-
-                if self.env_grid_spec:
-                    self.base_env.set_phi(phi)
 
         data = {}
         data['episode_rewards'] = episode_rewards
@@ -226,15 +222,14 @@ class FQI(object):
 
         return static_dataset
 
-    def _execute_rollout(self):
+    def _execute_rollout(self, r_env):
 
-        timestep = self.env.reset()
+        timestep = r_env.reset()
 
-        episode_cumulative_reward = 0
+        rollout_cumulative_reward = 0
         while not timestep.last():
-
             action = self.agent.select_action(timestep.observation)
-            timestep = self.env.step(action)
-            episode_cumulative_reward += timestep.reward
+            timestep = r_env.step(action)
+            rollout_cumulative_reward += timestep.reward
 
-        return episode_cumulative_reward
+        return rollout_cumulative_reward
