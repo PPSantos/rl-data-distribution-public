@@ -99,7 +99,7 @@ DEFAULT_TRAIN_ARGS = {
         'epsilon_schedule_timesteps': 500_000,
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
-        'synthetic_replay_buffer': False,
+        'synthetic_replay_buffer': True,
         'synthetic_replay_buffer_alpha': 1_000,
     },
 

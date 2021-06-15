@@ -102,8 +102,7 @@ class FQI(object):
             timestep = self.env.reset()
             env_state = self.base_env.get_state()
 
-            if not self.synthetic_replay_buffer:
-                self.agent.observe_first(timestep)
+            self.agent.observe_first(timestep)
 
             episode_cumulative_reward = 0
             while not timestep.last():
@@ -111,10 +110,10 @@ class FQI(object):
                 action = self.agent.select_action(timestep.observation)
                 timestep = self.env.step(action)
 
-                if not self.synthetic_replay_buffer:
-                    self.agent.observe_with_extras(action,
-                        next_timestep=timestep, extras=(np.int32(env_state),))
-                else:
+                self.agent.observe_with_extras(action,
+                    next_timestep=timestep, extras=(np.int32(env_state),))
+
+                if self.synthetic_replay_buffer:
                     # Insert transition from the static dataset.
                     transition, extras = next(static_dataset_iterator)
                     self.agent.add_to_replay_buffer(transition, extras)
