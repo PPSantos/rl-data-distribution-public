@@ -89,7 +89,7 @@ DEFAULT_TRAIN_ARGS = {
     'dqn_args': {
         'batch_size': 100,
         'target_update_period': 1_000,
-        'samples_per_insert': 50.0,
+        'samples_per_insert': 25.0,
         'min_replay_size': 50_000,
         'max_replay_size': 1_000_000,
         'prioritized_replay': False,
