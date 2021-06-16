@@ -25,7 +25,7 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 VAL_ITER_DATA = {
     'mdp1': 'mdp1_val_iter_2021-06-10-15-55-52',
     'gridEnv1': 'gridEnv1_val_iter_2021-05-14-15-54-10',
-    'gridEnv4': 'gridEnv4_val_iter_2021-04-28-09-54-18',
+    'gridEnv4': 'gridEnv4_val_iter_2021-06-16-10-08-44',
     'multiPathsEnv': 'multiPathsEnv_val_iter_2021-06-04-19-31-25',
     'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
     'mountaincar': 'mountaincar_val_iter_2021-05-29-19-15-34',
