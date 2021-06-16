@@ -47,7 +47,7 @@ DEFAULT_TRAIN_ARGS = {
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'gridEnv1',
+        'env_name': 'pendulum',
         'dim_obs': 8, # (for grid env. only).
         'time_limit': 50, # (for grid env. only).
         'tabular': False, # (for grid env. only).
@@ -58,10 +58,7 @@ DEFAULT_TRAIN_ARGS = {
     # Evaluation rollouts arguments.
     'rollouts_period': 500,
     'num_rollouts': 5,
-    'rollouts_types': ['default', 'stochastic_actions_1',
-                    'stochastic_actions_2', 'stochastic_actions_3',
-                    'stochastic_actions_4', 'stochastic_actions_5',
-                    'uniform_init_state_dist'],
+    'rollouts_types': ['default'],
 
     # Value iteration arguments.
     'val_iter_args': {
@@ -161,9 +158,12 @@ def train_run(run_args):
         env_grid_spec = None
 
     # Load rollouts environment(s).
-    rollouts_envs = [env_suite.get_custom_grid_env(**args['env_args'], env_type=t,
-                                                absorb=False, seed=time_delay)[0]
-                        for t in args['rollouts_types']]
+    if args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys():
+        rollouts_envs = [env_suite.get_custom_grid_env(**args['env_args'], env_type=t,
+                                                    absorb=False, seed=time_delay)[0]
+                            for t in args['rollouts_types']]
+    else:
+        rollouts_envs = [env_suite.get_env(args['env_args']['env_name'])]
 
     # print('Env num states:', env.num_states)
     # print('Env num actions:', env.num_actions)
