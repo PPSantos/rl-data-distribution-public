@@ -25,7 +25,7 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 VAL_ITER_DATA = {
     'mdp1': 'mdp1_val_iter_2021-06-10-15-55-52',
     'gridEnv1': 'gridEnv1_val_iter_2021-05-14-15-54-10',
-    'gridEnv4': 'gridEnv4_val_iter_2021-04-28-09-54-18',
+    'gridEnv4': 'gridEnv4_val_iter_2021-06-16-10-08-44',
     'multiPathsEnv': 'multiPathsEnv_val_iter_2021-06-04-19-31-25',
     'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
     'mountaincar': 'mountaincar_val_iter_2021-06-17-13-52-11',
@@ -47,7 +47,7 @@ DEFAULT_TRAIN_ARGS = {
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'gridEnv1',
+        'env_name': 'pendulum',
         'dim_obs': 8, # (for grid env. only).
         'time_limit': 50, # (for grid env. only).
         'tabular': False, # (for grid env. only).
@@ -58,10 +58,7 @@ DEFAULT_TRAIN_ARGS = {
     # Evaluation rollouts arguments.
     'rollouts_period': 500,
     'num_rollouts': 5,
-    'rollouts_types': ['default', 'stochastic_actions_1',
-                    'stochastic_actions_2', 'stochastic_actions_3',
-                    'stochastic_actions_4', 'stochastic_actions_5',
-                    'uniform_init_state_dist'],
+    'rollouts_types': ['default'],
 
     # Value iteration arguments.
     'val_iter_args': {
@@ -92,7 +89,7 @@ DEFAULT_TRAIN_ARGS = {
     'dqn_args': {
         'batch_size': 100,
         'target_update_period': 1_000,
-        'samples_per_insert': 50.0,
+        'samples_per_insert': 25.0,
         'min_replay_size': 50_000,
         'max_replay_size': 1_000_000,
         'prioritized_replay': False,
@@ -161,9 +158,12 @@ def train_run(run_args):
         env_grid_spec = None
 
     # Load rollouts environment(s).
-    rollouts_envs = [env_suite.get_custom_grid_env(**args['env_args'], env_type=t,
-                                                absorb=False, seed=time_delay)[0]
-                        for t in args['rollouts_types']]
+    if args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys():
+        rollouts_envs = [env_suite.get_custom_grid_env(**args['env_args'], env_type=t,
+                                                    absorb=False, seed=time_delay)[0]
+                            for t in args['rollouts_types']]
+    else:
+        rollouts_envs = [env_suite.get_env(args['env_args']['env_name'])]
 
     # print('Env num states:', env.num_states)
     # print('Env num actions:', env.num_actions)
