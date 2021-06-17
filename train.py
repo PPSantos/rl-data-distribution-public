@@ -28,7 +28,7 @@ VAL_ITER_DATA = {
     'gridEnv4': 'gridEnv4_val_iter_2021-04-28-09-54-18',
     'multiPathsEnv': 'multiPathsEnv_val_iter_2021-06-04-19-31-25',
     'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
-    'mountaincar': 'mountaincar_val_iter_2021-05-29-19-15-34',
+    'mountaincar': 'mountaincar_val_iter_2021-06-17-13-52-11',
 }
 
 DEFAULT_TRAIN_ARGS = {
