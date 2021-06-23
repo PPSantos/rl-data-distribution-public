@@ -100,7 +100,7 @@ DEFAULT_TRAIN_ARGS = {
         'epsilon_schedule_timesteps': 500_000,
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
-        'synthetic_replay_buffer': True,
+        'synthetic_replay_buffer': False,
         'synthetic_replay_buffer_alpha': 1_000,
     },
 
@@ -145,7 +145,8 @@ def create_exp_name(args):
 
 def train_run(run_args):
 
-    time_delay, args = run_args[0], run_args[1]
+    time_delay, exp_path, args = run_args
+    log_path = exp_path + f'/logs_learner_{time_delay}'
 
     time.sleep(time_delay)
 
@@ -192,7 +193,7 @@ def train_run(run_args):
 
     elif args['algo'] == 'dqn':
         args['dqn_args']['discount'] = args['gamma']
-        agent = DQN(env, env_grid_spec, args['dqn_args'])
+        agent = DQN(env, env_grid_spec, log_path, args['dqn_args'])
 
     elif args['algo'] == 'fqi':
         args['fqi_args']['discount'] = args['gamma']
@@ -255,7 +256,7 @@ def train(train_args=None):
 
     # Train agent(s).
     with mp.Pool(processes=args['num_processors']) as pool:
-        train_data = pool.map(train_run, [(2*t, args) for t in range(args['num_runs'])])
+        train_data = pool.map(train_run, [(2*t, exp_path, args) for t in range(args['num_runs'])])
         pool.close()
         pool.join()
 

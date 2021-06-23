@@ -4,6 +4,7 @@ import math
 import json
 import random
 import numpy as np
+import pandas as pd
 import pathlib
 import argparse
 
@@ -113,6 +114,8 @@ def main(exp_id, val_iter_exp):
     os.makedirs(replay_buffer_plots_path, exist_ok=True)
     q_vals_folder_path = PLOTS_FOLDER_PATH + exp_id + '/Q-values'
     os.makedirs(q_vals_folder_path, exist_ok=True)
+    learner_plots_folder_path = PLOTS_FOLDER_PATH + exp_id + '/learner'
+    os.makedirs(learner_plots_folder_path, exist_ok=True)
 
     # Get args file (assumes all experiments share the same arguments).
     exp_args = get_args_json_file(DATA_FOLDER_PATH + exp_id)
@@ -182,6 +185,11 @@ def main(exp_id, val_iter_exp):
     print('is_grid_env:', is_grid_env)
     if is_grid_env:
         lateral_size = int(np.sqrt(len(val_iter_data['policy']))) # Assumes env. is a square.
+
+    # Load learner(s) CSV data (get all 'logs.csv' files from 'exp_path' folder).
+    learner_csv_files = [str(p) for p in list(pathlib.Path(exp_path).rglob('logs.csv'))]
+    print('Number of learner csv (logs.csv) files found: {0}'.format(len(learner_csv_files)))
+    print(learner_csv_files)
 
     """
         Print policies.
@@ -749,6 +757,31 @@ def main(exp_id, val_iter_exp):
     plt.savefig(f'{replay_buffer_plots_path}/P_s_a_coverage.png', bbox_inches='tight', pad_inches=0)
     plt.close()
 
+    """
+        Learner(s): Loss(es) plots.
+    """
+    if len(learner_csv_files) > 0:
+
+        learner_csv_cols = pd.read_csv(learner_csv_files[0]).columns
+
+        for col in learner_csv_cols:
+
+            if col in ('steps', 'walltime', 'step', 'learner_steps', 'learner_walltime'):
+                continue
+
+            print(f'Computing learner plot for column "{col}".')
+
+            fig = plt.figure()
+            fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+            for learner_csv in learner_csv_files:
+                df = pd.read_csv(learner_csv)
+                plt.plot(df[col])
+
+            plt.xlabel('Learner step')
+            plt.ylabel(f'{col}')
+            plt.savefig(learner_plots_folder_path + f"/{col}.png", bbox_inches='tight', pad_inches=0)
+            plt.close()
 
     # Store scalars dict.
     with open(output_folder + "scalar_metrics.json", 'w') as f:

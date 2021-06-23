@@ -14,6 +14,7 @@ import acme
 from acme import specs
 from acme.tf import networks
 from acme import wrappers
+from acme.utils import loggers
 
 from algos.dqn import dqn_acme
 from rlutil.envs.gridcraft.grid_spec_cy import TileType
@@ -37,7 +38,7 @@ def wrap_env(env):
 
 class DQN(object):
 
-    def __init__(self, env, env_grid_spec, dqn_args):
+    def __init__(self, env, env_grid_spec, log_path, dqn_args):
 
         np.random.seed()
 
@@ -66,7 +67,8 @@ class DQN(object):
                                     discount=dqn_args['discount'],
                                     synthetic_replay_buffer=dqn_args['synthetic_replay_buffer'],
                                     num_states=self.base_env.num_states,
-                                    num_actions=self.base_env.num_actions)
+                                    num_actions=self.base_env.num_actions,
+                                    logger=loggers.CSVLogger(directory_or_file=log_path, label='learner'))
 
         self.synthetic_replay_buffer = dqn_args['synthetic_replay_buffer']
         self.synthetic_static_dataset_size = 500 # in episodes.
