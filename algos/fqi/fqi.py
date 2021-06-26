@@ -228,7 +228,7 @@ class FQI(object):
 
         rollout_cumulative_reward = 0
         while not timestep.last():
-            action = self.agent.select_action(timestep.observation)
+            action = self.agent.deterministic_action(timestep.observation)
             timestep = r_env.step(action)
             rollout_cumulative_reward += timestep.reward
 
