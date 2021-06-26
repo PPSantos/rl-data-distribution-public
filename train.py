@@ -43,11 +43,11 @@ DEFAULT_TRAIN_ARGS = {
     'gamma': 0.9, # discount factor.
 
     'q_vals_period': 20,
-    'replay_buffer_counts_period': 500,
+    'replay_buffer_counts_period': 100,
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'pendulum',
+        'env_name': 'gridEnv1',
         'dim_obs': 8, # (for grid env. only).
         'time_limit': 50, # (for grid env. only).
         'tabular': False, # (for grid env. only).
@@ -56,9 +56,11 @@ DEFAULT_TRAIN_ARGS = {
     },
 
     # Evaluation rollouts arguments.
-    'rollouts_period': 500,
+    'rollouts_period': 100,
     'num_rollouts': 5,
-    'rollouts_types': ['default'],
+    'rollouts_types': ['default', 'stochastic_actions_1', 'stochastic_actions_2',
+                    'stochastic_actions_3', 'stochastic_actions_4', 'stochastic_actions_5',
+                    'uniform_init_state_dist'],
 
     # Value iteration arguments.
     'val_iter_args': {
@@ -95,9 +97,9 @@ DEFAULT_TRAIN_ARGS = {
         'prioritized_replay': False,
         'importance_sampling_exponent': 0.9,
         'priority_exponent': 0.6,
-        'epsilon_init': 0.9,
-        'epsilon_final': 0.0,
-        'epsilon_schedule_timesteps': 500_000,
+        'epsilon_init': 0.05,
+        'epsilon_final': 0.05,
+        'epsilon_schedule_timesteps': 1_000_000,
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
         'synthetic_replay_buffer': False,
