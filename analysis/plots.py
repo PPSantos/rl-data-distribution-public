@@ -247,8 +247,6 @@ def main(exp_id, val_iter_exp):
         Scalar train rewards metrics.
     """
     scalar_metrics['train_rewards_total'] = np.mean(data['episode_rewards'])
-    half_split = data['episode_rewards'].shape[1] // 2
-    scalar_metrics['train_rewards_second_half'] = np.mean(data['episode_rewards'][:,half_split:])
 
     """
         `rollouts_rewards` plot.
@@ -278,10 +276,8 @@ def main(exp_id, val_iter_exp):
     """
     for t, rollout_type in enumerate(exp_args['rollouts_types']):
         rollout_type_data = data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
-
-        scalar_metrics[f'evaluation_rewards_total_{rollout_type}'] = np.mean(rollout_type_data)
-        half_split = data['rollouts_rewards'].shape[1] // 2
-        scalar_metrics[f'evaluation_rewards_second_half_{rollout_type}'] = np.mean(rollout_type_data[:,half_split:,:])
+        scalar_metrics[f'eval_rewards_total_{rollout_type}'] = np.mean(rollout_type_data)
+        scalar_metrics[f'eval_rewards_final_{rollout_type}'] = np.mean(rollout_type_data[:,-1,:])
 
     """
         `maximizing_action_s_*` plots.
@@ -349,8 +345,7 @@ def main(exp_id, val_iter_exp):
     errors = np.abs(val_iter_data['Q_vals'] - data['Q_vals']) # [R,E,S,A]
     errors = np.sum(errors, axis=(2,3)) # [R,E]
     scalar_metrics['train_qvals_summed_error_total'] = np.mean(errors)
-    half_split = data['Q_vals'].shape[1] // 2
-    scalar_metrics['train_qvals_summed_error_second_half'] = np.mean(errors[:,half_split:])
+    scalar_metrics['train_qvals_summed_error_final'] = np.mean(errors[:,-1])
 
     """
         `q_values_mean_error` plot.
