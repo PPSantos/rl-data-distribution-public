@@ -15,6 +15,7 @@ from envs import env_suite
 from algos.value_iteration import ValueIteration
 from algos.q_learning import QLearning
 from algos.dqn.dqn import DQN
+from algos.dqn2be.dqn2be import DQN2BE
 from algos.oracle_fqi.oracle_fqi import OracleFQI
 from algos.fqi.fqi import FQI
 from algos.linear_approximator import LinearApproximator
@@ -104,6 +105,30 @@ DEFAULT_TRAIN_ARGS = {
         'hidden_layers': [20,40,20],
         'synthetic_replay_buffer': False,
         'synthetic_replay_buffer_alpha': 1_000,
+    },
+
+    # DQN-2BE arguments.
+    'dqn2be_args': {
+        # Default DQN args.
+        'batch_size': 100,
+        'target_update_period': 1_000,
+        'samples_per_insert': 25.0,
+        'min_replay_size': 50_000,
+        'max_replay_size': 1_000_000,
+        'prioritized_replay': False,
+        'importance_sampling_exponent': 0.9,
+        'priority_exponent': 0.6,
+        'epsilon_init': 0.05,
+        'epsilon_final': 0.05,
+        'epsilon_schedule_timesteps': 1_000_000,
+        'learning_rate': 1e-03,
+        'hidden_layers': [20,40,20],
+        # Bellman error learning args.
+        'be_net_hidden_layers': [20,33,20],
+        'be_net_learning_rate': 1e-04,
+        'delta_init': 0.25,
+        'delta_final': 0.25,
+        'delta_schedule_timesteps': 10_000_000,
     },
 
     # FQI arguments.
@@ -196,6 +221,10 @@ def train_run(run_args):
     elif args['algo'] == 'dqn':
         args['dqn_args']['discount'] = args['gamma']
         agent = DQN(env, env_grid_spec, log_path, args['dqn_args'])
+
+    elif args['algo'] == 'dqn2be':
+        args['dqn2be_args']['discount'] = args['gamma']
+        agent = DQN2BE(env, env_grid_spec, log_path, args['dqn2be_args'])
 
     elif args['algo'] == 'fqi':
         args['fqi_args']['discount'] = args['gamma']

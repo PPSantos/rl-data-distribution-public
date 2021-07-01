@@ -2,6 +2,10 @@ import sonnet as snt
 import tensorflow as tf
 import tensorflow_probability as tfp
 
+from acme import types
+from typing import Callable, Optional, Union
+TensorTransformation = Union[snt.Module, Callable[[types.NestedTensor],
+                                                tf.Tensor]]
 
 class GaussianNoiseExploration(snt.Module):
     """ Sonnet module for adding gaussian noise (exploration). """
@@ -150,4 +154,55 @@ class InputStandardization(snt.Module):
         # Standardize inputs.
         normalized = (inputs - self._mean) / self._var
 
-        return normalized 
+        return normalized
+
+class ConvexCombination(snt.Module):
+    """ Sonnet module to linearly combine two inputs. """
+
+    def __init__(self,
+                 network_1: TensorTransformation,
+                 network_2: TensorTransformation,
+                 delta_init: int,
+                 delta_final: int,
+                 delta_schedule_timesteps: int):
+        """ Initialise ConvexCombination class.
+            Parameters:
+            ----------
+            * network_1
+                first input network.
+            * network_2
+                second input network.
+            * delta_init: int
+                Initial delta value.
+            * delta_final: int
+                Final delta value.
+            * delta_schedule_timesteps: int
+                Number of timesteps to decay delta from 'delta_init'
+                to 'delta_final'
+        """
+        super().__init__(name='convex_combination')
+
+        self._network_1 = network_1
+        self._network_2 = network_2
+
+        # Internalise parameters.
+        self._delta_init = delta_init
+        self._delta_final = delta_final
+        self._delta_schedule_timesteps = delta_schedule_timesteps
+
+        # Internal counter.
+        self._counter = tf.Variable(0.0)
+
+    def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
+
+        out_1 = self._network_1(inputs)
+        out_2 = self._network_2(inputs)
+
+        # Calculate new delta value.
+        self._counter.assign(self._counter + 1.0)
+        fraction = tf.math.minimum(self._counter / self._delta_schedule_timesteps, 1.0)
+        delta = self._delta_init + fraction * (self._delta_final - self._delta_init)
+
+        out = (1 - delta) * out_1 + delta * out_2
+
+        return out

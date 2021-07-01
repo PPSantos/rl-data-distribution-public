@@ -8,7 +8,7 @@ import tensorflow as tf
 from acme import core
 
 PythonState = tf.train.experimental.PythonState
-Checkpointable = Union[tf.Module, tf.Variable, PythonState] 
+Checkpointable = Union[tf.Module, tf.Variable, PythonState]
 
 
 class Saver:
