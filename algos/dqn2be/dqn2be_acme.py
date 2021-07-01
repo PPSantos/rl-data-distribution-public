@@ -78,10 +78,7 @@ class DQN2BE(agent_acme.Agent):
         epsilon_init: Initial epsilon value (probability of taking a random action)
         epsilon_final: Final epsilon value (probability of taking a random action)
         epsilon_schedule_timesteps: timesteps to decay epsilon from 'epsilon_init'
-        to 'epsilon_final'. 
-        delta_init: Initial delta value (p(a|s) propto (1-delta)Q_val + + eps)
-        delta_final: float = 0.2,
-        delta_schedule_timesteps: int = 20_000,
+        to 'epsilon_final'.
         learning_rate: learning rate for the q-network update.
         be_net_learning_rate: BE network learning rate.
         discount: discount to use for TD updates.
