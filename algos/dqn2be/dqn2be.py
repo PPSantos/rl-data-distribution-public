@@ -57,6 +57,7 @@ class DQN2BE(object):
                                     e_network=e_network,
                                     batch_size=dqn2be_args['batch_size'],
                                     target_update_period=dqn2be_args['target_update_period'],
+                                    target_e_net_update_period=dqn2be_args['target_e_net_update_period'],
                                     samples_per_insert=dqn2be_args['samples_per_insert'],
                                     min_replay_size=dqn2be_args['min_replay_size'],
                                     max_replay_size=dqn2be_args['max_replay_size'],

@@ -37,9 +37,9 @@ DEFAULT_TRAIN_ARGS = {
     #           (and vice versa) and 'val_iter' algorithms.
 
     # General arguments.
-    'num_runs': 10,
-    'num_processors': 10,
-    'algo': 'dqn',
+    'num_runs': 1,
+    'num_processors': 1,
+    'algo': 'dqn2be',
     'num_episodes': 20_000,
     'gamma': 0.9, # discount factor.
 
@@ -125,7 +125,8 @@ DEFAULT_TRAIN_ARGS = {
         'hidden_layers': [20,40,20],
         # Bellman error learning args.
         'e_net_hidden_layers': [20,33,20],
-        'e_net_learning_rate': 1e-03,
+        'e_net_learning_rate': 1e-02,
+        'target_e_net_update_period': 200,
         # 'delta_init': 0.25,
         # 'delta_final': 0.25,
         # 'delta_schedule_timesteps': 10_000_000,
