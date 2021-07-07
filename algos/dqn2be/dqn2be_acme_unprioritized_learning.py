@@ -29,11 +29,11 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
       self,
       network: snt.Module,
       target_network: snt.Module,
-      bellman_error_network: snt.Module,
-      target_bellman_error_network: snt.Module,
+      e_network: snt.Module,
+      target_e_network: snt.Module,
       discount: float,
       learning_rate: float,
-      be_net_learning_rate: float,
+      e_net_learning_rate: float,
       target_update_period: int,
       dataset: tf.data.Dataset,
       huber_loss_parameter: float = 1.,
@@ -45,13 +45,13 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     """Initializes the learner.
 
     Args:
-      network: the online Q network (the one being optimized)
+      network: the online Q network (the one being optimized).
       target_network: the target Q critic (which lags behind the online net).
-      bellman_error_network:
-      target_bellman_error_network:
+      e_network: the online E-values network (the one being optimized).
+      target_e_network: the target E-values critic (which lags behind the online net).
       discount: discount to use for TD updates.
       learning_rate: learning rate for the q-network update.
-      be_net_learning_rate: learning rate for the bellman error network update.
+      e_net_learning_rate: learning rate for the E-values network update.
       target_update_period: number of learner steps to perform before updating
         the target networks.
       dataset: dataset to learn from, whether fixed or from a replay buffer (see
@@ -67,10 +67,10 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     self._iterator = iter(dataset)  # pytype: disable=wrong-arg-types
     self._network = network
     self._target_network = target_network
-    self._bellman_error_network = bellman_error_network
-    self._target_bellman_error_network = target_bellman_error_network
+    self._e_network = e_network
+    self._target_e_network = target_e_network
     self._optimizer = snt.optimizers.Adam(learning_rate)
-    self._belman_error_net_optimizer = snt.optimizers.Adam(be_net_learning_rate)
+    self._e_net_optimizer = snt.optimizers.Adam(e_net_learning_rate)
 
     # Internalise the hyperparameters.
     self._discount = discount
@@ -139,36 +139,36 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
       """
         Bellman error network loss.
       """
-      be_tm1 = self._bellman_error_network(observation)
-      be_t_value = self._target_bellman_error_network(next_observation)
-      be_t_selector = self._bellman_error_network(next_observation)
-      be_loss, _ = trfl.double_qlearning(be_tm1, action, squared_loss, d_t,
-                                      be_t_value, be_t_selector)
-      be_loss = tf.reduce_mean(be_loss, axis=[0])  # []
+      e_tm1 = self._e_network(observation)
+      e_t_value = self._target_e_network(next_observation)
+      e_t_selector = self._e_network(next_observation)
+      e_loss, _ = trfl.double_qlearning(e_tm1, action, squared_loss, d_t,
+                                      e_t_value, e_t_selector)
+      e_loss = tf.reduce_mean(e_loss, axis=[0])  # []
 
-    # Do a step of SGD (DQN network).
+    # Do a step of SGD (Q network).
     gradients = tape.gradient(loss, self._network.trainable_variables)
     gradients, _ = tf.clip_by_global_norm(gradients, self._max_gradient_norm)
     self._optimizer.apply(gradients, self._network.trainable_variables)
 
-    # Do a step of SGD (Bellman error network).
-    gradients = tape.gradient(be_loss, self._bellman_error_network.trainable_variables)
+    # Do a step of SGD (E network).
+    gradients = tape.gradient(e_loss, self._e_network.trainable_variables)
     gradients, _ = tf.clip_by_global_norm(gradients, self._max_gradient_norm)
-    self._belman_error_net_optimizer.apply(gradients, self._bellman_error_network.trainable_variables)
+    self._e_net_optimizer.apply(gradients, self._e_network.trainable_variables)
 
     del tape
 
     # Periodically update the target network.
     if tf.math.mod(self._num_steps, self._target_update_period) == 0:
 
-      # DQN network.
+      # Q network.
       for src, dest in zip(self._network.variables,
                            self._target_network.variables):
         dest.assign(src)
 
-      # Bellman error network.
-      for src, dest in zip(self._bellman_error_network.variables,
-                           self._target_bellman_error_network.variables):
+      # E network.
+      for src, dest in zip(self._e_network.variables,
+                           self._target_e_network.variables):
         dest.assign(src)
 
     self._num_steps.assign_add(1)
@@ -176,7 +176,7 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     # Report loss & statistics for logging.
     fetches = {
         'loss': loss,
-        'be_loss': be_loss,
+        'e_loss': be_loss,
     }
 
     return fetches
@@ -208,8 +208,8 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     return {
         'network': self._network,
         'target_network': self._target_network,
-        'bellman_error_network': self._bellman_error_network,
-        'target_bellman_error_network': self._target_bellman_error_network,
+        'e_network': self._e_network,
+        'target_e_network': self._target_e_network,
         'optimizer': self._optimizer,
         'num_steps': self._num_steps
     }

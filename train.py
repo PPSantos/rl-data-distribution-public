@@ -124,11 +124,11 @@ DEFAULT_TRAIN_ARGS = {
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
         # Bellman error learning args.
-        'be_net_hidden_layers': [20,33,20],
-        'be_net_learning_rate': 1e-04,
-        'delta_init': 0.25,
-        'delta_final': 0.25,
-        'delta_schedule_timesteps': 10_000_000,
+        'e_net_hidden_layers': [20,33,20],
+        'e_net_learning_rate': 1e-03,
+        # 'delta_init': 0.25,
+        # 'delta_final': 0.25,
+        # 'delta_schedule_timesteps': 10_000_000,
     },
 
     # FQI arguments.

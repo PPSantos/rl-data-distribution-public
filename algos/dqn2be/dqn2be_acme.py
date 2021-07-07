@@ -33,7 +33,7 @@ class DQN2BE(agent_acme.Agent):
             self,
             environment_spec: specs.EnvironmentSpec,
             network: snt.Module,
-            bellman_error_network: snt.Module,
+            e_network: snt.Module,
             batch_size: int = 256,
             target_update_period: int = 100,
             samples_per_insert: float = 32.0,
@@ -45,11 +45,11 @@ class DQN2BE(agent_acme.Agent):
             epsilon_init: float = 1.0,
             epsilon_final: float = 0.01,
             epsilon_schedule_timesteps: int = 20_000,
-            delta_init: float = 0.2,
-            delta_final: float = 0.2,
-            delta_schedule_timesteps: int = 20_000,
+            # delta_init: float = 0.2,
+            # delta_final: float = 0.2,
+            # delta_schedule_timesteps: int = 20_000,
             learning_rate: float = 1e-3,
-            be_net_learning_rate: float = 1e-4,
+            e_net_learning_rate: float = 1e-4,
             discount: float = 0.99,
             max_gradient_norm: Optional[float] = None,
             logger: loggers.Logger = None,
@@ -59,8 +59,8 @@ class DQN2BE(agent_acme.Agent):
         """Initialize the agent.
         Args:
         environment_spec: description of the actions, observations, etc.
-        network: the online Q network (the one being optimized)
-        bellman_error_network: the network that learns the backpropagated bellman errors
+        network: the online Q network (the one being optimized).
+        e_network: the E-values network.
         batch_size: batch size for updates.
         target_update_period: number of learner steps to perform before updating
             the target networks.
@@ -80,7 +80,7 @@ class DQN2BE(agent_acme.Agent):
         epsilon_schedule_timesteps: timesteps to decay epsilon from 'epsilon_init'
         to 'epsilon_final'.
         learning_rate: learning rate for the q-network update.
-        be_net_learning_rate: BE network learning rate.
+        e_net_learning_rate: E-values network learning rate.
         discount: discount to use for TD updates.
         logger: logger object to be used by learner.
         max_gradient_norm: used for gradient clipping.
@@ -104,9 +104,7 @@ class DQN2BE(agent_acme.Agent):
 
         # Create a epsilon-greedy policy network.
         policy_network = snt.Sequential([
-            ConvexCombination(network, bellman_error_network, delta_init=0.25,
-                                                delta_final=0.25,
-                                                delta_schedule_timesteps=10_000_000),
+            network,
             EpsilonGreedyExploration(epsilon_init=epsilon_init,
                                      epsilon_final=epsilon_final,
                                      epsilon_schedule_timesteps=epsilon_schedule_timesteps)
@@ -114,13 +112,13 @@ class DQN2BE(agent_acme.Agent):
 
         # Create a target network.
         target_network = copy.deepcopy(network)
-        target_bellman_error_network = copy.deepcopy(bellman_error_network)
+        target_e_network = copy.deepcopy(e_network)
 
         # Ensure that we create the variables before proceeding (maybe not needed).
         tf2_utils.create_variables(network, [environment_spec.observations])
         tf2_utils.create_variables(target_network, [environment_spec.observations])
-        tf2_utils.create_variables(bellman_error_network, [environment_spec.observations])
-        tf2_utils.create_variables(target_bellman_error_network, [environment_spec.observations])
+        tf2_utils.create_variables(e_network, [environment_spec.observations])
+        tf2_utils.create_variables(target_e_network, [environment_spec.observations])
 
         # Create the actor which defines how we take actions.
         actor = actors.FeedForwardActor(policy_network, self.adder)
@@ -132,11 +130,11 @@ class DQN2BE(agent_acme.Agent):
             learner = DQN2BEUnprioritizedLearner(
                 network=network,
                 target_network=target_network,
-                bellman_error_network=bellman_error_network,
-                target_bellman_error_network=target_bellman_error_network,
+                e_network=e_network,
+                target_e_network=target_e_network,
                 discount=discount,
                 learning_rate=learning_rate,
-                be_net_learning_rate=be_net_learning_rate,
+                e_net_learning_rate=e_net_learning_rate,
                 target_update_period=target_update_period,
                 dataset=dataset,
                 max_gradient_norm=max_gradient_norm,
@@ -153,6 +151,7 @@ class DQN2BE(agent_acme.Agent):
         self._deterministic_actor = actors.FeedForwardActor(max_Q_network)
 
         self._Q_vals_actor = actors.FeedForwardActor(network)
+        self._E_vals_actor = actors.FeedForwardActor(e_network)
 
         super().__init__(
             actor=actor,
@@ -165,6 +164,9 @@ class DQN2BE(agent_acme.Agent):
 
     def get_Q_vals(self, obs: types.NestedArray) -> types.NestedArray:
         return self._Q_vals_actor.select_action(obs)
+
+    def get_E_vals(self, obs: types.NestedArray) -> types.NestedArray:
+        return self._E_vals_actor.select_action(obs)
 
     def deterministic_action(self, obs: types.NestedArray) -> types.NestedArray:
         return self._deterministic_actor.select_action(obs)

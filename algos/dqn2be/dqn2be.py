@@ -49,12 +49,12 @@ class DQN2BE(object):
 
         network = _make_network(env_spec,
                         hidden_layers=dqn2be_args['hidden_layers'])
-        bellman_error_network = _make_network(env_spec,
-                        hidden_layers=dqn2be_args['be_net_hidden_layers'])
+        e_network = _make_network(env_spec,
+                        hidden_layers=dqn2be_args['e_net_hidden_layers'])
 
         self.agent = dqn2be_acme.DQN2BE(environment_spec=env_spec,
                                     network=network,
-                                    bellman_error_network=bellman_error_network,
+                                    e_network=e_network,
                                     batch_size=dqn2be_args['batch_size'],
                                     target_update_period=dqn2be_args['target_update_period'],
                                     samples_per_insert=dqn2be_args['samples_per_insert'],
@@ -67,11 +67,11 @@ class DQN2BE(object):
                                     epsilon_final=dqn2be_args['epsilon_final'],
                                     epsilon_schedule_timesteps=dqn2be_args['epsilon_schedule_timesteps'],
                                     learning_rate=dqn2be_args['learning_rate'],
-                                    be_net_learning_rate=dqn2be_args['be_net_learning_rate'],
+                                    e_net_learning_rate=dqn2be_args['e_net_learning_rate'],
                                     discount=dqn2be_args['discount'],
-                                    delta_init=dqn2be_args['delta_init'],
-                                    delta_final=dqn2be_args['delta_final'],
-                                    delta_schedule_timesteps=dqn2be_args['delta_schedule_timesteps'],
+                                    # delta_init=dqn2be_args['delta_init'],
+                                    # delta_final=dqn2be_args['delta_final'],
+                                    # delta_schedule_timesteps=dqn2be_args['delta_schedule_timesteps'],
                                     num_states=self.base_env.num_states,
                                     num_actions=self.base_env.num_actions,
                                     logger=loggers.CSVLogger(directory_or_file=log_path, label='learner'))
@@ -88,6 +88,8 @@ class DQN2BE(object):
                 self.base_env.num_states, self.base_env.num_actions))
         Q_vals_episodes = []
         Q_vals_ep = 0
+        E_vals = np.zeros((num_episodes//q_vals_period,
+                self.base_env.num_states, self.base_env.num_actions))
 
         replay_buffer_counts_episodes = []
         replay_buffer_counts = []
@@ -121,7 +123,7 @@ class DQN2BE(object):
 
             episode_rewards.append(episode_cumulative_reward)
 
-            # Store current Q-values.
+            # Store current Q-values and E-values.
             if episode % q_vals_period == 0:
                 Q_vals_episodes.append(episode)
                 for state in range(self.base_env.num_states):
@@ -130,14 +132,19 @@ class DQN2BE(object):
                         tile_type = self.env_grid_spec.get_value(xy)
                         if tile_type == TileType.WALL:
                             Q_vals[Q_vals_ep,state,:] = 0
+                            E_vals[Q_vals_ep,state,:] = 0
                         else:
                             obs = self.base_env.observation(state)
                             qvs = self.agent.get_Q_vals(obs)
                             Q_vals[Q_vals_ep,state,:] = qvs
+                            evs = self.agent.get_E_vals(obs)
+                            E_vals[Q_vals_ep,state,:] = evs
                     else:
                         obs = self.base_env.observation(state)
                         qvs = self.agent.get_Q_vals(obs)
                         Q_vals[Q_vals_ep,state,:] = qvs
+                        evs = self.agent.get_E_vals(obs)
+                        E_vals[Q_vals_ep,:] = evs
                 Q_vals_ep += 1
 
             # Get replay buffer statistics.
@@ -161,6 +168,7 @@ class DQN2BE(object):
         data['states_counts'] = states_counts
         data['Q_vals_episodes'] = Q_vals_episodes
         data['Q_vals'] = Q_vals
+        data['E_vals'] = E_vals
         data['max_Q_vals'] = np.max(Q_vals[-1], axis=1)
         data['policy'] = np.argmax(Q_vals[-1], axis=1)
         data['replay_buffer_counts_episodes'] = replay_buffer_counts_episodes
