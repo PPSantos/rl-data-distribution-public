@@ -132,7 +132,7 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
       #    self._discount, q_tm1.dtype) # discount = 0 if last timestep.
 
       # Compute the loss.
-      squared_loss, extra = trfl.double_qlearning(q_tm1, action, r_t, d_t,
+      _, extra = trfl.double_qlearning(q_tm1, action, r_t, d_t,
                                        q_t_value, q_t_selector)
       loss = losses.huber(extra.td_error, self._huber_loss_parameter)
       loss = tf.reduce_mean(loss, axis=[0])  # []

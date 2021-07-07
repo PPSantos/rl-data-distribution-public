@@ -155,7 +155,7 @@ def main(exp_id, val_iter_exp):
     data['Q_vals_episodes'] = exp_data[0]['Q_vals_episodes'] # [(E)]
 
     # Q_vals field.
-    data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,E,S,A]
+    data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,(E),S,A]
     
     # max_Q_vals field.
     data['max_Q_vals'] = np.array([e['max_Q_vals'] for e in exp_data]) # [R,S]
@@ -178,6 +178,14 @@ def main(exp_id, val_iter_exp):
     # rollouts_rewards field.
     data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts_types,num_rollouts]
 
+    """
+    # e_losses field.
+    data['e_losses'] = np.array([e['e_losses'] for e in exp_data]) # [R,(E),E_vals_learning_iters]
+
+    # E_vals field.
+    data['E_vals'] = np.array([e['E_vals'] for e in exp_data]) # [R,(E),S,A]
+    """
+
     # Scalar metrics dict.
     scalar_metrics = {}
 
@@ -190,6 +198,66 @@ def main(exp_id, val_iter_exp):
     learner_csv_files = [str(p) for p in list(pathlib.Path(exp_path).rglob('logs.csv'))]
     print('Number of learner csv (logs.csv) files found: {0}'.format(len(learner_csv_files)))
     print(learner_csv_files)
+
+    ################################################
+    """
+    to_plot_idx = 10
+
+    N_runs = data['E_vals'].shape[0]
+    N_states = data['E_vals'].shape[2]
+
+    for run in range(N_runs):
+        print('='*40)
+        print('='*40)
+        print(f'Run {run}:')
+        Q_vals_run = data['Q_vals'][run][to_plot_idx] # [S,A]
+        E_vals_run = data['E_vals'][run][to_plot_idx] # [S,A]
+
+        print('Max Q-vals:')
+        max_q_vals = [np.max(Q_vals_run[s,:]) for s in range(N_states)]
+        print_env(max_q_vals, (lateral_size, lateral_size), float_format="{:.1f} ")
+
+        print('Q-vals max policy:')
+        max_policy = [np.argmax(Q_vals_run[s,:]) for s in range(N_states)] # S
+        print_env(max_policy, (lateral_size, lateral_size))
+
+        print('|Q-Q*| (mean error):')
+        sa_errors = np.abs(val_iter_data['Q_vals'] - Q_vals_run) # [S,A]
+        errors_states = np.mean(sa_errors, axis=1)
+        print_env(errors_states, (lateral_size, lateral_size), float_format="{:.1f} ")
+
+        print('|Q-Q*| (max error):')
+        sa_errors = np.abs(val_iter_data['Q_vals'] - Q_vals_run) # [S,A]
+        errors_states = np.max(sa_errors, axis=1)
+        print_env(errors_states, (lateral_size, lateral_size), float_format="{:.1f} ")
+
+        print('|Q-Q*| (error for a=argmax(Q)):')
+        sa_errors = np.abs(val_iter_data['Q_vals'] - Q_vals_run) # [S,A]
+        argmax_errors = [sa_errors[s,a_max] for (s, a_max) in enumerate(max_policy)] # S
+        print_env(argmax_errors, (lateral_size, lateral_size), float_format="{:.1f} ")
+
+        print('Max E-vals:')
+        max_e_vals = [np.max(E_vals_run[s,:]) for s in range(N_states)]
+        print_env(max_e_vals, (lateral_size, lateral_size), float_format="{:.1f} ")
+
+        print('E-vals max policy:')
+        max_policy = [np.argmax(E_vals_run[s,:]) for s in range(N_states)] # S
+        print_env(max_policy, (lateral_size, lateral_size))
+
+        # E-values learning losses.
+        fig = plt.figure()
+        fig.set_size_inches(FIGURE_X, FIGURE_Y)
+        plt.plot(data['Q_vals_episodes'], data['e_losses'][run, to_plot_idx,:])
+        plt.xlabel('Episode')
+        plt.ylabel('Loss')
+        plt.legend()
+        plt.show()
+
+    exit()
+    """
+
+    ################################################
+
 
     """
         Print policies.
