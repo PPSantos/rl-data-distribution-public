@@ -3,6 +3,8 @@
 import time
 from typing import Dict, List
 
+from tqdm import tqdm
+
 import acme
 from acme import types
 from acme.adders import reverb as adders
@@ -210,18 +212,11 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
 
     self._num_steps_e.assign_add(1)
 
-    # Report loss & statistics for logging.
-    fetches = {
-        'e_loss': e_loss,
-    }
-
-    return fetches
+    return e_loss
 
   def step(self):
     # Do a batch of SGD.
-    result = {}
-    result.update(self._step_q())
-    result.update(self._step_e())    
+    result = self._step_q()
 
     # Compute elapsed time.
     timestamp = time.time()
@@ -236,6 +231,15 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     if self._snapshotter is not None:
       self._snapshotter.save()
     self._logger.write(result)
+
+  def fit_e_vals(self):
+    print('Fitting E-values...')
+
+    e_losses = []
+    for _ in tqdm(range(10_000)):
+      e_losses.append(self._step_e())
+
+    return e_losses
 
   def get_variables(self, names: List[str]) -> List[np.ndarray]:
     return tf2_utils.to_numpy(self._variables)

@@ -37,13 +37,13 @@ DEFAULT_TRAIN_ARGS = {
     #           (and vice versa) and 'val_iter' algorithms.
 
     # General arguments.
-    'num_runs': 1,
-    'num_processors': 1,
+    'num_runs': 5,
+    'num_processors': 5,
     'algo': 'dqn2be',
     'num_episodes': 20_000,
     'gamma': 0.9, # discount factor.
 
-    'q_vals_period': 20,
+    'q_vals_period': 100,
     'replay_buffer_counts_period': 100,
 
     # Env. arguments.
@@ -125,7 +125,7 @@ DEFAULT_TRAIN_ARGS = {
         'hidden_layers': [20,40,20],
         # Bellman error learning args.
         'e_net_hidden_layers': [20,33,20],
-        'e_net_learning_rate': 1e-02,
+        'e_net_learning_rate': 1e-03,
         'target_e_net_update_period': 200,
         # 'delta_init': 0.25,
         # 'delta_final': 0.25,
@@ -315,8 +315,8 @@ if __name__ == "__main__":
         plots(exp_id, val_iter_data)
 
         # Compress and cleanup.
-        shutil.make_archive(exp_path,
-                        'gztar',
-                        os.path.dirname(exp_path),
-                        exp_id)
-        shutil.rmtree(exp_path)
+        # shutil.make_archive(exp_path,
+        #                 'gztar',
+        #                 os.path.dirname(exp_path),
+        #                 exp_id)
+        # shutil.rmtree(exp_path)

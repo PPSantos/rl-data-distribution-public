@@ -98,6 +98,8 @@ class DQN2BE(object):
         rollouts_episodes = []
         rollouts_rewards = []
 
+        e_losses = []
+
         for episode in tqdm(range(num_episodes)):
 
             timestep = self.env.reset()
@@ -126,6 +128,10 @@ class DQN2BE(object):
 
             # Store current Q-values and E-values.
             if episode % q_vals_period == 0:
+
+                # Fit optimal E-values given current Q-values.
+                e_losses.append(self.agent.fit_e_vals())
+
                 Q_vals_episodes.append(episode)
                 for state in range(self.base_env.num_states):
                     if self.env_grid_spec:
@@ -176,6 +182,8 @@ class DQN2BE(object):
         data['replay_buffer_counts'] = replay_buffer_counts
         data['rollouts_episodes'] = rollouts_episodes
         data['rollouts_rewards'] = rollouts_rewards
+
+        data['e_losses'] = e_losses
 
         return data
 
