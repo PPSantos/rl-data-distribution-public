@@ -52,7 +52,7 @@ DEFAULT_TRAIN_ARGS = {
         'dim_obs': 8, # (for grid env. only).
         'time_limit': 50, # (for grid env. only).
         'tabular': False, # (for grid env. only).
-        'smooth_obs': True, # (for grid env. only).
+        'smooth_obs': False, # (for grid env. only).
         'one_hot_obs': False, # (for grid env. only).
     },
 
