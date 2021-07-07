@@ -236,9 +236,9 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     print('Fitting E-values...')
 
     e_losses = []
-    for _ in tqdm(range(10_000)):
-      e_losses.append(self._step_e())
-
+    for _ in tqdm(range(20_000)):
+      e_l = self._step_e()
+      e_losses.append(float(e_l))
     return e_losses
 
   def get_variables(self, names: List[str]) -> List[np.ndarray]:
