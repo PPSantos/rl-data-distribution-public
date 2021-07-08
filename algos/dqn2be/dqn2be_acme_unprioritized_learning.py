@@ -183,8 +183,10 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
         self._discount, q_tm1.dtype)
 
     # Compute the loss.
-    squared_loss, extra = trfl.double_qlearning(q_tm1, action, r_t, d_t,
+    _, extra = trfl.double_qlearning(q_tm1, action, r_t, d_t,
                                       q_t_value, q_t_selector)
+    q_loss = losses.huber(extra.td_error, self._huber_loss_parameter)
+    q_loss = tf.reduce_mean(q_loss, axis=[0])  # []
 
     with tf.GradientTape(persistent=True) as tape:
 
@@ -192,7 +194,7 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
       e_tm1 = self._e_network(observation)
       e_t_value = self._target_e_network(next_observation)
       e_t_selector = self._e_network(next_observation)
-      e_loss, _ = trfl.double_qlearning(e_tm1, action, squared_loss, d_t,
+      e_loss, _ = trfl.double_qlearning(e_tm1, action, q_loss, d_t,
                                       e_t_value, e_t_selector)
       e_loss = tf.reduce_mean(e_loss, axis=[0])  # []
 
