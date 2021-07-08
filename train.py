@@ -126,7 +126,7 @@ DEFAULT_TRAIN_ARGS = {
         # Bellman error learning args.
         'e_net_hidden_layers': [20,40,20],
         'e_net_learning_rate': 1e-03,
-        'target_e_net_update_period': 250,
+        'target_e_net_update_period': 1_000,
         # 'delta_init': 0.25,
         # 'delta_final': 0.25,
         # 'delta_schedule_timesteps': 10_000_000,

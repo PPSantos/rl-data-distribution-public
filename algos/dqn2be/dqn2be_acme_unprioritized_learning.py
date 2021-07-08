@@ -167,8 +167,10 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     qa_tm1 = trfl.indexing_ops.batched_index(q_tm1, action) # [B]
     error = targets - qa_tm1 # [B]
     q_loss = losses.huber(error, self._huber_loss_parameter)
+    # Rescale and clip Q-loss.
+    q_loss = 0.01 * q_loss
+    q_loss = tf.clip_by_value(q_loss, -1., 1.)
 
-    # Evaluate Q networks.
     """ q_tm1 = self._network(observation) # [B,A]
     q_t_value = self._target_network(next_observation)
     q_t_selector = self._network(next_observation)
@@ -213,7 +215,7 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
 
     self._num_steps_e.assign_add(1)
 
-    return e_loss
+    return {'e_loss': e_loss, 'max_q_loss': tf.reduce_max(q_loss)}
 
   def step(self):
     # Do a batch of SGD.
@@ -239,7 +241,7 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     e_losses = []
     for _ in tqdm(range(20_000)):
       e_l = self._step_e()
-      e_losses.append(float(e_l))
+      e_losses.append(dict(zip(e_l.keys(), [float(v) for v in e_l.values()])))
     return e_losses
 
   def get_variables(self, names: List[str]) -> List[np.ndarray]:
