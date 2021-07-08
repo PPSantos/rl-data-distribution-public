@@ -110,11 +110,7 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     data, info = next(self._iterator)
 
     # Unpack data.
-    observation = data[0]
-    action = data[1]
-    reward = data[2]
-    discount = data[3]
-    next_observation = data[4]
+    observation, action, reward, discount, next_observation, state, _ = data
 
     with tf.GradientTape(persistent=True) as tape:
 
@@ -165,14 +161,15 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     data, info = next(self._iterator)
 
     # Unpack data.
-    observation = data[0]
-    action = data[1]
-    reward = data[2]
-    discount = data[3]
-    next_observation = data[4]
+    observation, action, reward, discount, next_observation, state, targets = data
+
+    q_tm1 = self._network(observation) # [B,A]
+    qa_tm1 = trfl.indexing_ops.batched_index(q_tm1, action) # [B]
+    error = targets - qa_tm1 # [B]
+    q_loss = losses.huber(error, self._huber_loss_parameter)
 
     # Evaluate Q networks.
-    q_tm1 = self._network(observation)
+    """ q_tm1 = self._network(observation) # [B,A]
     q_t_value = self._target_network(next_observation)
     q_t_selector = self._network(next_observation)
 
@@ -185,8 +182,7 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     # Compute the loss.
     _, extra = trfl.double_qlearning(q_tm1, action, r_t, d_t,
                                       q_t_value, q_t_selector)
-    q_loss = losses.huber(extra.td_error, self._huber_loss_parameter)
-    q_loss = tf.reduce_mean(q_loss, axis=[0])  # []
+    q_loss = losses.huber(extra.td_error, self._huber_loss_parameter) """
 
     with tf.GradientTape(persistent=True) as tape:
 
@@ -194,8 +190,11 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
       e_tm1 = self._e_network(observation)
       e_t_value = self._target_e_network(next_observation)
       e_t_selector = self._e_network(next_observation)
-      e_loss, _ = trfl.double_qlearning(e_tm1, action, q_loss, d_t,
+      d_t = tf.cast(tf.ones_like(discount), e_tm1.dtype) * tf.cast(
+          self._discount, e_tm1.dtype)
+      _, extra = trfl.double_qlearning(e_tm1, action, q_loss, d_t,
                                       e_t_value, e_t_selector)
+      e_loss = losses.huber(extra.td_error, self._huber_loss_parameter)
       e_loss = tf.reduce_mean(e_loss, axis=[0])  # []
 
     # Do a step of SGD (E network).

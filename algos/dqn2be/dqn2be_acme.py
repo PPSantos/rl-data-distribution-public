@@ -91,9 +91,13 @@ class DQN2BE(agent_acme.Agent):
         self.num_actions = num_actions
 
         # Create replay buffer.
-        extras = (tensor_spec.TensorSpec((),
+        env_state_spec = tensor_spec.TensorSpec((),
                                 dtype=tf.int32,
-                                name='env_state'),)
+                                name='env_state')
+        oracle_q_val_spec = tensor_spec.TensorSpec((),
+                                dtype=tf.float32,
+                                name='oracle_q_val')
+        extras = (env_state_spec, oracle_q_val_spec)
         transition_spec = spec_converter.convert_env_spec(environment_spec, extras=extras)
         self.replay_buffer = TFUniformReplayBuffer(data_spec=transition_spec,
                                                     batch_size=1,

@@ -224,6 +224,17 @@ def train_run(run_args):
         agent = DQN(env, env_grid_spec, log_path, args['dqn_args'])
 
     elif args['algo'] == 'dqn2be':
+
+        # Load optimal (oracle) policy/Q-values.
+        val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA[args['env_args']['env_name']]
+        print(f"Opening experiment {VAL_ITER_DATA[args['env_args']['env_name']]} to get oracle Q-vals")
+        with open(val_iter_path + "/train_data.json", 'r') as f:
+            val_iter_data = json.load(f)
+            val_iter_data = json.loads(val_iter_data)
+            val_iter_data = val_iter_data[0]
+        f.close()
+
+        args['dqn2be_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
         args['dqn2be_args']['discount'] = args['gamma']
         agent = DQN2BE(env, env_grid_spec, log_path, args['dqn2be_args'])
 

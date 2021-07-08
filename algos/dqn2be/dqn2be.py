@@ -77,6 +77,8 @@ class DQN2BE(object):
                                     num_actions=self.base_env.num_actions,
                                     logger=loggers.CSVLogger(directory_or_file=log_path, label='learner'))
 
+        self.oracle_q_vals = dqn2be_args['oracle_q_vals']
+
     def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
                 num_rollouts, rollouts_period, rollouts_envs):
 
@@ -113,8 +115,9 @@ class DQN2BE(object):
                 action = self.agent.select_action(timestep.observation)
                 timestep = self.env.step(action)
 
+                oracle_q_val = np.float32(self.oracle_q_vals[env_state,action])
                 self.agent.observe_with_extras(action,
-                    next_timestep=timestep, extras=(np.int32(env_state),))
+                    next_timestep=timestep, extras=(np.int32(env_state), oracle_q_val))
 
                 self.agent.update()
 

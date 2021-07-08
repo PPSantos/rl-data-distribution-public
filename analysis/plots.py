@@ -178,11 +178,11 @@ def main(exp_id, val_iter_exp):
     # rollouts_rewards field.
     data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts_types,num_rollouts]
 
-    # e_losses field.
-    """ data['e_losses'] = np.array([e['e_losses'] for e in exp_data]) # [R,(E),E_vals_learning_iters]
+    """# e_losses field.
+    data['e_losses'] = np.array([e['e_losses'] for e in exp_data]) # [R,(E),E_vals_learning_iters]
 
     # E_vals field.
-    data['E_vals'] = np.array([e['E_vals'] for e in exp_data]) # [R,(E),S,A] """
+    data['E_vals'] = np.array([e['E_vals'] for e in exp_data]) # [R,(E),S,A]"""
 
     # Scalar metrics dict.
     scalar_metrics = {}
@@ -198,7 +198,7 @@ def main(exp_id, val_iter_exp):
     print(learner_csv_files)
 
     ################################################
-    """ to_plot_idx = -3
+    """to_plot_idx = 20
 
     print(f"Episode = {data['Q_vals_episodes'][to_plot_idx]}")
 
