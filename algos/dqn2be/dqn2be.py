@@ -78,6 +78,7 @@ class DQN2BE(object):
                                     logger=loggers.CSVLogger(directory_or_file=log_path, label='learner'))
 
         self.oracle_q_vals = dqn2be_args['oracle_q_vals']
+        self.discount = dqn2be_args['discount']
 
     def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
                 num_rollouts, rollouts_period, rollouts_envs):
@@ -132,29 +133,55 @@ class DQN2BE(object):
             # Store current Q-values and E-values.
             if episode % q_vals_period == 0:
 
-                # Fit optimal E-values given current Q-values.
-                e_losses.append(self.agent.fit_e_vals())
-
-                Q_vals_episodes.append(episode)
+                print('Running value iteration...')
+                estimated_Q_vals = np.zeros((self.env.num_states, self.env.num_actions))
                 for state in range(self.base_env.num_states):
                     if self.env_grid_spec:
                         xy = self.env_grid_spec.idx_to_xy(state)
                         tile_type = self.env_grid_spec.get_value(xy)
                         if tile_type == TileType.WALL:
-                            Q_vals[Q_vals_ep,state,:] = 0
-                            E_vals[Q_vals_ep,state,:] = 0
+                            estimated_Q_vals[state,:] = 0
                         else:
                             obs = self.base_env.observation(state)
                             qvs = self.agent.get_Q_vals(obs)
-                            Q_vals[Q_vals_ep,state,:] = qvs
-                            evs = self.agent.get_E_vals(obs)
-                            E_vals[Q_vals_ep,state,:] = evs
+                            estimated_Q_vals[state,:] = qvs
                     else:
                         obs = self.base_env.observation(state)
                         qvs = self.agent.get_Q_vals(obs)
-                        Q_vals[Q_vals_ep,state,:] = qvs
-                        evs = self.agent.get_E_vals(obs)
-                        E_vals[Q_vals_ep,:] = evs
+                        estimated_Q_vals[state,:] = qvs
+
+                # print('estimated_Q_vals', estimated_Q_vals)
+                # print('oracle q vals', self.oracle_q_vals)
+                # print('np.abs(estimated_Q_vals - oracle_Q_vals)', np.abs(estimated_Q_vals - self.oracle_q_vals))
+
+                _E_vals = np.zeros((self.env.num_states, self.env.num_actions))
+                while True:
+                    _E_vals_old = np.copy(_E_vals)
+                    
+                    for state in range(self.env.num_states):
+                        for action in range(self.env.num_actions):
+
+                            e_sa = np.abs(estimated_Q_vals[state, action] - self.oracle_q_vals[state, action])
+                            _E_vals[state][action] = e_sa + \
+                                self.discount * np.dot(self.env.transition_matrix()[state][action], \
+                                np.max(_E_vals, axis=1))
+
+                    delta = np.sum(np.abs(_E_vals - _E_vals_old))
+                    print('Delta:', delta)
+
+                    if delta < 0.1:
+                        break
+
+                # print('E_vals', _E_vals)
+                # print('max_E_vals', np.max(_E_vals, axis=1))
+                # print('policy', np.argmax(_E_vals, axis=1))
+
+                # Fit optimal E-values given current Q-values.
+                #e_losses.append(self.agent.fit_e_vals())
+
+                Q_vals_episodes.append(episode)
+                Q_vals[Q_vals_ep,:,:] = estimated_Q_vals
+                E_vals[Q_vals_ep,:,:] = _E_vals
                 Q_vals_ep += 1
 
             # Get replay buffer statistics.

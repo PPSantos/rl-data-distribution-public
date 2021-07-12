@@ -252,8 +252,8 @@ def main(exp_id, val_iter_exp):
         plt.legend()
         plt.show()
 
-    exit()
-    """
+    exit()"""
+    
     
     ################################################
 
