@@ -19,6 +19,7 @@ from acme.utils import loggers
 from algos.dqn2be import dqn2be_acme
 from rlutil.envs.gridcraft.grid_spec_cy import TileType
 
+from algos.linear_approximator import ReplayBuffer
 
 def _make_network(env_spec : dm_env,
                   hidden_layers : Sequence[int] = [10,10]):
@@ -80,6 +81,9 @@ class DQN2BE(object):
         self.oracle_q_vals = dqn2be_args['oracle_q_vals']
         self.discount = dqn2be_args['discount']
 
+        self.replay = ReplayBuffer(size=dqn2be_args['max_replay_size'],
+                statistics_table_shape=(self.env.num_states,self.env.num_actions))
+
     def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
                 num_rollouts, rollouts_period, rollouts_envs):
 
@@ -120,6 +124,7 @@ class DQN2BE(object):
                 self.agent.observe_with_extras(action,
                     next_timestep=timestep, extras=(np.int32(env_state), oracle_q_val))
 
+                self.replay.add(env_state, action, timestep.reward, self.base_env.get_state(), False)
                 self.agent.update()
 
                 env_state = self.base_env.get_state()
@@ -133,7 +138,7 @@ class DQN2BE(object):
             # Store current Q-values and E-values.
             if episode % q_vals_period == 0:
 
-                print('Running value iteration...')
+                print('Running e-learning...')
                 estimated_Q_vals = np.zeros((self.env.num_states, self.env.num_actions))
                 for state in range(self.base_env.num_states):
                     if self.env_grid_spec:
@@ -155,22 +160,17 @@ class DQN2BE(object):
                 # print('np.abs(estimated_Q_vals - oracle_Q_vals)', np.abs(estimated_Q_vals - self.oracle_q_vals))
 
                 _E_vals = np.zeros((self.env.num_states, self.env.num_actions))
-                while True:
-                    _E_vals_old = np.copy(_E_vals)
-                    
-                    for state in range(self.env.num_states):
-                        for action in range(self.env.num_actions):
 
-                            e_sa = np.abs(estimated_Q_vals[state, action] - self.oracle_q_vals[state, action])
-                            _E_vals[state][action] = e_sa + \
-                                self.discount * np.dot(self.env.transition_matrix()[state][action], \
-                                np.max(_E_vals, axis=1))
+                for _ in range(10_000):
+                    # Sample from replay buffer.
+                    states, actions, rewards, next_states, _ = self.replay.sample(100)
 
-                    delta = np.sum(np.abs(_E_vals - _E_vals_old))
-                    print('Delta:', delta)
+                    for i in range(100):
+                        s_t, a_t, r_t1, s_t1 = states[i], actions[i], rewards[i], next_states[i]
+                        e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - self.oracle_q_vals[s_t, a_t])
 
-                    if delta < 0.1:
-                        break
+                        _E_vals[s_t][a_t] += 0.05 * \
+                        (e_t1 + 0.9 * np.max(_E_vals[s_t1,:]) - _E_vals[s_t][a_t])
 
                 # print('E_vals', _E_vals)
                 # print('max_E_vals', np.max(_E_vals, axis=1))

@@ -198,7 +198,7 @@ def main(exp_id, val_iter_exp):
     print(learner_csv_files)
 
     ################################################
-    """to_plot_idx = -15
+    """to_plot_idx = -20
 
     print(f"Episode = {data['Q_vals_episodes'][to_plot_idx]}")
 
@@ -244,13 +244,13 @@ def main(exp_id, val_iter_exp):
         print_env(max_policy, (lateral_size, lateral_size))
 
         # E-values learning losses.
-        fig = plt.figure()
-        fig.set_size_inches(FIGURE_X, FIGURE_Y)
-        plt.plot(data['e_losses'][run, to_plot_idx,:])
-        plt.xlabel('Episode')
-        plt.ylabel('Loss')
-        plt.legend()
-        plt.show()
+        # fig = plt.figure()
+        # fig.set_size_inches(FIGURE_X, FIGURE_Y)
+        # plt.plot(data['e_losses'][run, to_plot_idx,:])
+        # plt.xlabel('Episode')
+        # plt.ylabel('Loss')
+        # plt.legend()
+        # plt.show()
 
     exit()"""
     
