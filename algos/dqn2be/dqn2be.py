@@ -99,6 +99,9 @@ class DQN2BE(object):
         E_vals = np.zeros((num_episodes//q_vals_period,
                 self.base_env.num_states, self.base_env.num_actions))
 
+        Q_errors = np.zeros((num_episodes//q_vals_period,
+                self.base_env.num_states, self.base_env.num_actions))
+
         replay_buffer_counts_episodes = []
         replay_buffer_counts = []
 
@@ -161,16 +164,23 @@ class DQN2BE(object):
 
                 _E_vals = np.zeros((self.env.num_states, self.env.num_actions))
 
+                _q_errors =  np.zeros((self.env.num_states, self.env.num_actions))
+                _samples_counts = np.zeros((self.env.num_states, self.env.num_actions))
+
                 for _ in range(10_000):
                     # Sample from replay buffer.
                     states, actions, rewards, next_states, _ = self.replay.sample(100)
 
                     for i in range(100):
                         s_t, a_t, r_t1, s_t1 = states[i], actions[i], rewards[i], next_states[i]
-                        e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - self.oracle_q_vals[s_t, a_t])
+                        #e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - self.oracle_q_vals[s_t, a_t])
+                        e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - (r_t1 + 0.9*np.max(estimated_Q_vals[s_t1,:])))
 
                         _E_vals[s_t][a_t] += 0.05 * \
                         (e_t1 + 0.9 * np.max(_E_vals[s_t1,:]) - _E_vals[s_t][a_t])
+
+                        _samples_counts[s_t,a_t] += 1
+                        _q_errors[s_t,a_t] += e_t1
 
                 # print('E_vals', _E_vals)
                 # print('max_E_vals', np.max(_E_vals, axis=1))
@@ -182,6 +192,7 @@ class DQN2BE(object):
                 Q_vals_episodes.append(episode)
                 Q_vals[Q_vals_ep,:,:] = estimated_Q_vals
                 E_vals[Q_vals_ep,:,:] = _E_vals
+                Q_errors[Q_vals_ep,:,:] = _q_errors / _samples_counts
                 Q_vals_ep += 1
 
             # Get replay buffer statistics.
@@ -205,6 +216,7 @@ class DQN2BE(object):
         data['states_counts'] = states_counts
         data['Q_vals_episodes'] = Q_vals_episodes
         data['Q_vals'] = Q_vals
+        data['Q_errors'] = Q_errors
         data['E_vals'] = E_vals
         data['max_Q_vals'] = np.max(Q_vals[-1], axis=1)
         data['policy'] = np.argmax(Q_vals[-1], axis=1)

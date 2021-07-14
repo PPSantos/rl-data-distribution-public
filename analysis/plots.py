@@ -198,7 +198,7 @@ def main(exp_id, val_iter_exp):
     print(learner_csv_files)
 
     ################################################
-    """to_plot_idx = -20
+    """to_plot_idx = -5
 
     print(f"Episode = {data['Q_vals_episodes'][to_plot_idx]}")
 
@@ -251,6 +251,142 @@ def main(exp_id, val_iter_exp):
         # plt.ylabel('Loss')
         # plt.legend()
         # plt.show()
+
+    
+    matplotlib.rcParams['mathtext.fontset'] = 'stix'
+    matplotlib.rcParams['font.family'] = 'STIXGeneral'
+    matplotlib.pyplot.title(r'ABC123 vs $\mathrm{ABC123}^{123}$')
+
+    to_plot_idxs = [-9,-8,-7,-6,-5,-4,-3,-2,-1]
+
+    max_q_vals = []
+    max_e_vals = []
+    errors = []
+    buffer_counts = []
+
+    print(data['Q_vals'].shape)
+    print(data['E_vals'].shape)
+    print(data['replay_buffer_counts'].shape)
+    print('-'*30)
+
+    for run in range(N_runs):
+        for _idx in to_plot_idxs:
+
+            Q_vals_run = data['Q_vals'][run][_idx] # [S,A]
+            E_vals_run = data['E_vals'][run][_idx] # [S,A]
+            replay_counts_run = data['replay_buffer_counts'][run][_idx] # [S,A]
+
+            max_e_vals.append([np.max(E_vals_run[s,:]) for s in range(N_states)])
+            max_q_vals.append([np.max(Q_vals_run[s,:]) for s in range(N_states)])
+
+            sa_errors = np.abs(val_iter_data['Q_vals'] - Q_vals_run) # [S,A]
+            errors.append(np.mean(sa_errors, axis=1))
+
+            buffer_counts.append([np.sum(replay_counts_run[s,:]) for s in range(N_states)])
+
+    max_e_vals = np.array(max_e_vals)
+    max_q_vals = np.array(max_q_vals)
+    errors = np.array(errors)
+    buffer_counts = np.array(buffer_counts)
+    print(max_e_vals.shape)
+    print(max_q_vals.shape)
+    print(errors.shape)
+    print(buffer_counts.shape)
+
+    # max_q_vals
+    max_q_vals = np.mean(max_q_vals, axis=0)
+    max_q_vals = np.reshape(max_q_vals, (8,-1))
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    sns.heatmap(max_q_vals, linewidth=0.5, cmap="coolwarm", cbar=False)
+
+    #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
+    #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
+
+    plt.text(0.34, plt.ylim()[0]-0.30, 'S', fontsize=16, color='white')
+    plt.text(plt.xlim()[1]-0.7, 0.67, 'G', fontsize=16, color='white')
+
+    plt.xticks([]) # remove the tick marks by setting to an empty list
+    plt.yticks([]) # remove the tick marks by setting to an empty list
+    plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+    plt.grid()
+    plt.savefig('max_q_vals.pdf', bbox_inches='tight', pad_inches=0)
+    plt.savefig('max_q_vals.png', bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    # max_e_vals
+    max_e_vals = np.mean(max_e_vals, axis=0)
+    max_e_vals = np.reshape(max_e_vals, (8,-1))
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    sns.heatmap(max_e_vals, linewidth=0.5, cmap="coolwarm", cbar=False)
+
+    #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
+    #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
+
+    plt.text(0.34, plt.ylim()[0]-0.30, 'S', fontsize=16, color='white')
+    plt.text(plt.xlim()[1]-0.7, 0.67, 'G', fontsize=16, color='white')
+
+    plt.xticks([]) # remove the tick marks by setting to an empty list
+    plt.yticks([]) # remove the tick marks by setting to an empty list
+    plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+    plt.grid()
+    plt.savefig('max_e_vals.pdf', bbox_inches='tight', pad_inches=0)
+    plt.savefig('max_e_vals.png', bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    # buffer_counts
+    buffer_counts = np.mean(buffer_counts, axis=0)
+    buffer_counts = np.reshape(buffer_counts, (8,-1))
+    buffer_counts[0,7] = np.nan
+    buffer_counts[7,0] = np.nan
+    mask_array = np.ma.masked_invalid(buffer_counts).mask
+    labels = buffer_counts / np.nansum(buffer_counts) * 100
+    labels = np.around(labels, decimals=1)
+    print(labels)
+
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    sns.heatmap(buffer_counts, annot=labels, linewidth=0.5, cmap="coolwarm", cbar=False, mask=mask_array)
+
+    #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
+    #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
+
+    #plt.text(0.34, plt.ylim()[0]-0.30, 'S', fontsize=16, color='white')
+    #plt.text(plt.xlim()[1]-0.7, 0.67, 'G', fontsize=16, color='white')
+
+    plt.xticks([]) # remove the tick marks by setting to an empty list
+    plt.yticks([]) # remove the tick marks by setting to an empty list
+    plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+    plt.grid()
+    plt.savefig('buffer_counts.png', bbox_inches='tight', pad_inches=0)
+    plt.savefig('buffer_counts.pdf', bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    # errors
+    errors = np.mean(errors, axis=0)
+    errors = np.reshape(errors, (8,-1))
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    sns.heatmap(errors, linewidth=0.5, cmap="coolwarm", cbar=False)
+
+    #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
+    #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
+
+    plt.text(0.34, plt.ylim()[0]-0.30, 'S', fontsize=16, color='white')
+    plt.text(plt.xlim()[1]-0.7, 0.67, 'G', fontsize=16, color='white')
+
+    plt.xticks([]) # remove the tick marks by setting to an empty list
+    plt.yticks([]) # remove the tick marks by setting to an empty list
+    plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+    plt.grid()
+    plt.savefig('errors.png', bbox_inches='tight', pad_inches=0)
+    plt.savefig('errors.pdf', bbox_inches='tight', pad_inches=0)
+    plt.close()
 
     exit()"""
     
