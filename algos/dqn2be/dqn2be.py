@@ -192,7 +192,7 @@ class DQN2BE(object):
                 Q_vals_episodes.append(episode)
                 Q_vals[Q_vals_ep,:,:] = estimated_Q_vals
                 E_vals[Q_vals_ep,:,:] = _E_vals
-                Q_errors[Q_vals_ep,:,:] = _q_errors / _samples_counts
+                Q_errors[Q_vals_ep,:,:] = _q_errors / (_samples_counts + 1e-05)
                 Q_vals_ep += 1
 
             # Get replay buffer statistics.
