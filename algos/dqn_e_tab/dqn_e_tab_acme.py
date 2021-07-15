@@ -17,7 +17,6 @@ from tf_agents.specs import tensor_spec
 from algos import agent_acme, actors
 from algos.tf_uniform_replay_buffer import TFUniformReplayBuffer
 from algos.utils import tf2_savers, spec_converter
-from algos.utils.tf2_layers import EpsilonGreedyExploration, ConvexCombination
 from algos.dqn_e_tab.dqn_e_tab_acme_learning import DQN_E_tab_Learner
 from algos.tf_adder import TFAdder
 
@@ -38,9 +37,6 @@ class DQN_E_tab(agent_acme.Agent):
             samples_per_insert: float = 32.0,
             min_replay_size: int = 20,
             max_replay_size: int = 1000000,
-            epsilon_init: float = 1.0,
-            epsilon_final: float = 0.01,
-            epsilon_schedule_timesteps: int = 20_000,
             learning_rate: float = 1e-3,
             discount: float = 0.99,
             max_gradient_norm: Optional[float] = None,
@@ -61,19 +57,12 @@ class DQN_E_tab(agent_acme.Agent):
             following arguments are related to dataset construction and will be
             ignored if a dataset argument is passed.
         max_replay_size: maximum replay size.
-        epsilon_init: Initial epsilon value (probability of taking a random action)
-        epsilon_final: Final epsilon value (probability of taking a random action)
-        epsilon_schedule_timesteps: timesteps to decay epsilon from 'epsilon_init'
-            to 'epsilon_final'.
         learning_rate: learning rate for the q-network update.
         discount: discount to use for TD updates.
         logger: logger object to be used by learner.
         max_gradient_norm: used for gradient clipping.
 
         """
-        self.num_states = num_states
-        self.num_actions = num_actions
-
         # Create replay buffer.
         env_state_spec = tensor_spec.TensorSpec((),
                                 dtype=tf.int32,
@@ -86,8 +75,8 @@ class DQN_E_tab(agent_acme.Agent):
         self.replay_buffer = TFUniformReplayBuffer(data_spec=transition_spec,
                                                     batch_size=1,
                                                     max_length=max_replay_size,
-                                                    statistics_table_shape=(self.num_states,
-                                                                            self.num_actions))
+                                                    statistics_table_shape=(num_states,
+                                                                            num_actions))
         dataset = self.replay_buffer.as_dataset(sample_batch_size=batch_size)
         self._dataset_iterator = iter(dataset)
 
@@ -96,9 +85,7 @@ class DQN_E_tab(agent_acme.Agent):
         # Create a epsilon-greedy policy network.
         policy_network = snt.Sequential([
             network,
-            EpsilonGreedyExploration(epsilon_init=epsilon_init,
-                                     epsilon_final=epsilon_final,
-                                     epsilon_schedule_timesteps=epsilon_schedule_timesteps)
+            lambda q: trfl.epsilon_greedy(q, epsilon=0.05).sample(),
         ])
 
         # Create a target network.

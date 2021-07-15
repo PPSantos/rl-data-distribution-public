@@ -17,19 +17,9 @@ from acme import wrappers
 from acme.utils import loggers
 
 from algos.dqn_e_tab import dqn_e_tab_acme
+from algos.utils.array_functions import choice_eps_greedy
 from rlutil.envs.gridcraft.grid_spec_cy import TileType
 
-from algos.linear_approximator import ReplayBuffer
-
-def all_eq(values):
-    # Returns True if every element of 'values' is the same.
-    return all(np.isnan(values)) or max(values) - min(values) < 1e-6
-
-def choice_eps_greedy(values, epsilon):
-    if np.random.rand() <= epsilon or all_eq(values):
-        return np.random.choice(len(values))
-    else:
-        return np.argmax(values)
 
 def _make_network(env_spec : dm_env,
                   hidden_layers : Sequence[int] = [10,10]):
@@ -68,26 +58,25 @@ class DQN_E_tab(object):
                                     samples_per_insert=dqn_e_tab_args['samples_per_insert'],
                                     min_replay_size=dqn_e_tab_args['min_replay_size'],
                                     max_replay_size=dqn_e_tab_args['max_replay_size'],
-                                    epsilon_init=dqn_e_tab_args['epsilon_init'],
-                                    epsilon_final=dqn_e_tab_args['epsilon_final'],
-                                    epsilon_schedule_timesteps=dqn_e_tab_args['epsilon_schedule_timesteps'],
                                     learning_rate=dqn_e_tab_args['learning_rate'],
                                     discount=dqn_e_tab_args['discount'],
                                     num_states=self.base_env.num_states,
                                     num_actions=self.base_env.num_actions,
                                     logger=loggers.CSVLogger(directory_or_file=log_path, label='learner'))
 
-        self.oracle_q_vals = dqn_e_tab_args['oracle_q_vals']
-        self.discount = dqn_e_tab_args['discount']
-
         # E-values table.
         self.E = np.zeros((self.env.num_states,self.env.num_actions))
 
         # Internalise arguments.
+        self.oracle_q_vals = dqn_e_tab_args['oracle_q_vals']
+        self.discount = dqn_e_tab_args['discount']
         self.batch_size = dqn_e_tab_args['batch_size']
         self.samples_per_insert = dqn_e_tab_args['samples_per_insert']
         self.discount = dqn_e_tab_args['discount']
         self.lr_lambda = dqn_e_tab_args['lr_lambda']
+        self.epsilon_init = dqn_e_tab_args['epsilon_init']
+        self.epsilon_final = dqn_e_tab_args['epsilon_final']
+        self.epsilon_schedule_episodes = dqn_e_tab_args['epsilon_schedule_episodes']
 
     def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
                 num_rollouts, rollouts_period, rollouts_envs):
@@ -117,6 +106,10 @@ class DQN_E_tab(object):
 
         for episode in tqdm(range(num_episodes)):
 
+            # Calculate exploration epsilon.
+            fraction = np.minimum(episode / self.epsilon_schedule_episodes, 1.0)
+            curr_epsilon = self.epsilon_init + fraction * (self.epsilon_final - self.epsilon_init)
+
             timestep = self.env.reset()
             env_state = self.base_env.get_state()
 
@@ -125,7 +118,8 @@ class DQN_E_tab(object):
             episode_cumulative_reward = 0
             while not timestep.last():
 
-                action = self.agent.select_action(timestep.observation)
+                action = np.array(choice_eps_greedy(self.E[env_state], curr_epsilon))
+
                 timestep = self.env.step(action)
 
                 oracle_q_val = np.float32(self.oracle_q_vals[env_state,action])

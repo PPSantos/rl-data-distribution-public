@@ -2,15 +2,7 @@ import random
 import numpy as np
 from tqdm import tqdm
 
-def all_eq(values):
-    # Returns True if every element of 'values' is the same.
-    return all(np.isnan(values)) or max(values) - min(values) < 1e-6
-
-def choice_eps_greedy(values, epsilon):
-    if np.random.rand() <= epsilon or all_eq(values):
-        return np.random.choice(len(values))
-    else:
-        return np.argmax(values)
+from algos.utils.array_functions import choice_eps_greedy
 
 
 class LinearApproximator(object):

@@ -38,8 +38,8 @@ DEFAULT_TRAIN_ARGS = {
     #           (and vice versa) and 'val_iter' algorithms.
 
     # General arguments.
-    'num_runs': 5,
-    'num_processors': 5,
+    'num_runs': 3,
+    'num_processors': 3,
     'algo': 'dqn_e_tab',
     'num_episodes': 20_000,
     'gamma': 0.9, # discount factor.
@@ -116,13 +116,13 @@ DEFAULT_TRAIN_ARGS = {
         'samples_per_insert': 25.0,
         'min_replay_size': 50_000,
         'max_replay_size': 1_000_000,
-        'epsilon_init': 1.0,
-        'epsilon_final': 0.0,
-        'epsilon_schedule_timesteps': 1_000_000,
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
-        # E-learning (tabular version) args.
-        'lr_lambda': 0.05, # learning rate.
+        # E-learning args.
+        'lr_lambda': 0.05,
+        'epsilon_init': 1.0,
+        'epsilon_final': 0.0,
+        'epsilon_schedule_episodes': 20_000,
     },
 
     # DQN-2BE arguments.
