@@ -178,7 +178,7 @@ def main(exp_id, val_iter_exp):
     # rollouts_rewards field.
     data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts_types,num_rollouts]
 
-    """ # E_vals field.
+    """# E_vals field.
     data['E_vals'] = np.array([e['E_vals'] for e in exp_data]) # [R,(E),S,A]
 
     # Q_errors field.
@@ -254,6 +254,7 @@ def main(exp_id, val_iter_exp):
     #to_plot_idxs = [5,6,7,8,9,10,11,12,14,15]
 
     q_vals_summed = np.zeros((64,5)) # [S,A]
+    e_vals_summed = np.zeros((64,5)) # [S,A]
     max_q_vals = []
     max_e_vals = []
     errors = []
@@ -284,7 +285,7 @@ def main(exp_id, val_iter_exp):
             buffer_counts.append([np.sum(replay_counts_run[s,:]) for s in range(N_states)])
 
             q_vals_summed = q_vals_summed + Q_vals_run # [S,A]
-
+            e_vals_summed = e_vals_summed + E_vals_run # [S,A]
 
     max_e_vals = np.array(max_e_vals)
     max_q_vals = np.array(max_q_vals)
@@ -301,7 +302,8 @@ def main(exp_id, val_iter_exp):
     """
         gridEnv1
     """
-    """# max_q_vals
+    """
+    # max_q_vals
     max_q_vals = np.mean(max_q_vals, axis=0)
     max_q_vals = np.reshape(max_q_vals, (8,-1))
     fig = plt.figure()
@@ -330,7 +332,7 @@ def main(exp_id, val_iter_exp):
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-    sns.heatmap(q_vals_greedy_policy, linewidth=0.5, cmap="coolwarm")#, cbar=False)
+    sns.heatmap(q_vals_greedy_policy, linewidth=0.5, cmap="coolwarm") #, cbar=False)
 
     #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
     #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
@@ -366,6 +368,29 @@ def main(exp_id, val_iter_exp):
     plt.grid()
     plt.savefig('max_e_vals.pdf', bbox_inches='tight', pad_inches=0)
     plt.savefig('max_e_vals.png', bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    # greedy e-vals policy
+    e_vals_greedy_policy = np.argmax(e_vals_summed, axis=1) # [S]
+    e_vals_greedy_policy = np.reshape(e_vals_greedy_policy, (8,-1))
+
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    sns.heatmap(e_vals_greedy_policy, linewidth=0.5, cmap="coolwarm") #, cbar=False)
+
+    #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
+    #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
+
+    #plt.text(0.34, plt.ylim()[0]-0.30, 'S', fontsize=16, color='white')
+    #plt.text(plt.xlim()[1]-0.7, 0.67, 'G', fontsize=16, color='white')
+
+    plt.xticks([]) # remove the tick marks by setting to an empty list
+    plt.yticks([]) # remove the tick marks by setting to an empty list
+    plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+    plt.grid()
+    plt.savefig('e_vals_greedy_policy.pdf', bbox_inches='tight', pad_inches=0)
+    plt.savefig('e_vals_greedy_policy.png', bbox_inches='tight', pad_inches=0)
     plt.close()
 
     # buffer_counts
@@ -510,6 +535,31 @@ def main(exp_id, val_iter_exp):
     plt.grid()
     plt.savefig('max_e_vals.pdf', bbox_inches='tight', pad_inches=0)
     plt.savefig('max_e_vals.png', bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    # greedy e-vals policy
+    e_vals_greedy_policy = np.argmax(e_vals_summed, axis=1) # [S]
+    e_vals_greedy_policy = np.reshape(e_vals_greedy_policy, (8,-1))
+    e_vals_greedy_policy = np.delete(e_vals_greedy_policy, 0, 0)
+    e_vals_greedy_policy[3,[1,2,3,4,5,6]] = np.nan
+
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    sns.heatmap(e_vals_greedy_policy, linewidth=0.5, cmap="coolwarm") #, cbar=False)
+
+    #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
+    #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
+
+    #plt.text(0.34, plt.ylim()[0]-0.30, 'S', fontsize=16, color='white')
+    #plt.text(plt.xlim()[1]-0.7, 0.67, 'G', fontsize=16, color='white')
+
+    plt.xticks([]) # remove the tick marks by setting to an empty list
+    plt.yticks([]) # remove the tick marks by setting to an empty list
+    plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+    plt.grid()
+    plt.savefig('e_vals_greedy_policy.pdf', bbox_inches='tight', pad_inches=0)
+    plt.savefig('e_vals_greedy_policy.png', bbox_inches='tight', pad_inches=0)
     plt.close()
 
     # buffer_counts
