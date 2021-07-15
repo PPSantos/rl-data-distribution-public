@@ -182,6 +182,12 @@ def main(exp_id, val_iter_exp):
     data['e_losses'] = np.array([e['e_losses'] for e in exp_data]) # [R,(E),E_vals_learning_iters]
 
     # E_vals field.
+    data['E_vals'] = np.array([e['E_vals'] for e in exp_data]) # [R,(E),S,A]
+
+    # Q_errors field.
+    if 'Q_errors' in exp_data[0].keys():
+        data['Q_errors'] = np.array([e['Q_errors'] for e in exp_data]) # [R,(E),S,A]
+
     data['E_vals'] = np.array([e['E_vals'] for e in exp_data]) # [R,(E),S,A]"""
 
     # Scalar metrics dict.
@@ -257,12 +263,14 @@ def main(exp_id, val_iter_exp):
     matplotlib.rcParams['font.family'] = 'STIXGeneral'
     matplotlib.pyplot.title(r'ABC123 vs $\mathrm{ABC123}^{123}$')
 
-    to_plot_idxs = [-9,-8,-7,-6,-5,-4,-3,-2,-1]
+    to_plot_idxs = [5,6,7,8,9,10,11,12,14,15,17,20]
 
+    q_vals_summed = np.zeros((64,5)) # [S,A]
     max_q_vals = []
     max_e_vals = []
     errors = []
     buffer_counts = []
+    Q_errors = []
 
     print(data['Q_vals'].shape)
     print(data['E_vals'].shape)
@@ -275,26 +283,38 @@ def main(exp_id, val_iter_exp):
             Q_vals_run = data['Q_vals'][run][_idx] # [S,A]
             E_vals_run = data['E_vals'][run][_idx] # [S,A]
             replay_counts_run = data['replay_buffer_counts'][run][_idx] # [S,A]
+            if 'Q_errors' in exp_data[0].keys():
+                Q_errors_run = data['Q_errors'][run][_idx] # [S,A]
+                Q_errors.append(np.mean(Q_errors_run, axis=1)) # [S]
 
             max_e_vals.append([np.max(E_vals_run[s,:]) for s in range(N_states)])
             max_q_vals.append([np.max(Q_vals_run[s,:]) for s in range(N_states)])
 
             sa_errors = np.abs(val_iter_data['Q_vals'] - Q_vals_run) # [S,A]
-            errors.append(np.mean(sa_errors, axis=1))
+            errors.append(np.mean(sa_errors, axis=1)) # [S]
 
             buffer_counts.append([np.sum(replay_counts_run[s,:]) for s in range(N_states)])
+
+            q_vals_summed = q_vals_summed + Q_vals_run # [S,A]
+
 
     max_e_vals = np.array(max_e_vals)
     max_q_vals = np.array(max_q_vals)
     errors = np.array(errors)
     buffer_counts = np.array(buffer_counts)
-    print(max_e_vals.shape)
-    print(max_q_vals.shape)
-    print(errors.shape)
-    print(buffer_counts.shape)
+    print('max_e_vals shape', max_e_vals.shape)
+    print('max_q_vals shape', max_q_vals.shape)
+    print('errors shape', errors.shape)
+    print('buffer_counts shape', buffer_counts.shape)
+    if 'Q_errors' in exp_data[0].keys():
+        Q_errors = np.array(Q_errors)
+        print('Q_errors shape', Q_errors.shape)"""
 
+    """
+        gridEnv1
+    """
     # max_q_vals
-    max_q_vals = np.mean(max_q_vals, axis=0)
+    """max_q_vals = np.mean(max_q_vals, axis=0)
     max_q_vals = np.reshape(max_q_vals, (8,-1))
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
@@ -313,6 +333,29 @@ def main(exp_id, val_iter_exp):
     plt.grid()
     plt.savefig('max_q_vals.pdf', bbox_inches='tight', pad_inches=0)
     plt.savefig('max_q_vals.png', bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    # Greedy Q-vals policy
+    q_vals_greedy_policy = np.argmax(q_vals_summed, axis=1) # [S]
+    q_vals_greedy_policy = np.reshape(q_vals_greedy_policy, (8,-1))
+
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    sns.heatmap(q_vals_greedy_policy, linewidth=0.5, cmap="coolwarm")#, cbar=False)
+
+    #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
+    #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
+
+    #plt.text(0.34, plt.ylim()[0]-0.30, 'S', fontsize=16, color='white')
+    #plt.text(plt.xlim()[1]-0.7, 0.67, 'G', fontsize=16, color='white')
+
+    plt.xticks([]) # remove the tick marks by setting to an empty list
+    plt.yticks([]) # remove the tick marks by setting to an empty list
+    plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+    plt.grid()
+    plt.savefig('q_vals_greedy_policy.pdf', bbox_inches='tight', pad_inches=0)
+    plt.savefig('q_vals_greedy_policy.png', bbox_inches='tight', pad_inches=0)
     plt.close()
 
     # max_e_vals
@@ -345,7 +388,6 @@ def main(exp_id, val_iter_exp):
     mask_array = np.ma.masked_invalid(buffer_counts).mask
     labels = buffer_counts / np.nansum(buffer_counts) * 100
     labels = np.around(labels, decimals=1)
-    print(labels)
 
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
@@ -366,7 +408,7 @@ def main(exp_id, val_iter_exp):
     plt.savefig('buffer_counts.pdf', bbox_inches='tight', pad_inches=0)
     plt.close()
 
-    # errors
+    # errors: abs(Q_phi - Q*)
     errors = np.mean(errors, axis=0)
     errors = np.reshape(errors, (8,-1))
     fig = plt.figure()
@@ -387,6 +429,182 @@ def main(exp_id, val_iter_exp):
     plt.savefig('errors.png', bbox_inches='tight', pad_inches=0)
     plt.savefig('errors.pdf', bbox_inches='tight', pad_inches=0)
     plt.close()
+
+    if 'Q_errors' in exp_data[0].keys():
+        # errors: abs(Q_phi - (r+gamma*max(Q[s_t1,:])))
+
+        Q_errors = np.mean(Q_errors, axis=0)
+        Q_errors = np.reshape(Q_errors, (8,-1))
+        fig = plt.figure()
+        fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+        sns.heatmap(Q_errors, linewidth=0.5, cmap="coolwarm", cbar=False)
+
+        #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
+        #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
+
+        plt.text(0.34, plt.ylim()[0]-0.30, 'S', fontsize=16, color='white')
+        plt.text(plt.xlim()[1]-0.7, 0.67, 'G', fontsize=16, color='white')
+
+        plt.xticks([]) # remove the tick marks by setting to an empty list
+        plt.yticks([]) # remove the tick marks by setting to an empty list
+        plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+        plt.grid()
+        plt.savefig('Q_errors.png', bbox_inches='tight', pad_inches=0)
+        plt.savefig('Q_errors.pdf', bbox_inches='tight', pad_inches=0)
+        plt.close()"""
+
+    """
+        gridEnv4
+    """
+    """colormap = sns.color_palette("coolwarm", as_cmap=True)
+    colormap.set_bad("black")
+    # max_q_vals
+    max_q_vals = np.mean(max_q_vals, axis=0)
+    max_q_vals = np.reshape(max_q_vals, (8,-1))
+    max_q_vals = np.delete(max_q_vals, 0, 0)
+    max_q_vals[3,[1,2,3,4,5,6]] = np.nan
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    sns.heatmap(max_q_vals, linewidth=0.5, cmap=colormap, cbar=False)
+
+    #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
+    #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
+
+    plt.text(0.34, plt.ylim()[0]-3.35, 'S', fontsize=16, color='white')
+    plt.text(plt.xlim()[1]-0.7, plt.ylim()[0]-3.35, 'G', fontsize=16, color='white')
+
+    plt.xticks([]) # remove the tick marks by setting to an empty list
+    plt.yticks([]) # remove the tick marks by setting to an empty list
+    plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+    plt.grid()
+    plt.savefig('max_q_vals.pdf', bbox_inches='tight', pad_inches=0)
+    plt.savefig('max_q_vals.png', bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    # Greedy Q-vals policy
+    # q_vals_greedy_policy = np.argmax(q_vals_summed, axis=1) # [S]
+    # q_vals_greedy_policy = np.reshape(q_vals_greedy_policy, (8,-1))
+
+    # fig = plt.figure()
+    # fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    # sns.heatmap(q_vals_greedy_policy, linewidth=0.5, cmap="coolwarm")#, cbar=False)
+
+    # plt.xticks([]) # remove the tick marks by setting to an empty list
+    # plt.yticks([]) # remove the tick marks by setting to an empty list
+    # plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+    # plt.grid()
+    # plt.savefig('q_vals_greedy_policy.pdf', bbox_inches='tight', pad_inches=0)
+    # plt.savefig('q_vals_greedy_policy.png', bbox_inches='tight', pad_inches=0)
+    # plt.close()
+
+    # max_e_vals
+    max_e_vals = np.mean(max_e_vals, axis=0)
+    max_e_vals = np.reshape(max_e_vals, (8,-1))
+    max_e_vals = np.delete(max_e_vals, 0, 0)
+    max_e_vals[3,[1,2,3,4,5,6]] = np.nan
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    sns.heatmap(max_e_vals, linewidth=0.5, cmap=colormap, cbar=False)
+
+    #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
+    #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
+
+    plt.text(0.34, plt.ylim()[0]-3.35, 'S', fontsize=16, color='white')
+    plt.text(plt.xlim()[1]-0.7, plt.ylim()[0]-3.35, 'G', fontsize=16, color='white')
+
+    plt.xticks([]) # remove the tick marks by setting to an empty list
+    plt.yticks([]) # remove the tick marks by setting to an empty list
+    plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+    plt.grid()
+    plt.savefig('max_e_vals.pdf', bbox_inches='tight', pad_inches=0)
+    plt.savefig('max_e_vals.png', bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    # buffer_counts
+    buffer_counts = np.mean(buffer_counts, axis=0)
+    buffer_counts = np.reshape(buffer_counts, (8,-1))
+    buffer_counts = np.delete(buffer_counts, 0, 0)
+    buffer_counts[3,[1,2,3,4,5,6]] = np.nan
+    #buffer_counts[3,0] = np.nan # start
+    #buffer_counts[3,7] = np.nan # goal
+    mask_array = np.ma.masked_invalid(buffer_counts).mask
+    labels = buffer_counts / np.nansum(buffer_counts) * 100
+    labels = np.around(labels, decimals=1)
+
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    sns.heatmap(buffer_counts, annot=labels, linewidth=0.5, cmap="coolwarm", cbar=False, mask=mask_array)
+
+    #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
+    #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
+
+    #plt.text(0.34, plt.ylim()[0]-3.35, 'S', fontsize=16, color='white')
+    #plt.text(plt.xlim()[1]-0.7, plt.ylim()[0]-3.35, 'G', fontsize=16, color='white')
+
+    plt.xticks([]) # remove the tick marks by setting to an empty list
+    plt.yticks([]) # remove the tick marks by setting to an empty list
+    plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+    plt.grid()
+    plt.savefig('buffer_counts.png', bbox_inches='tight', pad_inches=0)
+    plt.savefig('buffer_counts.pdf', bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+    # errors
+    errors = np.mean(errors, axis=0)
+    errors = np.reshape(errors, (8,-1))
+    errors = np.delete(errors, 0, 0)
+    errors[3,[1,2,3,4,5,6]] = np.nan
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    sns.heatmap(errors, linewidth=0.5, cmap="coolwarm", cbar=False)
+
+    #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
+    #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
+
+    plt.text(0.34, plt.ylim()[0]-3.35, 'S', fontsize=16, color='white')
+    plt.text(plt.xlim()[1]-0.7, plt.ylim()[0]-3.35, 'G', fontsize=16, color='white')
+
+    plt.xticks([]) # remove the tick marks by setting to an empty list
+    plt.yticks([]) # remove the tick marks by setting to an empty list
+    plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+    plt.grid()
+    plt.savefig('errors.png', bbox_inches='tight', pad_inches=0)
+    plt.savefig('errors.pdf', bbox_inches='tight', pad_inches=0)
+    plt.close()
+
+
+    if 'Q_errors' in exp_data[0].keys():
+        # errors: abs(Q_phi - (r+gamma*max(Q[s_t1,:])))
+
+        Q_errors = np.mean(Q_errors, axis=0)
+        Q_errors = np.reshape(Q_errors, (8,-1))
+        Q_errors = np.delete(Q_errors, 0, 0)
+        Q_errors[3,[1,2,3,4,5,6]] = np.nan
+
+        fig = plt.figure()
+        fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+        sns.heatmap(Q_errors, linewidth=0.5, cmap="coolwarm", cbar=False)
+
+        #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
+        #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
+
+        plt.text(0.34, plt.ylim()[0]-3.35, 'S', fontsize=16, color='white')
+        plt.text(plt.xlim()[1]-0.7, plt.ylim()[0]-3.35, 'G', fontsize=16, color='white')
+
+        plt.xticks([]) # remove the tick marks by setting to an empty list
+        plt.yticks([]) # remove the tick marks by setting to an empty list
+        plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+        plt.grid()
+        plt.savefig('Q_errors.png', bbox_inches='tight', pad_inches=0)
+        plt.savefig('Q_errors.pdf', bbox_inches='tight', pad_inches=0)
+        plt.close()
 
     exit()"""
     
