@@ -16,10 +16,20 @@ from acme.tf import networks
 from acme import wrappers
 from acme.utils import loggers
 
-from algos.dqn2be import dqn2be_acme
+from algos.dqn_e_tab import dqn_e_tab_acme
 from rlutil.envs.gridcraft.grid_spec_cy import TileType
 
 from algos.linear_approximator import ReplayBuffer
+
+def all_eq(values):
+    # Returns True if every element of 'values' is the same.
+    return all(np.isnan(values)) or max(values) - min(values) < 1e-6
+
+def choice_eps_greedy(values, epsilon):
+    if np.random.rand() <= epsilon or all_eq(values):
+        return np.random.choice(len(values))
+    else:
+        return np.argmax(values)
 
 def _make_network(env_spec : dm_env,
                   hidden_layers : Sequence[int] = [10,10]):
@@ -37,9 +47,9 @@ def wrap_env(env):
     ])
 
 
-class DQN2BE(object):
+class DQN_E_tab(object):
 
-    def __init__(self, env, env_grid_spec, log_path, dqn2be_args):
+    def __init__(self, env, env_grid_spec, log_path, dqn_e_tab_args):
 
         np.random.seed()
 
@@ -49,40 +59,35 @@ class DQN2BE(object):
         env_spec = acme.make_environment_spec(self.env)
 
         network = _make_network(env_spec,
-                        hidden_layers=dqn2be_args['hidden_layers'])
-        e_network = _make_network(env_spec,
-                        hidden_layers=dqn2be_args['e_net_hidden_layers'])
+                        hidden_layers=dqn_e_tab_args['hidden_layers'])
 
-        self.agent = dqn2be_acme.DQN2BE(environment_spec=env_spec,
+        self.agent = dqn_e_tab_acme.DQN_E_tab(environment_spec=env_spec,
                                     network=network,
-                                    e_network=e_network,
-                                    batch_size=dqn2be_args['batch_size'],
-                                    target_update_period=dqn2be_args['target_update_period'],
-                                    target_e_net_update_period=dqn2be_args['target_e_net_update_period'],
-                                    samples_per_insert=dqn2be_args['samples_per_insert'],
-                                    min_replay_size=dqn2be_args['min_replay_size'],
-                                    max_replay_size=dqn2be_args['max_replay_size'],
-                                    prioritized_replay=dqn2be_args['prioritized_replay'],
-                                    importance_sampling_exponent=dqn2be_args['importance_sampling_exponent'],
-                                    priority_exponent=dqn2be_args['priority_exponent'],
-                                    epsilon_init=dqn2be_args['epsilon_init'],
-                                    epsilon_final=dqn2be_args['epsilon_final'],
-                                    epsilon_schedule_timesteps=dqn2be_args['epsilon_schedule_timesteps'],
-                                    learning_rate=dqn2be_args['learning_rate'],
-                                    e_net_learning_rate=dqn2be_args['e_net_learning_rate'],
-                                    discount=dqn2be_args['discount'],
-                                    # delta_init=dqn2be_args['delta_init'],
-                                    # delta_final=dqn2be_args['delta_final'],
-                                    # delta_schedule_timesteps=dqn2be_args['delta_schedule_timesteps'],
+                                    batch_size=dqn_e_tab_args['batch_size'],
+                                    target_update_period=dqn_e_tab_args['target_update_period'],
+                                    samples_per_insert=dqn_e_tab_args['samples_per_insert'],
+                                    min_replay_size=dqn_e_tab_args['min_replay_size'],
+                                    max_replay_size=dqn_e_tab_args['max_replay_size'],
+                                    epsilon_init=dqn_e_tab_args['epsilon_init'],
+                                    epsilon_final=dqn_e_tab_args['epsilon_final'],
+                                    epsilon_schedule_timesteps=dqn_e_tab_args['epsilon_schedule_timesteps'],
+                                    learning_rate=dqn_e_tab_args['learning_rate'],
+                                    discount=dqn_e_tab_args['discount'],
                                     num_states=self.base_env.num_states,
                                     num_actions=self.base_env.num_actions,
                                     logger=loggers.CSVLogger(directory_or_file=log_path, label='learner'))
 
-        self.oracle_q_vals = dqn2be_args['oracle_q_vals']
-        self.discount = dqn2be_args['discount']
+        self.oracle_q_vals = dqn_e_tab_args['oracle_q_vals']
+        self.discount = dqn_e_tab_args['discount']
 
-        self.replay = ReplayBuffer(size=dqn2be_args['max_replay_size'],
-                statistics_table_shape=(self.env.num_states,self.env.num_actions))
+        # E-values table.
+        self.E = np.zeros((self.env.num_states,self.env.num_actions))
+
+        # Internalise arguments.
+        self.batch_size = dqn_e_tab_args['batch_size']
+        self.samples_per_insert = dqn_e_tab_args['samples_per_insert']
+        self.discount = dqn_e_tab_args['discount']
+        self.lr_lambda = dqn_e_tab_args['lr_lambda']
 
     def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
                 num_rollouts, rollouts_period, rollouts_envs):
@@ -96,9 +101,9 @@ class DQN2BE(object):
                 self.base_env.num_states, self.base_env.num_actions))
         Q_vals_episodes = []
         Q_vals_ep = 0
+
         E_vals = np.zeros((num_episodes//q_vals_period,
                 self.base_env.num_states, self.base_env.num_actions))
-
         Q_errors = np.zeros((num_episodes//q_vals_period,
                 self.base_env.num_states, self.base_env.num_actions))
 
@@ -107,6 +112,8 @@ class DQN2BE(object):
 
         rollouts_episodes = []
         rollouts_rewards = []
+
+        steps_counter = 0
 
         for episode in tqdm(range(num_episodes)):
 
@@ -123,10 +130,15 @@ class DQN2BE(object):
 
                 oracle_q_val = np.float32(self.oracle_q_vals[env_state,action])
                 self.agent.observe_with_extras(action,
-                    next_timestep=timestep, extras=(np.int32(env_state), oracle_q_val))
+                    next_timestep=timestep, extras=(np.int32(env_state), np.int32(self.base_env.get_state())))
 
-                self.replay.add(env_state, action, timestep.reward, self.base_env.get_state(), False)
+                # Update Q-network.
                 self.agent.update()
+
+                # Update E-values.
+                if (steps_counter > self.batch_size and \
+                    steps_counter % (self.batch_size / self.samples_per_insert) == 0):
+                    self._update_e_vals()
 
                 env_state = self.base_env.get_state()
 
@@ -134,12 +146,13 @@ class DQN2BE(object):
                 episode_cumulative_reward += timestep.reward
                 states_counts[self.base_env.get_state()] += 1
 
+                steps_counter += 1
+
             episode_rewards.append(episode_cumulative_reward)
 
-            # Store current Q-values and E-values.
+            # Store current Q-values (and E-values).
             if episode % q_vals_period == 0:
 
-                print('Running e-learning...')
                 estimated_Q_vals = np.zeros((self.env.num_states, self.env.num_actions))
                 for state in range(self.base_env.num_states):
                     if self.env_grid_spec:
@@ -156,38 +169,36 @@ class DQN2BE(object):
                         qvs = self.agent.get_Q_vals(obs)
                         estimated_Q_vals[state,:] = qvs
 
-                # print('estimated_Q_vals', estimated_Q_vals)
-                # print('oracle q vals', self.oracle_q_vals)
-                # print('np.abs(estimated_Q_vals - oracle_Q_vals)', np.abs(estimated_Q_vals - self.oracle_q_vals))
+                Q_vals_episodes.append(episode)
+                Q_vals[Q_vals_ep,:,:] = estimated_Q_vals
 
+                # Estimate E-values for the current set of Q-values.
+                print('Estimating E-values for the current set of Q-values.')
                 _E_vals = np.zeros((self.env.num_states, self.env.num_actions))
-
                 _q_errors =  np.zeros((self.env.num_states, self.env.num_actions))
                 _samples_counts = np.zeros((self.env.num_states, self.env.num_actions))
 
                 for _ in range(10_000):
+
                     # Sample from replay buffer.
-                    states, actions, rewards, next_states, _ = self.replay.sample(100)
+                    data = self.agent.sample_replay_buffer_batch()
+                    _, actions, rewards, _, _, states, next_states = data
 
-                    for i in range(100):
+                    for i in range(self.batch_size):
                         s_t, a_t, r_t1, s_t1 = states[i], actions[i], rewards[i], next_states[i]
-                        #e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - self.oracle_q_vals[s_t, a_t])
-                        e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - (r_t1 + 0.9*np.max(estimated_Q_vals[s_t1,:])))
+                        # e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - self.oracle_q_vals[s_t, a_t]) # oracle target
+                        e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - (r_t1 + self.discount*np.max(estimated_Q_vals[s_t1,:]))) # TD target.
 
-                        _E_vals[s_t][a_t] += 0.05 * \
-                        (e_t1 + 0.9 * np.max(_E_vals[s_t1,:]) - _E_vals[s_t][a_t])
+                        _E_vals[s_t][a_t] += self.lr_lambda * \
+                        (e_t1 + self.discount * np.max(_E_vals[s_t1,:]) - _E_vals[s_t][a_t])
 
                         _samples_counts[s_t,a_t] += 1
                         _q_errors[s_t,a_t] += e_t1
 
-                # print('E_vals', _E_vals)
-                # print('max_E_vals', np.max(_E_vals, axis=1))
-                # print('policy', np.argmax(_E_vals, axis=1))
-
-                Q_vals_episodes.append(episode)
-                Q_vals[Q_vals_ep,:,:] = estimated_Q_vals
                 E_vals[Q_vals_ep,:,:] = _E_vals
                 Q_errors[Q_vals_ep,:,:] = _q_errors / (_samples_counts + 1e-05)
+
+
                 Q_vals_ep += 1
 
             # Get replay buffer statistics.
@@ -211,14 +222,15 @@ class DQN2BE(object):
         data['states_counts'] = states_counts
         data['Q_vals_episodes'] = Q_vals_episodes
         data['Q_vals'] = Q_vals
-        data['Q_errors'] = Q_errors
-        data['E_vals'] = E_vals
         data['max_Q_vals'] = np.max(Q_vals[-1], axis=1)
         data['policy'] = np.argmax(Q_vals[-1], axis=1)
         data['replay_buffer_counts_episodes'] = replay_buffer_counts_episodes
         data['replay_buffer_counts'] = replay_buffer_counts
         data['rollouts_episodes'] = rollouts_episodes
         data['rollouts_rewards'] = rollouts_rewards
+
+        data['E_vals'] = E_vals
+        data['Q_errors'] = Q_errors
 
         return data
 
@@ -233,3 +245,25 @@ class DQN2BE(object):
             rollout_cumulative_reward += timestep.reward
 
         return rollout_cumulative_reward
+
+    def _update_e_vals(self):
+
+        # Sample from replay buffer.
+        data = self.agent.sample_replay_buffer_batch()
+
+        observations, actions, rewards, _, next_observations, states, next_states = data
+
+        q_t = self.agent.get_Q_vals(observations) # [B,A]
+        q_t = q_t[range(q_t.shape[0]), actions] # [B]
+
+        q_t1 = self.agent.get_Q_vals(next_observations) # [B,A]
+        max_q_t1 = np.max(q_t1, axis=1) # [B]
+
+        e_t = np.abs(q_t - self.oracle_q_vals[states,actions]) # [B] - oracle target.
+        # e_t = np.abs(q_t - (rewards + self.discount*max_q_t1)) #  [B] - TD target.
+
+        for i in range(self.batch_size):
+            s_t, a_t, s_t1 = states[i], actions[i], next_states[i]
+
+            self.E[s_t][a_t] += self.lr_lambda * \
+                (e_t[i] + self.discount * np.max(self.E[s_t1,:]) - self.E[s_t][a_t])

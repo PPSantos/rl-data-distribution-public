@@ -16,6 +16,7 @@ from algos.value_iteration import ValueIteration
 from algos.q_learning import QLearning
 from algos.dqn.dqn import DQN
 from algos.dqn2be.dqn2be import DQN2BE
+from algos.dqn_e_tab.dqn_e_tab import DQN_E_tab
 from algos.oracle_fqi.oracle_fqi import OracleFQI
 from algos.fqi.fqi import FQI
 from algos.linear_approximator import LinearApproximator
@@ -39,7 +40,7 @@ DEFAULT_TRAIN_ARGS = {
     # General arguments.
     'num_runs': 5,
     'num_processors': 5,
-    'algo': 'dqn2be',
+    'algo': 'dqn_e_tab',
     'num_episodes': 20_000,
     'gamma': 0.9, # discount factor.
 
@@ -105,6 +106,23 @@ DEFAULT_TRAIN_ARGS = {
         'hidden_layers': [20,40,20],
         'synthetic_replay_buffer': False,
         'synthetic_replay_buffer_alpha': 1_000,
+    },
+
+    # dqn_e_tab arguments (dqn + tabular e-vals driven exploration).
+    'dqn_e_tab_args': {
+        # Default DQN args.
+        'batch_size': 100,
+        'target_update_period': 1_000,
+        'samples_per_insert': 25.0,
+        'min_replay_size': 50_000,
+        'max_replay_size': 1_000_000,
+        'epsilon_init': 1.0,
+        'epsilon_final': 0.0,
+        'epsilon_schedule_timesteps': 1_000_000,
+        'learning_rate': 1e-03,
+        'hidden_layers': [20,40,20],
+        # E-learning (tabular version) args.
+        'lr_lambda': 0.05, # learning rate.
     },
 
     # DQN-2BE arguments.
@@ -224,7 +242,6 @@ def train_run(run_args):
         agent = DQN(env, env_grid_spec, log_path, args['dqn_args'])
 
     elif args['algo'] == 'dqn2be':
-
         # Load optimal (oracle) policy/Q-values.
         val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA[args['env_args']['env_name']]
         print(f"Opening experiment {VAL_ITER_DATA[args['env_args']['env_name']]} to get oracle Q-vals")
@@ -237,6 +254,20 @@ def train_run(run_args):
         args['dqn2be_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
         args['dqn2be_args']['discount'] = args['gamma']
         agent = DQN2BE(env, env_grid_spec, log_path, args['dqn2be_args'])
+
+    elif args['algo'] == 'dqn_e_tab':
+        # Load optimal (oracle) policy/Q-values.
+        val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA[args['env_args']['env_name']]
+        print(f"Opening experiment {VAL_ITER_DATA[args['env_args']['env_name']]} to get oracle Q-vals")
+        with open(val_iter_path + "/train_data.json", 'r') as f:
+            val_iter_data = json.load(f)
+            val_iter_data = json.loads(val_iter_data)
+            val_iter_data = val_iter_data[0]
+        f.close()
+
+        args['dqn_e_tab_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
+        args['dqn_e_tab_args']['discount'] = args['gamma']
+        agent = DQN_E_tab(env, env_grid_spec, log_path, args['dqn_e_tab_args'])
 
     elif args['algo'] == 'fqi':
         args['fqi_args']['discount'] = args['gamma']
@@ -326,8 +357,8 @@ if __name__ == "__main__":
         plots(exp_id, val_iter_data)
 
         # Compress and cleanup.
-        # shutil.make_archive(exp_path,
-        #                 'gztar',
-        #                 os.path.dirname(exp_path),
-        #                 exp_id)
-        # shutil.rmtree(exp_path)
+        shutil.make_archive(exp_path,
+                        'gztar',
+                        os.path.dirname(exp_path),
+                        exp_id)
+        shutil.rmtree(exp_path)

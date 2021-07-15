@@ -95,6 +95,3 @@ class Agent(core.Actor, core.VariableSource):
 
     def get_variables(self, names: List[str]) -> List[List[np.ndarray]]:
         return self._learner.get_variables(names)
-
-    def fit_e_vals(self):
-        return self._learner.fit_e_vals()

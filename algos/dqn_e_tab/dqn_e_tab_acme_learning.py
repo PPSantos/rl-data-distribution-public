@@ -1,9 +1,7 @@
-"""DQN2BE learner implementation."""
+"""DQN_E_tab learner implementation."""
 
 import time
 from typing import Dict, List
-
-from tqdm import tqdm
 
 import acme
 from acme import types
@@ -20,10 +18,10 @@ import tensorflow as tf
 import trfl
 
 
-class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
-  """DQN2BE unprioritized learner.
+class DQN_E_tab_Learner(acme.Learner, tf2_savers.TFSaveable):
+  """DQN_E_tab learner.
 
-  This is the learning component of a DQN2BE agent. It takes a dataset as input
+  This is the learning component of a DQN_E_tab agent. It takes a dataset as input
   and implements update functionality to learn from this dataset.
   """
 
@@ -31,13 +29,9 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
       self,
       network: snt.Module,
       target_network: snt.Module,
-      e_network: snt.Module,
-      target_e_network: snt.Module,
       discount: float,
       learning_rate: float,
-      e_net_learning_rate: float,
       target_update_period: int,
-      target_e_net_update_period: int,
       dataset: tf.data.Dataset,
       huber_loss_parameter: float = 1.,
       counter: counting.Counter = None,
@@ -48,13 +42,10 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     """Initializes the learner.
 
     Args:
-      network: the online Q network (the one being optimized).
+      network: the online Q network (the one being optimized)
       target_network: the target Q critic (which lags behind the online net).
-      e_network: the online E-values network (the one being optimized).
-      target_e_network: the target E-values critic (which lags behind the online net).
       discount: discount to use for TD updates.
       learning_rate: learning rate for the q-network update.
-      e_net_learning_rate: learning rate for the E-values network update.
       target_update_period: number of learner steps to perform before updating
         the target networks.
       dataset: dataset to learn from, whether fixed or from a replay buffer (see
@@ -66,18 +57,14 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
       max_gradient_norm: used for gradient clipping.
     """
     # Internalise agent components (replay buffer, networks, optimizer).
-    self._iterator = iter(dataset)  # pytype: disable=wrong-arg-types
+    self._iterator = iter(dataset)
     self._network = network
     self._target_network = target_network
-    self._e_network = e_network
-    self._target_e_network = target_e_network
     self._optimizer = snt.optimizers.Adam(learning_rate)
-    self._e_net_optimizer = snt.optimizers.Adam(e_net_learning_rate)
 
     # Internalise the hyperparameters.
     self._discount = discount
     self._target_update_period = target_update_period
-    self._target_e_net_update_period = target_e_net_update_period
     self._huber_loss_parameter = huber_loss_parameter
     if max_gradient_norm is None:
       max_gradient_norm = 1e10  # A very large number. Infinity results in NaNs.
@@ -85,8 +72,7 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
 
     # Learner state.
     self._variables: List[List[tf.Tensor]] = [network.trainable_variables]
-    self._num_steps_q = tf.Variable(0, dtype=tf.int32)
-    self._num_steps_e = tf.Variable(0, dtype=tf.int32)
+    self._num_steps = tf.Variable(0, dtype=tf.int32)
 
     # Internalise logging/counting objects.
     self._counter = counter or counting.Counter()
@@ -105,14 +91,14 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     self._timestamp = None
 
   @tf.function
-  def _step_q(self) -> Dict[str, tf.Tensor]:
+  def _step(self) -> Dict[str, tf.Tensor]:
 
     data, info = next(self._iterator)
 
     # Unpack data.
-    observation, action, reward, discount, next_observation, state, _ = data
+    observation, action, reward, discount, next_observation, _, _ = data
 
-    with tf.GradientTape(persistent=True) as tape:
+    with tf.GradientTape() as tape:
 
       # Evaluate Q networks.
       q_tm1 = self._network(observation)
@@ -133,20 +119,17 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
       loss = losses.huber(extra.td_error, self._huber_loss_parameter)
       loss = tf.reduce_mean(loss, axis=[0])  # []
 
-    # Do a step of SGD (Q network).
+    # Do a step of SGD.
     gradients = tape.gradient(loss, self._network.trainable_variables)
     gradients, _ = tf.clip_by_global_norm(gradients, self._max_gradient_norm)
     self._optimizer.apply(gradients, self._network.trainable_variables)
 
-    del tape
-
-    # Periodically update the Q target network.
-    if tf.math.mod(self._num_steps_q, self._target_update_period) == 0:
+    # Periodically update the target network.
+    if tf.math.mod(self._num_steps, self._target_update_period) == 0:
       for src, dest in zip(self._network.variables,
                            self._target_network.variables):
         dest.assign(src)
-
-    self._num_steps_q.assign_add(1)
+    self._num_steps.assign_add(1)
 
     # Report loss & statistics for logging.
     fetches = {
@@ -155,71 +138,9 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
 
     return fetches
 
-  @tf.function
-  def _step_e(self) -> Dict[str, tf.Tensor]:
-
-    data, info = next(self._iterator)
-
-    # Unpack data.
-    observation, action, reward, discount, next_observation, state, targets = data
-
-    q_tm1 = self._network(observation) # [B,A]
-    qa_tm1 = trfl.indexing_ops.batched_index(q_tm1, action) # [B]
-    error = targets - qa_tm1 # [B]
-    q_loss = losses.huber(error, self._huber_loss_parameter)
-    # Rescale and clip Q-loss.
-    q_loss = 0.01 * q_loss
-    q_loss = tf.clip_by_value(q_loss, -1., 1.)
-
-    """ q_tm1 = self._network(observation) # [B,A]
-    q_t_value = self._target_network(next_observation)
-    q_t_selector = self._network(next_observation)
-
-    # The rewards and discounts have to have the same type as network values.
-    r_t = tf.cast(reward, q_tm1.dtype)
-    r_t = tf.clip_by_value(r_t, -1., 1.)
-    d_t = tf.cast(tf.ones_like(discount), q_tm1.dtype) * tf.cast(
-        self._discount, q_tm1.dtype)
-
-    # Compute the loss.
-    _, extra = trfl.double_qlearning(q_tm1, action, r_t, d_t,
-                                      q_t_value, q_t_selector)
-    q_loss = losses.huber(extra.td_error, self._huber_loss_parameter) """
-
-    with tf.GradientTape(persistent=True) as tape:
-
-      # Evaluate E networks.
-      e_tm1 = self._e_network(observation)
-      e_t_value = self._target_e_network(next_observation)
-      e_t_selector = self._e_network(next_observation)
-      d_t = tf.cast(tf.ones_like(discount), e_tm1.dtype) * tf.cast(
-          self._discount, e_tm1.dtype)
-      _, extra = trfl.double_qlearning(e_tm1, action, q_loss, d_t,
-                                      e_t_value, e_t_selector)
-      e_loss = losses.huber(extra.td_error, self._huber_loss_parameter)
-      e_loss = tf.reduce_mean(e_loss, axis=[0])  # []
-
-    # Do a step of SGD (E network).
-    gradients = tape.gradient(e_loss, self._e_network.trainable_variables)
-    gradients, _ = tf.clip_by_global_norm(gradients, self._max_gradient_norm)
-    self._e_net_optimizer.apply(gradients, self._e_network.trainable_variables)
-
-    del tape
-
-    # Periodically update the E target network.
-    if tf.math.mod(self._num_steps_e, self._target_e_net_update_period) == 0:
-
-      for src, dest in zip(self._e_network.variables,
-                           self._target_e_network.variables):
-        dest.assign(src)
-
-    self._num_steps_e.assign_add(1)
-
-    return {'e_loss': e_loss, 'max_q_loss': tf.reduce_max(q_loss)}
-
   def step(self):
     # Do a batch of SGD.
-    result = self._step_q()
+    result = self._step()
 
     # Compute elapsed time.
     timestamp = time.time()
@@ -244,9 +165,6 @@ class DQN2BEUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     return {
         'network': self._network,
         'target_network': self._target_network,
-        'e_network': self._e_network,
-        'target_e_network': self._target_e_network,
         'optimizer': self._optimizer,
-        'num_steps_q': self._num_steps_q,
-        'num_steps_e': self._num_steps_e,
+        'num_steps': self._num_steps
     }
