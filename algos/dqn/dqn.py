@@ -1,18 +1,13 @@
-import os
-import random
 from typing import Sequence
 
 from tqdm import tqdm
 import numpy as np
 
-import dm_env
-
-import tensorflow as tf
 import sonnet as snt
 
+import dm_env
+
 import acme
-from acme import specs
-from acme.tf import networks
 from acme import wrappers
 from acme.utils import loggers
 

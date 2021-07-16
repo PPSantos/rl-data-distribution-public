@@ -40,7 +40,7 @@ DEFAULT_TRAIN_ARGS = {
     # General arguments.
     'num_runs': 1,
     'num_processors': 1,
-    'algo': 'dqn',
+    'algo': 'dqn_e_tab',
     'num_episodes': 20_000,
     'gamma': 0.9, # discount factor.
 

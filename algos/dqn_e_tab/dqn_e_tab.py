@@ -1,18 +1,13 @@
-import os
-import random
 from typing import Sequence
 
 from tqdm import tqdm
 import numpy as np
 
-import dm_env
-
-import tensorflow as tf
 import sonnet as snt
 
+import dm_env
+
 import acme
-from acme import specs
-from acme.tf import networks
 from acme import wrappers
 from acme.utils import loggers
 
@@ -79,7 +74,7 @@ class DQN_E_tab(object):
         self.epsilon_schedule_episodes = dqn_e_tab_args['epsilon_schedule_episodes']
 
     def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
-                num_rollouts, rollouts_period, rollouts_envs):
+                num_rollouts, rollouts_period, rollouts_envs, compute_e_vals):
 
         rollouts_envs = [wrap_env(e) for e in rollouts_envs]
 
@@ -91,10 +86,11 @@ class DQN_E_tab(object):
         Q_vals_episodes = []
         Q_vals_ep = 0
 
-        E_vals = np.zeros((num_episodes//q_vals_period,
-                self.base_env.num_states, self.base_env.num_actions))
-        Q_errors = np.zeros((num_episodes//q_vals_period,
-                self.base_env.num_states, self.base_env.num_actions))
+        if compute_e_vals:
+            E_vals = np.zeros((num_episodes//q_vals_period,
+                    self.base_env.num_states, self.base_env.num_actions))
+            Q_errors = np.zeros((num_episodes//q_vals_period,
+                    self.base_env.num_states, self.base_env.num_actions))
 
         replay_buffer_counts_episodes = []
         replay_buffer_counts = []
@@ -146,7 +142,7 @@ class DQN_E_tab(object):
 
             # Store current Q-values (and E-values).
             if episode % q_vals_period == 0:
-
+                print('Storing current Q-values estimates.')
                 estimated_Q_vals = np.zeros((self.env.num_states, self.env.num_actions))
                 for state in range(self.base_env.num_states):
                     if self.env_grid_spec:
@@ -167,30 +163,31 @@ class DQN_E_tab(object):
                 Q_vals[Q_vals_ep,:,:] = estimated_Q_vals
 
                 # Estimate E-values for the current set of Q-values.
-                print('Estimating E-values for the current set of Q-values.')
-                _E_vals = np.zeros((self.env.num_states, self.env.num_actions))
-                _q_errors =  np.zeros((self.env.num_states, self.env.num_actions))
-                _samples_counts = np.zeros((self.env.num_states, self.env.num_actions))
+                if compute_e_vals:
+                    print('Estimating E-values for the current set of Q-values.')
+                    _E_vals = np.zeros((self.env.num_states, self.env.num_actions))
+                    _q_errors =  np.zeros((self.env.num_states, self.env.num_actions))
+                    _samples_counts = np.zeros((self.env.num_states, self.env.num_actions))
 
-                for _ in range(10_000):
+                    for _ in range(10_000):
 
-                    # Sample from replay buffer.
-                    data = self.agent.sample_replay_buffer_batch()
-                    _, actions, rewards, _, _, states, next_states = data
+                        # Sample from replay buffer.
+                        data = self.agent.sample_replay_buffer_batch()
+                        _, actions, rewards, _, _, states, next_states = data
 
-                    for i in range(self.batch_size):
-                        s_t, a_t, r_t1, s_t1 = states[i], actions[i], rewards[i], next_states[i]
-                        # e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - self.oracle_q_vals[s_t, a_t]) # oracle target
-                        e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - (r_t1 + self.discount*np.max(estimated_Q_vals[s_t1,:]))) # TD target.
+                        for i in range(self.batch_size):
+                            s_t, a_t, r_t1, s_t1 = states[i], actions[i], rewards[i], next_states[i]
+                            # e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - self.oracle_q_vals[s_t, a_t]) # oracle target
+                            e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - (r_t1 + self.discount*np.max(estimated_Q_vals[s_t1,:]))) # TD target.
 
-                        _E_vals[s_t][a_t] += self.lr_lambda * \
-                        (e_t1 + self.discount * np.max(_E_vals[s_t1,:]) - _E_vals[s_t][a_t])
+                            _E_vals[s_t][a_t] += self.lr_lambda * \
+                            (e_t1 + self.discount * np.max(_E_vals[s_t1,:]) - _E_vals[s_t][a_t])
 
-                        _samples_counts[s_t,a_t] += 1
-                        _q_errors[s_t,a_t] += e_t1
+                            _samples_counts[s_t,a_t] += 1
+                            _q_errors[s_t,a_t] += e_t1
 
-                E_vals[Q_vals_ep,:,:] = _E_vals
-                Q_errors[Q_vals_ep,:,:] = _q_errors / (_samples_counts + 1e-05)
+                    E_vals[Q_vals_ep,:,:] = _E_vals
+                    Q_errors[Q_vals_ep,:,:] = _q_errors / (_samples_counts + 1e-05)
 
                 Q_vals_ep += 1
 
@@ -221,9 +218,9 @@ class DQN_E_tab(object):
         data['replay_buffer_counts'] = replay_buffer_counts
         data['rollouts_episodes'] = rollouts_episodes
         data['rollouts_rewards'] = rollouts_rewards
-
-        data['E_vals'] = E_vals
-        data['Q_errors'] = Q_errors
+        if compute_e_vals:
+            data['E_vals'] = E_vals
+            data['Q_errors'] = Q_errors
 
         return data
 
