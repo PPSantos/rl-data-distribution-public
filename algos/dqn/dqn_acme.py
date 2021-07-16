@@ -18,7 +18,7 @@ from algos import agent_acme, actors
 from algos.tf_uniform_replay_buffer import TFUniformReplayBuffer
 from algos.utils import tf2_savers, spec_converter
 from algos.utils.tf2_layers import EpsilonGreedyExploration
-from algos.dqn.dqn_acme_unprioritized_learning import DQNUnprioritizedLearner
+from algos.dqn.dqn_acme_learning import DQNLearner
 from algos.tf_adder import TFAdder
 
 
@@ -38,9 +38,6 @@ class DQN(agent_acme.Agent):
             samples_per_insert: float = 32.0,
             min_replay_size: int = 20,
             max_replay_size: int = 1000000,
-            prioritized_replay: bool = True,
-            importance_sampling_exponent: float = 0.2,
-            priority_exponent: float = 0.6,
             epsilon_init: float = 1.0,
             epsilon_final: float = 0.01,
             epsilon_schedule_timesteps: int = 20000,
@@ -65,11 +62,6 @@ class DQN(agent_acme.Agent):
             following arguments are related to dataset construction and will be
             ignored if a dataset argument is passed.
         max_replay_size: maximum replay size.
-        prioritized_replay: whether to use a prioritized replay buffer.
-        importance_sampling_exponent: power to which importance weights are raised
-            before normalizing (beta). See https://arxiv.org/pdf/1710.02298.pdf
-        priority_exponent: exponent used in prioritized sampling (omega).
-            See https://arxiv.org/pdf/1710.02298.pdf
         epsilon_init: Initial epsilon value (probability of taking a random action)
         epsilon_final: Final epsilon value (probability of taking a random action)
         epsilon_schedule_timesteps: timesteps to decay epsilon from 'epsilon_init'
@@ -78,22 +70,24 @@ class DQN(agent_acme.Agent):
         discount: discount to use for TD updates.
         logger: logger object to be used by learner.
         max_gradient_norm: used for gradient clipping.
+        
         """
-
-        self.num_states = num_states
-        self.num_actions = num_actions
-
         # Create replay buffer.
-        extras = (tensor_spec.TensorSpec((),
+        env_state_spec = tensor_spec.TensorSpec((),
                                 dtype=tf.int32,
-                                name='env_state'),)
+                                name='env_state')
+        env_next_state_spec = tensor_spec.TensorSpec((),
+                                dtype=tf.int32,
+                                name='env_next_state')
+        extras = (env_state_spec, env_next_state_spec)
         transition_spec = spec_converter.convert_env_spec(environment_spec, extras=extras)
         self.replay_buffer = TFUniformReplayBuffer(data_spec=transition_spec,
                                                     batch_size=1,
                                                     max_length=max_replay_size,
-                                                    statistics_table_shape=(self.num_states,
-                                                                            self.num_actions))
+                                                    statistics_table_shape=(num_states,
+                                                                            num_actions))
         dataset = self.replay_buffer.as_dataset(sample_batch_size=batch_size)
+        self._dataset_iterator = iter(dataset)
         self.adder = TFAdder(self.replay_buffer, transition_spec)
 
         # Create a epsilon-greedy policy network.
@@ -118,19 +112,16 @@ class DQN(agent_acme.Agent):
             actor = actors.FeedForwardActor(policy_network, self.adder)
 
         # The learner updates the parameters (and initializes them).
-        if prioritized_replay:
-            raise NotImplementedError('Prioritized replay not implemented.')
-        else:
-            learner = DQNUnprioritizedLearner(
-                network=network,
-                target_network=target_network,
-                discount=discount,
-                learning_rate=learning_rate,
-                target_update_period=target_update_period,
-                dataset=dataset,
-                max_gradient_norm=max_gradient_norm,
-                logger=logger,
-                checkpoint=False)
+        learner = DQNLearner(
+            network=network,
+            target_network=target_network,
+            discount=discount,
+            learning_rate=learning_rate,
+            target_update_period=target_update_period,
+            dataset=dataset,
+            max_gradient_norm=max_gradient_norm,
+            logger=logger,
+            checkpoint=False)
 
         self._saver = tf2_savers.Saver(learner.state)
 
@@ -165,8 +156,12 @@ class DQN(agent_acme.Agent):
         self._saver.load(p)
 
     def get_replay_buffer_counts(self):
-        print('Getting replay buffer counts...')
+        print('Getting replay buffer counts.')
         return self.replay_buffer.get_statistics()
 
     def add_to_replay_buffer(self, transition, extras=None):
         self.adder.add_op(transition, extras)
+
+    def sample_replay_buffer_batch(self):        
+        data, info = next(self._dataset_iterator)
+        return [d.numpy() for d in data]

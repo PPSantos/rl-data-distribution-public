@@ -192,7 +192,6 @@ class DQN_E_tab(object):
                 E_vals[Q_vals_ep,:,:] = _E_vals
                 Q_errors[Q_vals_ep,:,:] = _q_errors / (_samples_counts + 1e-05)
 
-
                 Q_vals_ep += 1
 
             # Get replay buffer statistics.

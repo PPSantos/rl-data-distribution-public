@@ -17,7 +17,7 @@ from tf_agents.specs import tensor_spec
 from algos import agent_acme, actors
 from algos.tf_uniform_replay_buffer import TFUniformReplayBuffer
 from algos.utils import tf2_savers, spec_converter
-from algos.dqn_e_tab.dqn_e_tab_acme_learning import DQN_E_tab_Learner
+from algos.dqn.dqn_acme_learning import DQNLearner
 from algos.tf_adder import TFAdder
 
 
@@ -79,7 +79,6 @@ class DQN_E_tab(agent_acme.Agent):
                                                                             num_actions))
         dataset = self.replay_buffer.as_dataset(sample_batch_size=batch_size)
         self._dataset_iterator = iter(dataset)
-
         self.adder = TFAdder(self.replay_buffer, transition_spec)
 
         # Create a epsilon-greedy policy network.
@@ -99,7 +98,7 @@ class DQN_E_tab(agent_acme.Agent):
         actor = actors.FeedForwardActor(policy_network, self.adder)
 
         # The learner updates the parameters (and initializes them).
-        learner = DQN_E_tab_Learner(
+        learner = DQNLearner(
             network=network,
             target_network=target_network,
             discount=discount,
@@ -143,7 +142,7 @@ class DQN_E_tab(agent_acme.Agent):
         self._saver.load(p)
 
     def get_replay_buffer_counts(self):
-        print('Getting replay buffer counts...')
+        print('Getting replay buffer counts.')
         return self.replay_buffer.get_statistics()
 
     def add_to_replay_buffer(self, transition, extras=None):

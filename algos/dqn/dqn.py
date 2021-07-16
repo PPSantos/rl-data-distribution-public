@@ -57,9 +57,6 @@ class DQN(object):
                                     samples_per_insert=dqn_args['samples_per_insert'],
                                     min_replay_size=dqn_args['min_replay_size'],
                                     max_replay_size=dqn_args['max_replay_size'],
-                                    prioritized_replay=dqn_args['prioritized_replay'],
-                                    importance_sampling_exponent=dqn_args['importance_sampling_exponent'],
-                                    priority_exponent=dqn_args['priority_exponent'],
                                     epsilon_init=dqn_args['epsilon_init'],
                                     epsilon_final=dqn_args['epsilon_final'],
                                     epsilon_schedule_timesteps=dqn_args['epsilon_schedule_timesteps'],
@@ -79,8 +76,13 @@ class DQN(object):
             print('self.sampling_dist (synthetic replay buffer dataset):', self.sampling_dist)
             print('self.sampling_dist_size (S*A):', self.sampling_dist_size)
 
+        # Internalise parameters.
+        self.oracle_q_vals = dqn_args['oracle_q_vals']
+        self.discount = dqn_args['discount']
+        self.batch_size = dqn_args['batch_size']
+
     def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
-                num_rollouts, rollouts_period, rollouts_envs):
+                num_rollouts, rollouts_period, rollouts_envs, compute_e_vals):
 
         rollouts_envs = [wrap_env(e) for e in rollouts_envs]
 
@@ -91,6 +93,12 @@ class DQN(object):
                 self.base_env.num_states, self.base_env.num_actions))
         Q_vals_episodes = []
         Q_vals_ep = 0
+
+        if compute_e_vals:
+            E_vals = np.zeros((num_episodes//q_vals_period,
+                    self.base_env.num_states, self.base_env.num_actions))
+            Q_errors = np.zeros((num_episodes//q_vals_period,
+                    self.base_env.num_states, self.base_env.num_actions))
 
         replay_buffer_counts_episodes = []
         replay_buffer_counts = []
@@ -118,7 +126,7 @@ class DQN(object):
                 timestep = self.env.step(action)
 
                 self.agent.observe_with_extras(action,
-                    next_timestep=timestep, extras=(np.int32(env_state),))
+                    next_timestep=timestep, extras=(np.int32(env_state), np.int32(self.base_env.get_state())))
 
                 if self.synthetic_replay_buffer:
                     # Insert transition from the static dataset.
@@ -135,23 +143,55 @@ class DQN(object):
 
             episode_rewards.append(episode_cumulative_reward)
 
-            # Store current Q-values.
+            # Store current Q-values (and E-values).
             if episode % q_vals_period == 0:
-                Q_vals_episodes.append(episode)
+                print('Storing current Q-values estimates.')
+                estimated_Q_vals = np.zeros((self.env.num_states, self.env.num_actions))
                 for state in range(self.base_env.num_states):
                     if self.env_grid_spec:
                         xy = self.env_grid_spec.idx_to_xy(state)
                         tile_type = self.env_grid_spec.get_value(xy)
                         if tile_type == TileType.WALL:
-                            Q_vals[Q_vals_ep,state,:] = 0
+                            estimated_Q_vals[state,:] = 0
                         else:
                             obs = self.base_env.observation(state)
                             qvs = self.agent.get_Q_vals(obs)
-                            Q_vals[Q_vals_ep,state,:] = qvs
+                            estimated_Q_vals[state,:] = qvs
                     else:
                         obs = self.base_env.observation(state)
                         qvs = self.agent.get_Q_vals(obs)
-                        Q_vals[Q_vals_ep,state,:] = qvs
+                        estimated_Q_vals[state,:] = qvs
+
+                Q_vals_episodes.append(episode)
+                Q_vals[Q_vals_ep,:,:] = estimated_Q_vals
+
+                # Estimate E-values for the current set of Q-values.
+                if compute_e_vals:
+                    print('Estimating E-values for the current set of Q-values.')
+                    _E_vals = np.zeros((self.env.num_states, self.env.num_actions))
+                    _q_errors =  np.zeros((self.env.num_states, self.env.num_actions))
+                    _samples_counts = np.zeros((self.env.num_states, self.env.num_actions))
+
+                    for _ in range(10_000):
+
+                        # Sample from replay buffer.
+                        data = self.agent.sample_replay_buffer_batch()
+                        _, actions, rewards, _, _, states, next_states = data
+
+                        for i in range(self.batch_size):
+                            s_t, a_t, r_t1, s_t1 = states[i], actions[i], rewards[i], next_states[i]
+                            # e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - self.oracle_q_vals[s_t, a_t]) # oracle target
+                            e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - (r_t1 + self.discount*np.max(estimated_Q_vals[s_t1,:]))) # TD target.
+
+                            _E_vals[s_t][a_t] += 0.05 * \
+                            (e_t1 + self.discount * np.max(_E_vals[s_t1,:]) - _E_vals[s_t][a_t])
+
+                            _samples_counts[s_t,a_t] += 1
+                            _q_errors[s_t,a_t] += e_t1
+
+                    E_vals[Q_vals_ep,:,:] = _E_vals
+                    Q_errors[Q_vals_ep,:,:] = _q_errors / (_samples_counts + 1e-05)
+
                 Q_vals_ep += 1
 
             # Get replay buffer statistics.
@@ -181,6 +221,9 @@ class DQN(object):
         data['replay_buffer_counts'] = replay_buffer_counts
         data['rollouts_episodes'] = rollouts_episodes
         data['rollouts_rewards'] = rollouts_rewards
+        if compute_e_vals:
+            data['E_vals'] = E_vals
+            data['Q_errors'] = Q_errors
 
         return data
 
@@ -217,7 +260,7 @@ class DQN(object):
                             np.array(reward, dtype=np.float32),
                             np.array(1.0, dtype=np.float32),
                             next_observation)
-            extras = (np.int32(state),)
+            extras = (np.int32(state), np.int32(self.base_env.get_state()))
 
             static_dataset.append((transition, extras))
 

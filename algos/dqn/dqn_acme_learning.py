@@ -18,7 +18,7 @@ import tensorflow as tf
 import trfl
 
 
-class DQNUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
+class DQNLearner(acme.Learner, tf2_savers.TFSaveable):
   """DQN unprioritized learner.
 
   This is the learning component of a DQN agent. It takes a dataset as input
@@ -57,7 +57,6 @@ class DQNUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
       max_gradient_norm: used for gradient clipping.
     """
     # Internalise agent components (replay buffer, networks, optimizer).
-    # TODO(b/155086959): Fix type stubs and remove.
     self._iterator = iter(dataset)  # pytype: disable=wrong-arg-types
     self._network = network
     self._target_network = target_network
@@ -97,11 +96,7 @@ class DQNUnprioritizedLearner(acme.Learner, tf2_savers.TFSaveable):
     data, info = next(self._iterator)
 
     # Unpack data.
-    observation = data[0]
-    action = data[1]
-    reward = data[2]
-    discount = data[3]
-    next_observation = data[4]
+    observation, action, reward, discount, next_observation, _, _ = data
 
     with tf.GradientTape() as tape:
       # Evaluate our networks.

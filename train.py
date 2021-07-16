@@ -38,14 +38,21 @@ DEFAULT_TRAIN_ARGS = {
     #           (and vice versa) and 'val_iter' algorithms.
 
     # General arguments.
-    'num_runs': 3,
-    'num_processors': 3,
-    'algo': 'dqn_e_tab',
+    'num_runs': 1,
+    'num_processors': 1,
+    'algo': 'dqn',
     'num_episodes': 20_000,
     'gamma': 0.9, # discount factor.
 
+    # Period at which the Q-values are stored.
     'q_vals_period': 100,
+
+    # Period at which replay buffer counts are calculated and stored.
     'replay_buffer_counts_period': 100,
+
+    # Whether to estimate and store the E-vals at each
+    # 'q_vals_period' steps for the current set of Q-values.
+    'compute_e_vals': True,
 
     # Env. arguments.
     'env_args': {
@@ -90,17 +97,15 @@ DEFAULT_TRAIN_ARGS = {
     },
 
     # DQN arguments.
+    # (Standard DQN algorithm).
     'dqn_args': {
         'batch_size': 100,
         'target_update_period': 1_000,
         'samples_per_insert': 25.0,
         'min_replay_size': 50_000,
         'max_replay_size': 1_000_000,
-        'prioritized_replay': False,
-        'importance_sampling_exponent': 0.9,
-        'priority_exponent': 0.6,
-        'epsilon_init': 0.05,
-        'epsilon_final': 0.05,
+        'epsilon_init': 1.0,
+        'epsilon_final': 0.0,
         'epsilon_schedule_timesteps': 1_000_000,
         'learning_rate': 1e-03,
         'hidden_layers': [20,40,20],
@@ -108,7 +113,8 @@ DEFAULT_TRAIN_ARGS = {
         'synthetic_replay_buffer_alpha': 1_000,
     },
 
-    # dqn_e_tab arguments (dqn + tabular e-vals driven exploration).
+    # DQN + E_tab arguments.
+    # (DQN version featuring tabular E-values driven exploration).
     'dqn_e_tab_args': {
         # Default DQN args.
         'batch_size': 100,
@@ -126,6 +132,7 @@ DEFAULT_TRAIN_ARGS = {
     },
 
     # DQN-2BE arguments.
+    # TODO: this will be dqn_e_func
     'dqn2be_args': {
         # Default DQN args.
         'batch_size': 100,
@@ -221,6 +228,15 @@ def train_run(run_args):
     # env.render()
     # print('\n')
 
+    # Load optimal (oracle) policy/Q-values.
+    val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA[args['env_args']['env_name']]
+    print(f"Opening experiment {VAL_ITER_DATA[args['env_args']['env_name']]} to get oracle Q-vals")
+    with open(val_iter_path + "/train_data.json", 'r') as f:
+        val_iter_data = json.load(f)
+        val_iter_data = json.loads(val_iter_data)
+        val_iter_data = val_iter_data[0]
+    f.close()
+
     # Instantiate algorithm.
     if args['algo'] == 'val_iter':
         args['val_iter_args']['gamma'] = args['gamma']
@@ -238,33 +254,19 @@ def train_run(run_args):
         agent = LinearApproximator(env, env_grid_spec, **args['linear_approximator_args'])
 
     elif args['algo'] == 'dqn':
+        args['dqn_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
         args['dqn_args']['discount'] = args['gamma']
         agent = DQN(env, env_grid_spec, log_path, args['dqn_args'])
 
     elif args['algo'] == 'dqn2be':
-        # Load optimal (oracle) policy/Q-values.
-        val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA[args['env_args']['env_name']]
-        print(f"Opening experiment {VAL_ITER_DATA[args['env_args']['env_name']]} to get oracle Q-vals")
-        with open(val_iter_path + "/train_data.json", 'r') as f:
-            val_iter_data = json.load(f)
-            val_iter_data = json.loads(val_iter_data)
-            val_iter_data = val_iter_data[0]
-        f.close()
+
+        raise ValueError('Not implemented - this will be dqn_e_func algorithm')
 
         args['dqn2be_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
         args['dqn2be_args']['discount'] = args['gamma']
         agent = DQN2BE(env, env_grid_spec, log_path, args['dqn2be_args'])
 
     elif args['algo'] == 'dqn_e_tab':
-        # Load optimal (oracle) policy/Q-values.
-        val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA[args['env_args']['env_name']]
-        print(f"Opening experiment {VAL_ITER_DATA[args['env_args']['env_name']]} to get oracle Q-vals")
-        with open(val_iter_path + "/train_data.json", 'r') as f:
-            val_iter_data = json.load(f)
-            val_iter_data = json.loads(val_iter_data)
-            val_iter_data = val_iter_data[0]
-        f.close()
-
         args['dqn_e_tab_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
         args['dqn_e_tab_args']['discount'] = args['gamma']
         agent = DQN_E_tab(env, env_grid_spec, log_path, args['dqn_e_tab_args'])
@@ -274,16 +276,6 @@ def train_run(run_args):
         agent = FQI(env, env_grid_spec, args['fqi_args'])
 
     elif args['algo'] == 'oracle_fqi':
-
-        # Load optimal (oracle) policy/Q-values.
-        val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA[args['env_args']['env_name']]
-        print(f"Opening experiment {VAL_ITER_DATA[args['env_args']['env_name']]} to get oracle Q-vals")
-        with open(val_iter_path + "/train_data.json", 'r') as f:
-            val_iter_data = json.load(f)
-            val_iter_data = json.loads(val_iter_data)
-            val_iter_data = val_iter_data[0]
-        f.close()
-
         args['oracle_fqi_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
         args['oracle_fqi_args']['discount'] = args['gamma']
         agent = OracleFQI(env, env_grid_spec, args['oracle_fqi_args'])
@@ -297,7 +289,8 @@ def train_run(run_args):
                              replay_buffer_counts_period=args['replay_buffer_counts_period'],
                              num_rollouts=args['num_rollouts'],
                              rollouts_period=args['rollouts_period'],
-                             rollouts_envs=rollouts_envs)
+                             rollouts_envs=rollouts_envs,
+                             compute_e_vals=args['compute_e_vals'])
 
     return train_data
 
