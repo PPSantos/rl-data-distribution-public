@@ -11,7 +11,7 @@ import acme
 from acme import wrappers
 from acme.utils import loggers
 
-from algos.dqn_e_tab import dqn_e_tab_acme
+from algos.dqn import dqn_acme
 from algos.utils.array_functions import choice_eps_greedy
 from rlutil.envs.gridcraft.grid_spec_cy import TileType
 
@@ -46,7 +46,7 @@ class DQN_E_tab(object):
         network = _make_network(env_spec,
                         hidden_layers=dqn_e_tab_args['hidden_layers'])
 
-        self.agent = dqn_e_tab_acme.DQN_E_tab(environment_spec=env_spec,
+        self.agent = dqn_acme.DQN(environment_spec=env_spec,
                                     network=network,
                                     batch_size=dqn_e_tab_args['batch_size'],
                                     target_update_period=dqn_e_tab_args['target_update_period'],

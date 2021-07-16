@@ -25,7 +25,7 @@ from algos.tf_adder import TFAdder
 class DQN(agent_acme.Agent):
     """DQN agent.
     This implements a single-process DQN agent. This is a simple Q-learning
-    algorithm that inserts N-step transitions into a replay buffer, and
+    algorithm that inserts transitions into a replay buffer, and
     periodically updates its policy by sampling these transitions.
     """
 
@@ -68,9 +68,14 @@ class DQN(agent_acme.Agent):
             to 'epsilon_final'. 
         learning_rate: learning rate for the q-network update.
         discount: discount to use for TD updates.
-        logger: logger object to be used by learner.
         max_gradient_norm: used for gradient clipping.
-        
+        logger: logger object to be used by learner.
+        synthetic_replay_buffer: whether to use a synthesized replay buffer instead
+            of using the default replay buffer. The synthesized replay buffer is built
+            by generating env. transitions using the generative model of the environment.
+        num_states: the number of states of the environment (MDP states).
+        num_states: the number of actions of the environment (MDP actions).
+
         """
         # Create replay buffer.
         env_state_spec = tensor_spec.TensorSpec((),
@@ -81,14 +86,14 @@ class DQN(agent_acme.Agent):
                                 name='env_next_state')
         extras = (env_state_spec, env_next_state_spec)
         transition_spec = spec_converter.convert_env_spec(environment_spec, extras=extras)
-        self.replay_buffer = TFUniformReplayBuffer(data_spec=transition_spec,
+        self._replay_buffer = TFUniformReplayBuffer(data_spec=transition_spec,
                                                     batch_size=1,
                                                     max_length=max_replay_size,
                                                     statistics_table_shape=(num_states,
                                                                             num_actions))
-        dataset = self.replay_buffer.as_dataset(sample_batch_size=batch_size)
+        dataset = self._replay_buffer.as_dataset(sample_batch_size=batch_size)
         self._dataset_iterator = iter(dataset)
-        self.adder = TFAdder(self.replay_buffer, transition_spec)
+        self._adder = TFAdder(self._replay_buffer, transition_spec)
 
         # Create a epsilon-greedy policy network.
         policy_network = snt.Sequential([
@@ -109,7 +114,7 @@ class DQN(agent_acme.Agent):
         if synthetic_replay_buffer:
             actor = actors.FeedForwardActor(policy_network)
         else:
-            actor = actors.FeedForwardActor(policy_network, self.adder)
+            actor = actors.FeedForwardActor(policy_network, self._adder)
 
         # The learner updates the parameters (and initializes them).
         learner = DQNLearner(
@@ -149,18 +154,18 @@ class DQN(agent_acme.Agent):
     def deterministic_action(self, obs: types.NestedArray) -> types.NestedArray:
         return self._deterministic_actor.select_action(obs)
 
-    def save(self, p):
+    def save(self, p: str):
         self._saver.save(p)
 
-    def load(self, p):
+    def load(self, p: str):
         self._saver.load(p)
 
     def get_replay_buffer_counts(self):
         print('Getting replay buffer counts.')
-        return self.replay_buffer.get_statistics()
+        return self._replay_buffer.get_statistics()
 
     def add_to_replay_buffer(self, transition, extras=None):
-        self.adder.add_op(transition, extras)
+        self._adder.add_op(transition, extras)
 
     def sample_replay_buffer_batch(self):        
         data, info = next(self._dataset_iterator)
