@@ -4,15 +4,12 @@ import time
 from typing import Dict, List
 
 import acme
-from acme import types
-from acme.adders import reverb as adders
 from acme.tf import losses
 from acme.tf import savers as tf2_savers
 from acme.tf import utils as tf2_utils
 from acme.utils import counting
 from acme.utils import loggers
 import numpy as np
-import reverb
 import sonnet as snt
 import tensorflow as tf
 import trfl
@@ -57,7 +54,7 @@ class DQNLearner(acme.Learner, tf2_savers.TFSaveable):
       max_gradient_norm: used for gradient clipping.
     """
     # Internalise agent components (replay buffer, networks, optimizer).
-    self._iterator = iter(dataset)  # pytype: disable=wrong-arg-types
+    self._iterator = iter(dataset)
     self._network = network
     self._target_network = target_network
     self._optimizer = snt.optimizers.Adam(learning_rate)

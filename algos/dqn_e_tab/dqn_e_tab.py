@@ -118,7 +118,6 @@ class DQN_E_tab(object):
 
                 timestep = self.env.step(action)
 
-                oracle_q_val = np.float32(self.oracle_q_vals[env_state,action])
                 self.agent.observe_with_extras(action,
                     next_timestep=timestep, extras=(np.int32(env_state), np.int32(self.base_env.get_state())))
 

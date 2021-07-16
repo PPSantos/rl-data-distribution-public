@@ -14,12 +14,12 @@ from envs import env_suite
 # Import algorithms.
 from algos.value_iteration import ValueIteration
 from algos.q_learning import QLearning
+from algos.linear_approximator import LinearApproximator
 from algos.dqn.dqn import DQN
-from algos.dqn2be.dqn2be import DQN2BE
 from algos.dqn_e_tab.dqn_e_tab import DQN_E_tab
+from algos.dqn_e_func.dqn_e_func import DQN_E_func
 from algos.oracle_fqi.oracle_fqi import OracleFQI
 from algos.fqi.fqi import FQI
-from algos.linear_approximator import LinearApproximator
 
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
@@ -38,9 +38,9 @@ DEFAULT_TRAIN_ARGS = {
     #           (and vice versa) and 'val_iter' algorithms.
 
     # General arguments.
-    'num_runs': 1,
-    'num_processors': 1,
-    'algo': 'dqn_e_tab',
+    'num_runs': 5,
+    'num_processors': 5,
+    'algo': 'dqn',
     'num_episodes': 20_000,
     'gamma': 0.9, # discount factor.
 
@@ -131,30 +131,25 @@ DEFAULT_TRAIN_ARGS = {
         'epsilon_schedule_episodes': 20_000,
     },
 
-    # DQN-2BE arguments.
-    # TODO: this will be dqn_e_func
-    'dqn2be_args': {
+    # DQN + E_func arguments.
+    # (DQN version featuring a function approx. E-values driven exploration).
+    'dqn_e_func_args': {
         # Default DQN args.
         'batch_size': 100,
         'target_update_period': 1_000,
         'samples_per_insert': 25.0,
         'min_replay_size': 50_000,
         'max_replay_size': 1_000_000,
-        'prioritized_replay': False,
-        'importance_sampling_exponent': 0.9,
-        'priority_exponent': 0.6,
+        'learning_rate': 1e-03,
+        'hidden_layers': [20,40,20],
+        # Specific deep E-network args.
+        # (By default args are equal to the above (DQN) args).
+        'e_net_hidden_layers': [20,40,20],
+        'e_net_learning_rate': 1e-02,
+        'target_e_net_update_period': 1_000,
         'epsilon_init': 1.0,
         'epsilon_final': 0.0,
         'epsilon_schedule_timesteps': 1_000_000,
-        'learning_rate': 1e-03,
-        'hidden_layers': [20,40,20],
-        # Bellman error learning args.
-        'e_net_hidden_layers': [20,40,20],
-        'e_net_learning_rate': 1e-03,
-        'target_e_net_update_period': 1_000,
-        # 'delta_init': 0.25,
-        # 'delta_final': 0.25,
-        # 'delta_schedule_timesteps': 10_000_000,
     },
 
     # FQI arguments.
@@ -243,9 +238,7 @@ def train_run(run_args):
         agent = ValueIteration(env, **args['val_iter_args'])
 
     elif args['algo'] == 'q_learning':
-
-        raise ValueError('Not implemented')
-
+        raise ValueError('Not implemented: TODO')
         args['q_learning_args']['gamma'] = args['gamma']
         agent = QLearning(env, **args['q_learning_args'])
 
@@ -258,24 +251,23 @@ def train_run(run_args):
         args['dqn_args']['discount'] = args['gamma']
         agent = DQN(env, env_grid_spec, log_path, args['dqn_args'])
 
-    elif args['algo'] == 'dqn2be':
-
-        raise ValueError('Not implemented - this will be dqn_e_func algorithm')
-
-        args['dqn2be_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
-        args['dqn2be_args']['discount'] = args['gamma']
-        agent = DQN2BE(env, env_grid_spec, log_path, args['dqn2be_args'])
-
     elif args['algo'] == 'dqn_e_tab':
         args['dqn_e_tab_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
         args['dqn_e_tab_args']['discount'] = args['gamma']
         agent = DQN_E_tab(env, env_grid_spec, log_path, args['dqn_e_tab_args'])
 
+    elif args['algo'] == 'dqn_e_func':
+        args['dqn_e_func_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
+        args['dqn_e_func_args']['discount'] = args['gamma']
+        agent = DQN_E_func(env, env_grid_spec, log_path, args['dqn_e_func_args'])
+
     elif args['algo'] == 'fqi':
+        raise ValueError('Not implemented: TODO')
         args['fqi_args']['discount'] = args['gamma']
         agent = FQI(env, env_grid_spec, args['fqi_args'])
 
     elif args['algo'] == 'oracle_fqi':
+        raise ValueError('Not implemented: TODO')
         args['oracle_fqi_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
         args['oracle_fqi_args']['discount'] = args['gamma']
         agent = OracleFQI(env, env_grid_spec, args['oracle_fqi_args'])

@@ -43,7 +43,7 @@ class LinearApproximator(object):
         self.env_grid_spec = env_grid_spec
 
     def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
-            num_rollouts, rollouts_period, rollouts_envs):
+            num_rollouts, rollouts_period, rollouts_envs, compute_e_vals):
 
         if self.synthetic_replay_buffer:
             self._prefill_replay_buffer()

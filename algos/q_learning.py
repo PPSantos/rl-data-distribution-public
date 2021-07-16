@@ -15,7 +15,8 @@ class QLearning(object):
         self.expl_eps_final = expl_eps_final
         self.expl_eps_episodes = expl_eps_episodes
 
-    def train(self, num_episodes):
+    def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
+                num_rollouts, rollouts_period, rollouts_envs, compute_e_vals):
 
         Q = np.zeros((self.env.num_states, self.env.num_actions))
 
