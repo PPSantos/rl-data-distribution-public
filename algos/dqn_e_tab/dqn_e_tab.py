@@ -67,7 +67,6 @@ class DQN_E_tab(object):
         self.discount = dqn_e_tab_args['discount']
         self.batch_size = dqn_e_tab_args['batch_size']
         self.samples_per_insert = dqn_e_tab_args['samples_per_insert']
-        self.discount = dqn_e_tab_args['discount']
         self.lr_lambda = dqn_e_tab_args['lr_lambda']
         self.epsilon_init = dqn_e_tab_args['epsilon_init']
         self.epsilon_final = dqn_e_tab_args['epsilon_final']
@@ -192,6 +191,7 @@ class DQN_E_tab(object):
 
             # Get replay buffer statistics.
             if (episode > 1) and (episode % replay_buffer_counts_period == 0):
+                print('Getting replay buffer statistics.')
                 replay_buffer_counts_episodes.append(episode)
                 replay_buffer_counts.append(self.agent.get_replay_buffer_counts())
 
@@ -248,8 +248,8 @@ class DQN_E_tab(object):
         q_t1 = self.agent.get_Q_vals(next_observations) # [B,A]
         max_q_t1 = np.max(q_t1, axis=1) # [B]
 
-        e_t = np.abs(q_t - self.oracle_q_vals[states,actions]) # [B] - oracle target.
-        # e_t = np.abs(q_t - (rewards + self.discount*max_q_t1)) #  [B] - TD target.
+        # e_t = np.abs(q_t - self.oracle_q_vals[states,actions]) # [B] - oracle target.
+        e_t = np.abs(q_t - (rewards + self.discount*max_q_t1)) #  [B] - TD target.
 
         for i in range(self.batch_size):
             s_t, a_t, s_t1 = states[i], actions[i], next_states[i]

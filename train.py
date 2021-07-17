@@ -40,7 +40,7 @@ DEFAULT_TRAIN_ARGS = {
     # General arguments.
     'num_runs': 5,
     'num_processors': 5,
-    'algo': 'dqn',
+    'algo': 'dqn_e_tab',
     'num_episodes': 20_000,
     'gamma': 0.9, # discount factor.
 
@@ -238,7 +238,7 @@ def train_run(run_args):
         agent = ValueIteration(env, **args['val_iter_args'])
 
     elif args['algo'] == 'q_learning':
-        raise ValueError('Not implemented: TODO')
+        raise ValueError('Not implemented.')
         args['q_learning_args']['gamma'] = args['gamma']
         agent = QLearning(env, **args['q_learning_args'])
 
@@ -262,12 +262,12 @@ def train_run(run_args):
         agent = DQN_E_func(env, env_grid_spec, log_path, args['dqn_e_func_args'])
 
     elif args['algo'] == 'fqi':
-        raise ValueError('Not implemented: TODO')
+        raise ValueError('Not implemented.')
         args['fqi_args']['discount'] = args['gamma']
         agent = FQI(env, env_grid_spec, args['fqi_args'])
 
     elif args['algo'] == 'oracle_fqi':
-        raise ValueError('Not implemented: TODO')
+        raise ValueError('Not implemented.')
         args['oracle_fqi_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
         args['oracle_fqi_args']['discount'] = args['gamma']
         agent = OracleFQI(env, env_grid_spec, args['oracle_fqi_args'])

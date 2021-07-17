@@ -161,7 +161,6 @@ class DQN(agent_acme.Agent):
         self._saver.load(p)
 
     def get_replay_buffer_counts(self):
-        print('Getting replay buffer counts.')
         return self._replay_buffer.get_statistics()
 
     def add_to_replay_buffer(self, transition, extras=None):

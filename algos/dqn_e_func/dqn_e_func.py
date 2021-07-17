@@ -178,6 +178,7 @@ class DQN_E_func(object):
 
             # Get replay buffer statistics.
             if (episode > 1) and (episode % replay_buffer_counts_period == 0):
+                print('Getting replay buffer statistics.')
                 replay_buffer_counts_episodes.append(episode)
                 replay_buffer_counts.append(self.agent.get_replay_buffer_counts())
 
