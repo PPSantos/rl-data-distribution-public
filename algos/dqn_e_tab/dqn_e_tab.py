@@ -82,11 +82,13 @@ class DQN_E_tab(object):
 
         Q_vals = np.zeros((num_episodes//q_vals_period,
                 self.base_env.num_states, self.base_env.num_actions))
+        E_vals = np.zeros((num_episodes//q_vals_period,
+                self.base_env.num_states, self.base_env.num_actions))
         Q_vals_episodes = []
         Q_vals_ep = 0
 
         if compute_e_vals:
-            E_vals = np.zeros((num_episodes//q_vals_period,
+            estimated_E_vals = np.zeros((num_episodes//q_vals_period,
                     self.base_env.num_states, self.base_env.num_actions))
             Q_errors = np.zeros((num_episodes//q_vals_period,
                     self.base_env.num_states, self.base_env.num_actions))
@@ -148,14 +150,19 @@ class DQN_E_tab(object):
                         tile_type = self.env_grid_spec.get_value(xy)
                         if tile_type == TileType.WALL:
                             estimated_Q_vals[state,:] = 0
+                            E_vals[Q_vals_ep,state,:] = 0
                         else:
                             obs = self.base_env.observation(state)
                             qvs = self.agent.get_Q_vals(obs)
+                            evs = self.agent.get_E_vals(obs)
                             estimated_Q_vals[state,:] = qvs
+                            E_vals[Q_vals_ep,state,:] = evs
                     else:
                         obs = self.base_env.observation(state)
                         qvs = self.agent.get_Q_vals(obs)
+                        evs = self.agent.get_E_vals(obs)
                         estimated_Q_vals[state,:] = qvs
+                        E_vals[Q_vals_ep,state,:] = evs
 
                 Q_vals_episodes.append(episode)
                 Q_vals[Q_vals_ep,:,:] = estimated_Q_vals
@@ -184,7 +191,7 @@ class DQN_E_tab(object):
                             _samples_counts[s_t,a_t] += 1
                             _q_errors[s_t,a_t] += e_t1
 
-                    E_vals[Q_vals_ep,:,:] = _E_vals
+                    estimated_E_vals[Q_vals_ep,:,:] = _E_vals
                     Q_errors[Q_vals_ep,:,:] = _q_errors / (_samples_counts + 1e-05)
 
                 Q_vals_ep += 1
@@ -211,6 +218,7 @@ class DQN_E_tab(object):
         data['states_counts'] = states_counts
         data['Q_vals_episodes'] = Q_vals_episodes
         data['Q_vals'] = Q_vals
+        data['E_vals'] = E_vals
         data['max_Q_vals'] = np.max(Q_vals[-1], axis=1)
         data['policy'] = np.argmax(Q_vals[-1], axis=1)
         data['replay_buffer_counts_episodes'] = replay_buffer_counts_episodes
@@ -218,7 +226,7 @@ class DQN_E_tab(object):
         data['rollouts_episodes'] = rollouts_episodes
         data['rollouts_rewards'] = rollouts_rewards
         if compute_e_vals:
-            data['E_vals'] = E_vals
+            data['estimated_E_vals'] = estimated_E_vals
             data['Q_errors'] = Q_errors
 
         return data

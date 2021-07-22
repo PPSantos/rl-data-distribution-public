@@ -126,8 +126,8 @@ def main(exp_id, val_iter_exp):
     if 'Q_errors' in exp_data[0].keys():
         data['Q_errors'] = np.array([e['Q_errors'] for e in exp_data]) # [R,(E),S,A]
 
-    # E_vals field.
-    data['E_vals'] = np.array([e['E_vals'] for e in exp_data]) # [R,(E),S,A]
+    # estimated_E_vals field (old E_vals field, i.e., the E-values estimated via the tabular E-learning algorithm).
+    data['E_vals'] = np.array([e['estimated_E_vals'] for e in exp_data]) # [R,(E),S,A]
 
     is_grid_env = exp_args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys()
     print('is_grid_env:', is_grid_env)
