@@ -150,22 +150,18 @@ class DQN_E_tab(object):
                         tile_type = self.env_grid_spec.get_value(xy)
                         if tile_type == TileType.WALL:
                             estimated_Q_vals[state,:] = 0
-                            E_vals[Q_vals_ep,state,:] = 0
                         else:
                             obs = self.base_env.observation(state)
                             qvs = self.agent.get_Q_vals(obs)
-                            evs = self.agent.get_E_vals(obs)
                             estimated_Q_vals[state,:] = qvs
-                            E_vals[Q_vals_ep,state,:] = evs
                     else:
                         obs = self.base_env.observation(state)
                         qvs = self.agent.get_Q_vals(obs)
-                        evs = self.agent.get_E_vals(obs)
                         estimated_Q_vals[state,:] = qvs
-                        E_vals[Q_vals_ep,state,:] = evs
 
                 Q_vals_episodes.append(episode)
                 Q_vals[Q_vals_ep,:,:] = estimated_Q_vals
+                E_vals[Q_vals_ep,:,:] = self.E
 
                 # Estimate E-values for the current set of Q-values.
                 if compute_e_vals:
