@@ -52,7 +52,7 @@ DEFAULT_TRAIN_ARGS = {
 
     # Whether to estimate and store the E-vals at each
     # 'q_vals_period' steps for the current set of Q-values.
-    'compute_e_vals': True,
+    'compute_e_vals': False,
 
     # Env. arguments.
     'env_args': {
