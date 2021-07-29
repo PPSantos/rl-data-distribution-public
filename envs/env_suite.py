@@ -175,6 +175,41 @@ CUSTOM_GRID_ENVS = {
 
 }
 
+CUSTOM_PENDULUM_ENVS = {
+    'default': {
+        'gravity': 10.0,
+        'initial_states': [-np.pi/4],
+    },
+    'uniform_init_state_dist': {
+        'gravity': 10.0,
+        'initial_states': [-np.pi, -(3/4)*np.pi, -np.pi/2, -np.pi/4, 0, np.pi/4, np.pi/2, (3/4)*np.pi],
+    },
+    'gravity_4': {
+        'gravity': 4.0,
+        'initial_states': [-np.pi/4],
+    },
+    'gravity_6': {
+        'gravity': 6.0,
+        'initial_states': [-np.pi/4],
+    },
+    'gravity_8': {
+        'gravity': 8.0,
+        'initial_states': [-np.pi/4],
+    },
+    'gravity_12': {
+        'gravity': 12.0,
+        'initial_states': [-np.pi/4],
+    },
+    'gravity_14': {
+        'gravity': 14.0,
+        'initial_states': [-np.pi/4],
+    },
+    'gravity_16': {
+        'gravity': 16.0,
+        'initial_states': [-np.pi/4],
+    },
+}
+
 def get_custom_grid_env(env_name, env_type='default', dim_obs=8, time_limit=50, tabular=False,
                         smooth_obs=False, one_hot_obs=False, absorb=False, seed=None):
 
@@ -261,6 +296,21 @@ def wrap_obs_time(env, dim_obs=32, time_limit=50, smooth_obs=False, one_hot_obs=
 
 def wrap_time(env, time_limit=50):
     return time_limit_wrapper.TimeLimitWrapper(env, time_limit=time_limit)
+
+def get_pendulum_env(env_type='default'):
+
+    if env_type not in CUSTOM_PENDULUM_ENVS.keys():
+        raise KeyError('Unknown pendulum env. type.')
+
+    env_params = CUSTOM_PENDULUM_ENVS[env_type]
+
+    env = tabular_env.InvertedPendulum(state_discretization=32,
+                                       action_discretization=5,
+                                       gravity=env_params['gravity'],
+                                       initial_states=env_params['initial_states'],
+    )
+    env = wrap_time(env, time_limit=50)
+    return env
 
 # suite
 ENV_KEYS = ['grid16randomobs', 'grid16onehot', 'grid64randomobs', 'grid64onehot', 'cliffwalk', 'pendulum', 'mountaincar', 'sparsegraph']

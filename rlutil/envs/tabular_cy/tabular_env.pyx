@@ -300,9 +300,11 @@ cdef class InvertedPendulum(TabularEnv):
     Dynamics and reward are based on OpenAI gym's implementation of Pendulum-v0
     """
 
-    def __init__(self, int state_discretization=64, int action_discretization=5):
+    def __init__(self, int state_discretization=64, int action_discretization=5,
+                double gravity=10.0, list initial_states=[-pi/4]):
         self._state_disc = state_discretization
         self._action_disc = action_discretization
+        self._gravity = gravity
         self.max_vel = 4.
         self.max_torque = 3.
 
@@ -314,16 +316,16 @@ cdef class InvertedPendulum(TabularEnv):
         self._vel_min = -self.max_vel
         self._vel_step = (2*self.max_vel)/state_discretization
 
-        cdef int initial_state = self.to_state_id(PendulumState(-pi/4, 0))
-        super(InvertedPendulum, self).__init__(state_discretization*state_discretization, action_discretization, 
-            {initial_state: 1.0})
+        initial_state_distr = {self.to_state_id(PendulumState(s, 0)): 1.0/len(initial_states) for s in initial_states}
+        super(InvertedPendulum, self).__init__(state_discretization*state_discretization,
+                                               action_discretization, initial_state_distr)
         self.observation_space = gym.spaces.Box(low=np.array([0,0,-self.max_vel]), high=np.array([1,1,self.max_vel]), dtype=np.float32)
 
     cdef map[int, double] transitions_cy(self, int state, int action):
         self._transition_map.clear()
 
         # pendulum dynamics
-        cdef double g = 10.
+        cdef double g = self._gravity
         cdef double m = 1.
         cdef double l = 1.
         cdef double dt = 0.05

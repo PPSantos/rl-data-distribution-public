@@ -247,7 +247,7 @@ def main(exp_id, val_iter_exp):
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-        sns.heatmap(max_q_vals, linewidth=0.5, cmap="coolwarm", cbar=False)
+        sns.heatmap(max_q_vals, linewidth=0.5, cmap="coolwarm")#, cbar=False)
 
         #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
         #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
@@ -292,7 +292,7 @@ def main(exp_id, val_iter_exp):
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-        sns.heatmap(max_e_vals, linewidth=0.5, cmap="coolwarm", cbar=False)
+        sns.heatmap(max_e_vals, linewidth=0.5, cmap="coolwarm")#, cbar=False)
 
         #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
         #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
@@ -343,7 +343,7 @@ def main(exp_id, val_iter_exp):
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-        sns.heatmap(buffer_counts, annot=labels, linewidth=0.5, cmap="coolwarm", cbar=False, mask=mask_array)
+        sns.heatmap(buffer_counts, annot=labels, linewidth=0.5, cmap="coolwarm", mask=mask_array, cbar=False)
 
         #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
         #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
@@ -365,7 +365,7 @@ def main(exp_id, val_iter_exp):
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-        sns.heatmap(errors, linewidth=0.5, cmap="coolwarm", cbar=False)
+        sns.heatmap(errors, linewidth=0.5, cmap="coolwarm")#, cbar=False)
 
         #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
         #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
@@ -389,7 +389,7 @@ def main(exp_id, val_iter_exp):
             fig = plt.figure()
             fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-            sns.heatmap(Q_errors, linewidth=0.5, cmap="coolwarm", cbar=False)
+            sns.heatmap(Q_errors, linewidth=0.5, cmap="coolwarm") #, cbar=False)
 
             #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
             #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
@@ -418,7 +418,7 @@ def main(exp_id, val_iter_exp):
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-        sns.heatmap(max_q_vals, linewidth=0.5, cmap=colormap, cbar=False)
+        sns.heatmap(max_q_vals, linewidth=0.5, cmap=colormap)#, cbar=False)
 
         #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
         #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
@@ -459,7 +459,7 @@ def main(exp_id, val_iter_exp):
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-        sns.heatmap(max_e_vals, linewidth=0.5, cmap=colormap, cbar=False)
+        sns.heatmap(max_e_vals, linewidth=0.5, cmap=colormap)#, cbar=False)
 
         #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
         #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
@@ -538,7 +538,7 @@ def main(exp_id, val_iter_exp):
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-        sns.heatmap(errors, linewidth=0.5, cmap="coolwarm", cbar=False)
+        sns.heatmap(errors, linewidth=0.5, cmap="coolwarm")#, cbar=False)
 
         #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
         #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
@@ -565,7 +565,7 @@ def main(exp_id, val_iter_exp):
             fig = plt.figure()
             fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-            sns.heatmap(Q_errors, linewidth=0.5, cmap="coolwarm", cbar=False)
+            sns.heatmap(Q_errors, linewidth=0.5, cmap="coolwarm")#, cbar=False)
 
             #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
             #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)

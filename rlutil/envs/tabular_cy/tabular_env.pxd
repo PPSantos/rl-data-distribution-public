@@ -45,6 +45,7 @@ cdef struct PendulumState:
 cdef class InvertedPendulum(TabularEnv):
     cdef int _state_disc
     cdef int _action_disc
+    cdef double _gravity
     cdef double max_vel
     cdef double max_torque
     cdef double[:] action_map
