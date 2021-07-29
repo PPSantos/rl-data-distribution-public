@@ -387,7 +387,9 @@ cdef class MountainCar(TabularEnv):
     Dynamics and reward are based on OpenAI gym's implementation of MountainCar-v0
     """
 
-    def __init__(self, int posdisc=64, int veldisc=64, int action_discretization=5):
+    def __init__(self, int posdisc=64, int veldisc=64, int action_discretization=5,
+                    gravity=0.0025, initial_states=[-0.5]):
+        self._gravity = gravity
         self._pos_disc = posdisc
         self._vel_disc = veldisc
         self._action_disc = action_discretization
@@ -400,8 +402,8 @@ cdef class MountainCar(TabularEnv):
         self._state_step = (self.max_pos-self.min_pos) / self._pos_disc
         self._vel_step = (self.max_vel-self.min_vel)/self._vel_disc
 
-        cdef int initial_state = self.to_state_id(MountainCarState(-0.5, 0))
-        super(MountainCar, self).__init__(self._pos_disc*self._vel_disc, 3, {initial_state: 1.0})
+        initial_state_distr = {self.to_state_id(MountainCarState(s, 0)): 1.0/len(initial_states) for s in initial_states}
+        super(MountainCar, self).__init__(self._pos_disc*self._vel_disc, 3, initial_state_distr)
         self.observation_space = gym.spaces.Box(low=np.array([self.min_pos,-self.max_vel]), high=np.array([self.max_pos,self.max_vel]), dtype=np.float32)
 
     cdef map[int, double] transitions_cy(self, int state, int action):
@@ -409,7 +411,7 @@ cdef class MountainCar(TabularEnv):
         state_vec = self.from_state_id(state)
         position, velocity = state_vec.pos, state_vec.vel
         for _ in range(3):
-            velocity += (action-1)*0.001 + cos(3*position)*(-0.0025)
+            velocity += (action-1)*0.001 + cos(3*position)*(-self._gravity)
             velocity = fmax(fmin(velocity, self.max_vel-1e-8), self.min_vel)
             position += velocity
             position = fmax(fmin(position, self.max_pos-1e-8), self.min_pos)

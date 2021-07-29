@@ -175,7 +175,7 @@ CUSTOM_GRID_ENVS = {
 
 }
 
-CUSTOM_PENDULUM_ENVS = {
+PENDULUM_ENVS = {
     'default': {
         'gravity': 10.0,
         'initial_states': [-np.pi/4],
@@ -210,31 +210,66 @@ CUSTOM_PENDULUM_ENVS = {
     },
 }
 
-def get_custom_grid_env(env_name, env_type='default', dim_obs=8, time_limit=50, tabular=False,
-                        smooth_obs=False, one_hot_obs=False, absorb=False, seed=None):
+MOUNTAINCAR_ENVS = {
+    'default': {
+        'gravity': 0.0025,
+        'initial_states': [-0.5],
+    },
+    'uniform_init_state_dist': {
+        'gravity': 0.0025,
+        'initial_states': [-1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4,
+                           -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4],
+    },
+    'gravity_0020': {
+        'gravity': 0.0020,
+        'initial_states': [-0.5],
+    },
+    'gravity_0023': {
+        'gravity': 0.0023,
+        'initial_states': [-0.5],
+    },
+    'gravity_0027': {
+        'gravity': 0.0027,
+        'initial_states': [-0.5],
+    },
+    'gravity_0030': {
+        'gravity': 0.0030,
+        'initial_states': [-0.5],
+    },
+}
+
+def get_custom_grid_env(env_name, dim_obs=8, time_limit=50, tabular=False, smooth_obs=False,
+                        one_hot_obs=False, absorb=False, seed=None):
 
     if env_name not in CUSTOM_GRID_ENVS.keys():
         raise KeyError('Unknown env. name.')
 
-    if env_type not in CUSTOM_GRID_ENVS[env_name].keys():
-        raise KeyError('Unknown env. type.')
-
-    env_params = CUSTOM_GRID_ENVS[env_name][env_type]
-
+    # Load default env.
+    default_env_params = CUSTOM_GRID_ENVS[env_name]['default']
     with math_utils.np_seed(seed):
-        env = grid_env_cy.GridEnv(env_params['grid_spec'], phi=env_params['phi'])
-
+        train_env = grid_env_cy.GridEnv(default_env_params['grid_spec'], phi=default_env_params['phi'])
         if absorb:
-            env = env_wrapper.AbsorbingStateWrapper(env)
-
+            train_env = env_wrapper.AbsorbingStateWrapper(train_env)
         if tabular:
-            env = wrap_time(env, time_limit=time_limit)
+            train_env = wrap_time(train_env, time_limit=time_limit)
         else:
-            env = wrap_obs_time(env, time_limit=time_limit, one_hot_obs=one_hot_obs,
+            train_env = wrap_obs_time(train_env, time_limit=time_limit, one_hot_obs=one_hot_obs,
                                 dim_obs=dim_obs, smooth_obs=smooth_obs)
 
-    return env, env_params['grid_spec']
+    # Load rollouts envs.
+    rollouts_envs = []
+    for r_type, r_env_params in sorted(CUSTOM_GRID_ENVS[env_name].items()):
+        r_env = grid_env_cy.GridEnv(r_env_params['grid_spec'], phi=r_env_params['phi'])
+        if absorb:
+            r_env = env_wrapper.AbsorbingStateWrapper(r_env)
+        if tabular:
+            r_env = wrap_time(r_env, time_limit=time_limit)
+        else:
+            r_env = wrap_obs_time(r_env, time_limit=time_limit, one_hot_obs=one_hot_obs,
+                                dim_obs=dim_obs, smooth_obs=smooth_obs)
+        rollouts_envs.append(r_env)
 
+    return train_env, default_env_params['grid_spec'], rollouts_envs
 
 def random_grid_env(size_x, size_y, dim_obs=32, time_limit=50,
     wall_ratio=0.1, smooth_obs=False, distance_reward=True,
@@ -297,61 +332,86 @@ def wrap_obs_time(env, dim_obs=32, time_limit=50, smooth_obs=False, one_hot_obs=
 def wrap_time(env, time_limit=50):
     return time_limit_wrapper.TimeLimitWrapper(env, time_limit=time_limit)
 
-def get_pendulum_env(env_type='default'):
 
-    if env_type not in CUSTOM_PENDULUM_ENVS.keys():
-        raise KeyError('Unknown pendulum env. type.')
-
-    env_params = CUSTOM_PENDULUM_ENVS[env_type]
-
-    env = tabular_env.InvertedPendulum(state_discretization=32,
-                                       action_discretization=5,
-                                       gravity=env_params['gravity'],
-                                       initial_states=env_params['initial_states'],
-    )
-    env = wrap_time(env, time_limit=50)
-    return env
-
-# suite
-ENV_KEYS = ['grid16randomobs', 'grid16onehot', 'grid64randomobs', 'grid64onehot', 'cliffwalk', 'pendulum', 'mountaincar', 'sparsegraph']
+# Environments suite.
+ENV_KEYS = ['pendulum', 'mountaincar', 'multiPathsEnv', 'mdp1']
 def get_env(name):
-    if name == 'grid16randomobs':
-        env = random_grid_env(16, 16, dim_obs=16, time_limit=50, wall_ratio=0.2, smooth_obs=False, seed=0)
-    elif name == 'grid16onehot':
-        env = random_grid_env(16, 16, time_limit=50, wall_ratio=0.2, one_hot_obs=True, seed=0)
-    elif name == 'grid16sparse':
-        env = random_grid_env(16, 16, time_limit=50, wall_ratio=0.2, one_hot_obs=True, seed=0, distance_reward=False)
-    elif name == 'grid64randomobs':
-        env = random_grid_env(64, 64, dim_obs=64, time_limit=100, wall_ratio=0.2, smooth_obs=False, seed=0)
-    elif name == 'grid64onehot':
-        env = random_grid_env(64, 64, time_limit=100, wall_ratio=0.2, one_hot_obs=True, seed=0)
-    elif name == 'cliffwalk':
-        with math_utils.np_seed(0):
-            env = tabular_env.CliffwalkEnv(25)
-            # Cliffwalk is unsolvable by QI with moderate entropy - up the reward to reduce the effects.
-            env = env_wrapper.AbsorbingStateWrapper(env, absorb_reward=10.0)
-            env = wrap_obs_time(env, dim_obs=16, time_limit=50)
-    elif name == 'pendulum':
-        env = tabular_env.InvertedPendulum(state_discretization=32, action_discretization=5)
-        env = wrap_time(env, time_limit=50)
+
+    if name == 'pendulum':
+        # Load default env.
+        default_params = PENDULUM_ENVS['default']
+        train_env = tabular_env.InvertedPendulum(state_discretization=32,
+                                                 action_discretization=5,
+                                                 gravity=default_params['gravity'],
+                                                 initial_states=default_params['initial_states'])
+        train_env = wrap_time(train_env, time_limit=50)
+
+        # Load rollouts envs.
+        rollouts_envs = []
+        for r_type, r_env_params in sorted(PENDULUM_ENVS.items()):
+            r_env = tabular_env.InvertedPendulum(state_discretization=32,
+                                                 action_discretization=5,
+                                                 gravity=r_env_params['gravity'],
+                                                 initial_states=r_env_params['initial_states'])
+            r_env = wrap_time(r_env, time_limit=50)
+            rollouts_envs.append(r_env)
+
+        return train_env, rollouts_envs
+
     elif name == 'mountaincar':
-        env = tabular_env.MountainCar(posdisc=56, veldisc=32)
-        # MountainCar is unsolvable by QI with moderate entropy - up the reward to reduce the effects.
-        env = env_wrapper.AbsorbingStateWrapper(env, absorb_reward=10.0)  
-        env = wrap_time(env, time_limit=100)
-    elif name == 'sparsegraph':
-        with math_utils.np_seed(0):
-            env = tabular_env.RandomTabularEnv(num_states=500, num_actions=3, transitions_per_action=1, self_loop=True)
-            env = env_wrapper.AbsorbingStateWrapper(env, absorb_reward=10.0)
-            env = wrap_obs_time(env, dim_obs=4, time_limit=10)
+        # Load default env.
+        default_params = MOUNTAINCAR_ENVS['default']
+        train_env = tabular_env.MountainCar(posdisc=56, veldisc=32,
+                                            gravity=default_params['gravity'],
+                                            initial_states=default_params['initial_states'])
+        train_env = env_wrapper.AbsorbingStateWrapper(train_env, absorb_reward=10.0)  
+        train_env = wrap_time(train_env, time_limit=100)
+
+        # Load rollouts envs.
+        rollouts_envs = []
+        for r_type, r_env_params in sorted(MOUNTAINCAR_ENVS.items()):
+            r_env = tabular_env.MountainCar(posdisc=56, veldisc=32,
+                                            gravity=r_env_params['gravity'],
+                                            initial_states=r_env_params['initial_states'])
+            r_env = env_wrapper.AbsorbingStateWrapper(r_env, absorb_reward=10.0)  
+            r_env = wrap_time(r_env, time_limit=100)
+            rollouts_envs.append(r_env)
+
+        return train_env, rollouts_envs
+
     elif name == 'multiPathsEnv':
         env = tabular_env.MultiPathsEnv()
         # env = random_obs_wrapper.MultiPathsEnvObsWrapper(env, dim_obs=5)
         env = random_obs_wrapper.MultiPathsEnvObsWrapper1Hot(env)
         env = time_limit_wrapper.TimeLimitWrapper(env, time_limit=10)
+        return env, []
+
     elif name == 'mdp1':
         env = tabular_env.MDP1()
         env = time_limit_wrapper.TimeLimitWrapper(env, time_limit=5)
+        return env, []
+
     else:
         raise NotImplementedError('Unknown env id: %s' % name)
-    return env
+
+    # if name == 'grid16randomobs':
+    #     env = random_grid_env(16, 16, dim_obs=16, time_limit=50, wall_ratio=0.2, smooth_obs=False, seed=0)
+    # elif name == 'grid16onehot':
+    #     env = random_grid_env(16, 16, time_limit=50, wall_ratio=0.2, one_hot_obs=True, seed=0)
+    # elif name == 'grid16sparse':
+    #     env = random_grid_env(16, 16, time_limit=50, wall_ratio=0.2, one_hot_obs=True, seed=0, distance_reward=False)
+    # elif name == 'grid64randomobs':
+    #     env = random_grid_env(64, 64, dim_obs=64, time_limit=100, wall_ratio=0.2, smooth_obs=False, seed=0)
+    # elif name == 'grid64onehot':
+    #     env = random_grid_env(64, 64, time_limit=100, wall_ratio=0.2, one_hot_obs=True, seed=0)
+    # elif name == 'cliffwalk':
+    #     with math_utils.np_seed(0):
+    #         env = tabular_env.CliffwalkEnv(25)
+    #         # Cliffwalk is unsolvable by QI with moderate entropy - up the reward to reduce the effects.
+    #         env = env_wrapper.AbsorbingStateWrapper(env, absorb_reward=10.0)
+    #         env = wrap_obs_time(env, dim_obs=16, time_limit=50)
+    # elif name == 'sparsegraph':
+    #     with math_utils.np_seed(0):
+    #         env = tabular_env.RandomTabularEnv(num_states=500, num_actions=3, transitions_per_action=1, self_loop=True)
+    #         env = env_wrapper.AbsorbingStateWrapper(env, absorb_reward=10.0)
+    #         env = wrap_obs_time(env, dim_obs=4, time_limit=10)

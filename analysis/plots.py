@@ -251,7 +251,16 @@ def main(exp_id, val_iter_exp):
     """
         `rollouts_rewards` plot.
     """
-    for t, rollout_type in enumerate(exp_args['rollouts_types']):
+    if exp_args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys():
+        rollouts_types = sorted(env_suite.CUSTOM_GRID_ENVS[exp_args['env_args']['env_name']].keys())
+    elif exp_args['env_args']['env_name'] == 'pendulum':
+        rollouts_types = sorted(env_suite.PENDULUM_ENVS.keys())
+    elif exp_args['env_args']['env_name'] == 'mountaincar':
+        rollouts_types = sorted(env_suite.MOUNTAINCAR_ENVS.keys())
+    else:
+        raise ValueError(f'Env. {exp_args["env_args"]["env_name"]} does not have rollout types defined.')
+
+    for t, rollout_type in enumerate(rollouts_types):
         print(f'Computing `rollouts_rewards_{rollout_type}` plot.')
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
@@ -274,7 +283,7 @@ def main(exp_id, val_iter_exp):
     """
         Scalar evaluation rewards metrics.
     """
-    for t, rollout_type in enumerate(exp_args['rollouts_types']):
+    for t, rollout_type in enumerate(rollouts_types):
         rollout_type_data = data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
         scalar_metrics[f'eval_rewards_total_{rollout_type}'] = np.mean(rollout_type_data)
         scalar_metrics[f'eval_rewards_final_{rollout_type}'] = np.mean(rollout_type_data[:,-1,:])

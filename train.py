@@ -67,8 +67,6 @@ DEFAULT_TRAIN_ARGS = {
     # Evaluation rollouts arguments.
     'rollouts_period': 100,
     'num_rollouts': 5,
-    'rollouts_types': ['default', 'uniform_init_state_dist', 'gravity_6',
-                    'gravity_8', 'gravity_12', 'gravity_14'],
 
     # Value iteration arguments.
     'val_iter_args': {
@@ -197,26 +195,14 @@ def train_run(run_args):
 
     time.sleep(time_delay)
 
-    # Load train environment.
-    if args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys(): # Grid env.
-        env, env_grid_spec = env_suite.get_custom_grid_env(**args['env_args'], env_type='default',
+    # Load train (and rollouts) environment.
+    env_name = args['env_args']['env_name']
+    if env_name in env_suite.CUSTOM_GRID_ENVS.keys():
+        env, env_grid_spec, rollouts_envs = env_suite.get_custom_grid_env(**args['env_args'],
                                                         absorb=False, seed=time_delay)
-    elif args['env_args']['env_name'] == 'pendulum':
-        env = env_suite.get_pendulum_env(env_type='default')
-        env_grid_spec = None
     else:
-        env = env_suite.get_env(args['env_args']['env_name'])
+        env, rollouts_envs = env_suite.get_env(env_name)
         env_grid_spec = None
-
-    # Load rollouts environment(s).
-    if args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys():
-        rollouts_envs = [env_suite.get_custom_grid_env(**args['env_args'], env_type=t,
-                                                    absorb=False, seed=time_delay)[0]
-                            for t in args['rollouts_types']]
-    elif args['env_args']['env_name'] == 'pendulum':
-        rollouts_envs = [env_suite.get_pendulum_env(env_type=t) for t in args['rollouts_types']]
-    else:
-        rollouts_envs = [env_suite.get_env(args['env_args']['env_name'])]
 
     # print('Env num states:', env.num_states)
     # print('Env num actions:', env.num_actions)
@@ -228,8 +214,8 @@ def train_run(run_args):
     # print('\n')
 
     # Load optimal (oracle) policy/Q-values.
-    val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA[args['env_args']['env_name']]
-    print(f"Opening experiment {VAL_ITER_DATA[args['env_args']['env_name']]} to get oracle Q-vals")
+    val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA[env_name]
+    print(f"Opening experiment {VAL_ITER_DATA[env_name]} to get oracle Q-vals")
     with open(val_iter_path + "/train_data.json", 'r') as f:
         val_iter_data = json.load(f)
         val_iter_data = json.loads(val_iter_data)

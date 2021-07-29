@@ -64,6 +64,7 @@ cdef struct MountainCarState:
     double vel
     
 cdef class MountainCar(TabularEnv):
+    cdef double _gravity
     cdef int _pos_disc
     cdef int _vel_disc
     cdef int _action_disc
