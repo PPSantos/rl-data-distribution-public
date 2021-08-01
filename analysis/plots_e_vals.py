@@ -126,8 +126,11 @@ def main(exp_id, val_iter_exp):
     if 'Q_errors' in exp_data[0].keys():
         data['Q_errors'] = np.array([e['Q_errors'] for e in exp_data]) # [R,(E),S,A]
 
-    # estimated_E_vals field (old E_vals field, i.e., the E-values estimated via the tabular E-learning algorithm).
-    data['E_vals'] = np.array([e['estimated_E_vals'] for e in exp_data]) # [R,(E),S,A]
+    # E_vals field.
+    data['E_vals'] = np.array([e['E_vals'] for e in exp_data]) # [R,(E),S,A]
+    
+    # estimated_E_vals field (the E-values estimated via the tabular E-learning algorithm).
+    data['estimated_E_vals'] = np.array([e['estimated_E_vals'] for e in exp_data]) # [R,(E),S,A]
 
     is_grid_env = exp_args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys()
     print('is_grid_env:', is_grid_env)
@@ -199,6 +202,7 @@ def main(exp_id, val_iter_exp):
     e_vals_summed = np.zeros((N_states,N_actions)) # [S,A]
     max_q_vals = []
     max_e_vals = []
+    max_estimated_e_vals = []
     errors = []
     buffer_counts = []
     Q_errors = []
@@ -208,12 +212,14 @@ def main(exp_id, val_iter_exp):
 
             Q_vals_run = data['Q_vals'][run][_idx] # [S,A]
             E_vals_run = data['E_vals'][run][_idx] # [S,A]
+            estimated_E_vals_run = data['estimated_E_vals'][run][_idx] # [S,A]
             replay_counts_run = data['replay_buffer_counts'][run][_idx] # [S,A]
             if 'Q_errors' in exp_data[0].keys():
                 Q_errors_run = data['Q_errors'][run][_idx] # [S,A]
                 Q_errors.append(np.mean(Q_errors_run, axis=1)) # [S]
 
             max_e_vals.append([np.max(E_vals_run[s,:]) for s in range(N_states)])
+            max_estimated_e_vals.append([np.max(estimated_E_vals_run[s,:]) for s in range(N_states)])
             max_q_vals.append([np.max(Q_vals_run[s,:]) for s in range(N_states)])
 
             sa_errors = np.abs(val_iter_data['Q_vals'] - Q_vals_run) # [S,A]
@@ -225,6 +231,7 @@ def main(exp_id, val_iter_exp):
             e_vals_summed = e_vals_summed + E_vals_run # [S,A]
 
     max_e_vals = np.array(max_e_vals)
+    max_estimated_e_vals = np.array(max_estimated_e_vals)
     max_q_vals = np.array(max_q_vals)
     errors = np.array(errors)
     buffer_counts = np.array(buffer_counts)
@@ -306,6 +313,28 @@ def main(exp_id, val_iter_exp):
         plt.grid()
         plt.savefig(f'{e_vals_folder_path}/max_e_vals.pdf', bbox_inches='tight', pad_inches=0)
         plt.savefig(f'{e_vals_folder_path}/max_e_vals.png', bbox_inches='tight', pad_inches=0)
+        plt.close()
+
+        # max estimated_e_vals
+        max_estimated_e_vals = np.mean(max_estimated_e_vals, axis=0)
+        max_estimated_e_vals = np.reshape(max_estimated_e_vals, (8,-1))
+        fig = plt.figure()
+        fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+        sns.heatmap(max_estimated_e_vals, linewidth=0.5, cmap="coolwarm", cbar=False)
+
+        #plt.hlines([0, plt.ylim()[0]], *plt.xlim(), color='black', linewidth=4)
+        #plt.vlines([0, plt.xlim()[1]], *plt.ylim(), color='black', linewidth=4)
+
+        plt.text(0.34, plt.ylim()[0]-0.30, 'S', fontsize=16, color='white')
+        plt.text(plt.xlim()[1]-0.7, 0.67, 'G', fontsize=16, color='white')
+
+        plt.xticks([]) # remove the tick marks by setting to an empty list
+        plt.yticks([]) # remove the tick marks by setting to an empty list
+        plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+        plt.grid()
+        plt.savefig(f'{e_vals_folder_path}/max_estimated_e_vals.pdf', bbox_inches='tight', pad_inches=0)
+        plt.savefig(f'{e_vals_folder_path}/max_estimated_e_vals.png', bbox_inches='tight', pad_inches=0)
         plt.close()
 
         # greedy e-vals policy
