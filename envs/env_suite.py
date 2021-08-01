@@ -238,6 +238,30 @@ MOUNTAINCAR_ENVS = {
     },
 }
 
+MULTIPATHS_ENVS = {
+    'default': {
+        'initial_states': [0],
+        'init_action_random_p': 0.01,
+    },
+    'uniform_init_state_dist': {
+        'initial_states': [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],
+        'init_action_random_p': 0.01,
+    },
+    'action_random_p_0.05': {
+        'initial_states': [0],
+        'init_action_random_p': 0.05,
+    },
+    'action_random_p_0.1': {
+        'initial_states': [0],
+        'init_action_random_p': 0.1,
+    },
+    'action_random_p_0.2': {
+        'initial_states': [0],
+        'init_action_random_p': 0.2,
+    },
+}
+
+
 def get_custom_grid_env(env_name, dim_obs=8, time_limit=50, tabular=False, smooth_obs=False,
                         one_hot_obs=False, absorb=False, seed=None):
 
@@ -380,11 +404,25 @@ def get_env(name):
         return train_env, rollouts_envs
 
     elif name == 'multiPathsEnv':
-        env = tabular_env.MultiPathsEnv()
-        # env = random_obs_wrapper.MultiPathsEnvObsWrapper(env, dim_obs=5)
-        env = random_obs_wrapper.MultiPathsEnvObsWrapper1Hot(env)
-        env = time_limit_wrapper.TimeLimitWrapper(env, time_limit=10)
-        return env, []
+        # Load default env.
+        default_params = MULTIPATHS_ENVS['default']
+        train_env = tabular_env.MultiPathsEnv(init_action_random_p=default_params['init_action_random_p'],
+                                        initial_states=default_params['initial_states'])
+        train_env = random_obs_wrapper.MultiPathsEnvObsWrapper(train_env, dim_obs=5)
+        #train_env = random_obs_wrapper.MultiPathsEnvObsWrapper1Hot(train_env)
+        train_env = time_limit_wrapper.TimeLimitWrapper(train_env, time_limit=10)
+
+        # Load rollouts envs.
+        rollouts_envs = []
+        for r_type, r_env_params in sorted(MULTIPATHS_ENVS.items()):
+            r_env = tabular_env.MultiPathsEnv(init_action_random_p=r_env_params['init_action_random_p'],
+                                        initial_states=r_env_params['initial_states'])
+            r_env = random_obs_wrapper.MultiPathsEnvObsWrapper(r_env, dim_obs=5)
+            #r_env = random_obs_wrapper.MultiPathsEnvObsWrapper1Hot(r_env)
+            r_env = time_limit_wrapper.TimeLimitWrapper(r_env, time_limit=10)            
+            rollouts_envs.append(r_env)
+
+        return train_env, rollouts_envs
 
     elif name == 'mdp1':
         env = tabular_env.MDP1()

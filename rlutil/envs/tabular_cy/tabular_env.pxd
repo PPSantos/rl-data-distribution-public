@@ -79,6 +79,7 @@ cdef class MountainCar(TabularEnv):
     cdef int to_state_id(self, MountainCarState pend_state)
 
 cdef class MultiPathsEnv(TabularEnv):
+    cdef double _init_action_random_p
     cdef int[:] _correct_actions
 
 cdef class MDP1(TabularEnv):

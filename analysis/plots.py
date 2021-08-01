@@ -257,6 +257,8 @@ def main(exp_id, val_iter_exp):
         rollouts_types = sorted(env_suite.PENDULUM_ENVS.keys())
     elif exp_args['env_args']['env_name'] == 'mountaincar':
         rollouts_types = sorted(env_suite.MOUNTAINCAR_ENVS.keys())
+    elif exp_args['env_args']['env_name'] == 'multiPathsEnv':
+        rollouts_types = sorted(env_suite.MULTIPATHS_ENVS.keys())
     else:
         raise ValueError(f'Env. {exp_args["env_args"]["env_name"]} does not have rollout types defined.')
 

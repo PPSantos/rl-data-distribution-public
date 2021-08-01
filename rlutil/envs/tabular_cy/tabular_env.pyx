@@ -453,8 +453,10 @@ cdef class MountainCar(TabularEnv):
         print('(%f, %f) = %d' % (x1, x2, self.get_state()))
 
 cdef class MultiPathsEnv(TabularEnv):
-    def __init__(self):
-        super(MultiPathsEnv, self).__init__(5*5+2, 5, {0: 1.0})
+    def __init__(self, init_action_random_p=0.01, initial_states=[0]):
+        initial_state_distr = {state: 1.0/len(initial_states) for state in initial_states}
+        super(MultiPathsEnv, self).__init__(5*5+2, 5, initial_state_distr)
+        self._init_action_random_p = init_action_random_p
 
         with np_seed(999):
             self._correct_actions = np.random.randint(low=0, high=5, size=5*5+2, dtype=np.int32)
@@ -463,8 +465,8 @@ cdef class MultiPathsEnv(TabularEnv):
         self._transition_map.clear()
 
         if state == 0: # Start state.
-            probs = [0.01, 0.01, 0.01, 0.01, 0.01]
-            probs[action] = 0.96
+            probs = [self._init_action_random_p]*5
+            probs[action] += 1 - self._init_action_random_p*5
             for (next_state, p) in zip([1,6,11,16,21], probs):
                 self._transition_map.insert(pair[int, double](next_state, p))
 
