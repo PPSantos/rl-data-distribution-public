@@ -40,7 +40,7 @@ DEFAULT_TRAIN_ARGS = {
     # General arguments.
     'num_runs': 20,
     'num_processors': 10,
-    'algo': 'dqn_e_tab',
+    'algo': 'dqn',
     'num_episodes': 40_000,
     'gamma': 0.9, # discount factor.
 
@@ -105,7 +105,7 @@ DEFAULT_TRAIN_ARGS = {
         'epsilon_final': 0.0,
         'epsilon_schedule_timesteps': 400_000,
         'learning_rate': 1e-03,
-        'hidden_layers': [20,40,20],
+        'hidden_layers': [32,64,32],
         'synthetic_replay_buffer': False,
         'synthetic_replay_buffer_alpha': 1_000,
     },
@@ -120,7 +120,7 @@ DEFAULT_TRAIN_ARGS = {
         'min_replay_size': 20_000,
         'max_replay_size': 400_000,
         'learning_rate': 1e-03,
-        'hidden_layers': [20,40,20],
+        'hidden_layers': [32,64,32],
         # E-learning args.
         'lr_lambda': 0.05,
         'epsilon_init': 1.0,

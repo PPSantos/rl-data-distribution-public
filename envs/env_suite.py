@@ -408,7 +408,7 @@ def get_env(name):
         default_params = MULTIPATHS_ENVS['default']
         train_env = tabular_env.MultiPathsEnv(init_action_random_p=default_params['init_action_random_p'],
                                         initial_states=default_params['initial_states'])
-        train_env = random_obs_wrapper.MultiPathsEnvObsWrapper(train_env, dim_obs=5)
+        train_env = random_obs_wrapper.MultiPathsEnvObsWrapper(train_env, dim_obs=8)
         #train_env = random_obs_wrapper.MultiPathsEnvObsWrapper1Hot(train_env)
         train_env = time_limit_wrapper.TimeLimitWrapper(train_env, time_limit=10)
 
@@ -417,7 +417,7 @@ def get_env(name):
         for r_type, r_env_params in sorted(MULTIPATHS_ENVS.items()):
             r_env = tabular_env.MultiPathsEnv(init_action_random_p=r_env_params['init_action_random_p'],
                                         initial_states=r_env_params['initial_states'])
-            r_env = random_obs_wrapper.MultiPathsEnvObsWrapper(r_env, dim_obs=5)
+            r_env = random_obs_wrapper.MultiPathsEnvObsWrapper(r_env, dim_obs=8)
             #r_env = random_obs_wrapper.MultiPathsEnvObsWrapper1Hot(r_env)
             r_env = time_limit_wrapper.TimeLimitWrapper(r_env, time_limit=10)            
             rollouts_envs.append(r_env)
