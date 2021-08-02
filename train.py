@@ -201,7 +201,7 @@ def train_run(run_args):
         env, env_grid_spec, rollouts_envs = env_suite.get_custom_grid_env(**args['env_args'],
                                                         absorb=False, seed=time_delay)
     else:
-        env, rollouts_envs = env_suite.get_env(env_name)
+        env, rollouts_envs = env_suite.get_env(env_name, seed=time_delay)
         env_grid_spec = None
 
     # print('Env num states:', env.num_states)
