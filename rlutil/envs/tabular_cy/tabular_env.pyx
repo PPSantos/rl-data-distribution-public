@@ -393,9 +393,9 @@ cdef class MountainCar(TabularEnv):
         self._pos_disc = posdisc
         self._vel_disc = veldisc
         self._action_disc = action_discretization
-        self.max_vel = 0.06 # gym 0.07
+        self.max_vel = 0.07 # gym 0.07
         self.min_vel = -self.max_vel
-        self.max_pos = 0.55 # gym 0.6
+        self.max_pos = 0.6 # gym 0.6
         self.min_pos = -1.2 # gym -1.2
         self.goal_pos = 0.5
 
@@ -424,6 +424,7 @@ cdef class MountainCar(TabularEnv):
     cpdef double reward(self, int state, int action, int next_state):
         state_vec = self.from_state_id(state)
         if state_vec.pos >= self.goal_pos:
+            print('REACHED GOAL')
             return 1.0
         return 0.0
     

@@ -389,7 +389,7 @@ def get_env(name, seed):
         train_env = tabular_env.MountainCar(posdisc=56, veldisc=32,
                                             gravity=default_params['gravity'],
                                             initial_states=default_params['initial_states'])
-        train_env = env_wrapper.AbsorbingStateWrapper(train_env, absorb_reward=10.0)  
+        #train_env = env_wrapper.AbsorbingStateWrapper(train_env, absorb_reward=10.0)  
         train_env = wrap_time(train_env, time_limit=100)
 
         # Load rollouts envs.
@@ -398,7 +398,7 @@ def get_env(name, seed):
             r_env = tabular_env.MountainCar(posdisc=56, veldisc=32,
                                             gravity=r_env_params['gravity'],
                                             initial_states=r_env_params['initial_states'])
-            r_env = env_wrapper.AbsorbingStateWrapper(r_env, absorb_reward=10.0)  
+            #r_env = env_wrapper.AbsorbingStateWrapper(r_env, absorb_reward=10.0)  
             r_env = wrap_time(r_env, time_limit=100)
             rollouts_envs.append(r_env)
 

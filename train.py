@@ -38,11 +38,11 @@ DEFAULT_TRAIN_ARGS = {
     #           (and vice versa) and 'val_iter' algorithms.
 
     # General arguments.
-    'num_runs': 20,
+    'num_runs': 10,
     'num_processors': 10,
     'algo': 'dqn',
-    'num_episodes': 40_000,
-    'gamma': 0.9, # discount factor.
+    'num_episodes': 20_000,
+    'gamma': 0.99, # discount factor.
 
     # Period at which the Q-values are stored.
     'q_vals_period': 100,
@@ -56,7 +56,7 @@ DEFAULT_TRAIN_ARGS = {
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'multiPathsEnv',
+        'env_name': 'mountaincar',
         'dim_obs': 8, # (for grid env. only).
         'time_limit': 50, # (for grid env. only).
         'tabular': False, # (for grid env. only).
@@ -99,11 +99,11 @@ DEFAULT_TRAIN_ARGS = {
         'batch_size': 100,
         'target_update_period': 1_000,
         'samples_per_insert': 25.0,
-        'min_replay_size': 20_000,
-        'max_replay_size': 400_000,
-        'epsilon_init': 1.0,
-        'epsilon_final': 0.0,
-        'epsilon_schedule_timesteps': 400_000,
+        'min_replay_size': 50_000,
+        'max_replay_size': 2_000_000,
+        'epsilon_init': 0.05,
+        'epsilon_final': 0.05,
+        'epsilon_schedule_timesteps': 2_000_000,
         'learning_rate': 1e-03,
         'hidden_layers': [32,64,32],
         'synthetic_replay_buffer': False,
@@ -117,15 +117,15 @@ DEFAULT_TRAIN_ARGS = {
         'batch_size': 100,
         'target_update_period': 1_000,
         'samples_per_insert': 25.0,
-        'min_replay_size': 20_000,
-        'max_replay_size': 400_000,
+        'min_replay_size': 50_000,
+        'max_replay_size': 2_000_000,
         'learning_rate': 1e-03,
         'hidden_layers': [32,64,32],
         # E-learning args.
         'lr_lambda': 0.05,
-        'epsilon_init': 1.0,
-        'epsilon_final': 0.0,
-        'epsilon_schedule_episodes': 40_000,
+        'epsilon_init': 0.05,
+        'epsilon_final': 0.05,
+        'epsilon_schedule_episodes': 20_000,
     },
 
     # DQN + E_func arguments.
