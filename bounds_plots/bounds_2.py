@@ -22,13 +22,23 @@ FIGURE_Y = 4.0
 
 
 SHOW_PLOTS = False
-PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/bounds_plots/plots/'
+PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/bounds_plots/plots_2/'
 
 args = {
+
+    'gamma': 0.9,
+
+    # P^pi matrices args.
     'num_states': 10,
     'mdp_dirichlet_alphas': [0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0],
-    'mu_dirichlet_alphas': [0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0],
     'num_mdps': 50,
+
+    # initial states distributions.
+    'init_dists_dirichlet_alphas': [0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0],
+    'num_init_dists': 20,
+
+    # mu dists args.
+    'mu_dirichlet_alphas': [0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0],
     'num_trials': 50,
 }
 
@@ -94,46 +104,68 @@ if __name__ == '__main__':
 
 
     print('Calculating bounds values...')
-    # Generate a set of MDPs (transition probs.).
-    Ps = {}
+    # Generate a set of P^pi matrices.
+    Ps = []
     for mdp_alpha in args['mdp_dirichlet_alphas']:
-
-        Ps_aux = np.zeros((args['num_mdps'], args['num_states'], args['num_states']))
-        for i in range(args['num_mdps']):
-
+        for j in range(args['num_mdps']):
             P = np.zeros((args['num_states'],args['num_states']))
             for state in range(args['num_states']):
                 P[state,:] = np.random.dirichlet([mdp_alpha]*args['num_states'])
+            Ps.append(P)
+    Ps = np.array(Ps)
+    print('Ps', Ps.shape)
 
-            Ps_aux[i,:,:] = P
-
-        Ps[mdp_alpha] = Ps_aux
+    # Generate a set of initial dists.
+    init_dists = []
+    for init_dist_alpha in args['init_dists_dirichlet_alphas']:
+        for j in range(args['num_init_dists']):
+            init_dists.append(np.random.dirichlet([init_dist_alpha]*args['num_states']))
+    init_dists = np.array(init_dists)
+    print('init_dists', init_dists.shape)
 
     to_plot = {}
-    for mdp_alpha in args['mdp_dirichlet_alphas']:
+    for mu_alpha in args['mu_dirichlet_alphas']:
 
         Cs = []
-        for mu_alpha in args['mu_dirichlet_alphas']:
+        for trial in range(args['num_trials']):
 
-            print('mu_alpha=', mu_alpha)
-            c_aux = []
+            # Randomly select initial state dist.
+            init_dist = init_dists[np.random.choice(init_dists.shape[0])] # [S]
+            
+            # Randomly select mu dist.
+            mu_dist = np.random.dirichlet([mu_alpha]*args['num_states']) # [S]
 
-            for _ in range(args['num_trials']):
-                mu = np.random.dirichlet([mu_alpha]*args['num_states'])
+            # Calculate c(m) for m=1.
+            P = Ps[np.random.choice(init_dists.shape[0])] # [S,S]
+            Ps_product = np.dot(init_dist,P) # [S]
 
-                for p in Ps[mdp_alpha]:
+            c_1 = np.max(Ps_product / (mu_dist + 1e-04))
+            #cms = [c_1]
+            C_value = c_1
 
-                    # Calculate bound C value.
-                    max_c = np.max(np.divide(p[0,:],(mu+1e-04)))
-                    for j in range(args['num_states'])[1:]:
-                        max_c = max(max_c, np.max(np.divide(p[j,:],(mu+1e-04))))
+            for m in range(2,50): # number of MDP timesteps.
+                
+                # Randomly select P^pi matrix.
+                P = Ps[np.random.choice(init_dists.shape[0])]
+                Ps_product = np.dot(Ps_product,P)
 
-                    c_aux.append(max_c)
+                c_m = np.max(Ps_product / (mu_dist + 1e-04))
+                #cms.append(c_m)
 
-            Cs.append(c_aux)
+                C_value += m * c_m * args['gamma']**(m-1)
 
-        to_plot[mdp_alpha] = np.mean(np.array(Cs), axis=1)
+            # Calculate bound C value.
+            C_value = (1-args['gamma'])**2 * C_value
 
+            print('C_val', C_value)
+
+            Cs.append(C_value)
+
+        to_plot[mu_alpha] = Cs
+
+    print(to_plot)
+
+    exit()
 
     """
         X Axis = Alpha (Dirichlet parameter)
