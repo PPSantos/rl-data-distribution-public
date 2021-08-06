@@ -303,7 +303,6 @@ cdef class InvertedPendulum(TabularEnv):
     def __init__(self, int state_discretization=64, int action_discretization=5,
                 double gravity=10.0, list initial_states=[-pi/4]):
         self._state_disc = state_discretization
-        self._action_disc = action_discretization
         self._gravity = gravity
         self.max_vel = 4.
         self.max_torque = 3.
@@ -387,12 +386,11 @@ cdef class MountainCar(TabularEnv):
     Dynamics and reward are based on OpenAI gym's implementation of MountainCar-v0
     """
 
-    def __init__(self, int posdisc=64, int veldisc=64, int action_discretization=5,
+    def __init__(self, int posdisc=64, int veldisc=64, int action_discretization=3,
                     gravity=0.0025, initial_states=[-0.5]):
         self._gravity = gravity
         self._pos_disc = posdisc
         self._vel_disc = veldisc
-        self._action_disc = action_discretization
         self.max_vel = 0.07 # gym 0.07
         self.min_vel = -self.max_vel
         self.max_pos = 0.6 # gym 0.6
@@ -400,11 +398,14 @@ cdef class MountainCar(TabularEnv):
         self.goal_pos = 0.5
 
         self._state_step = (self.max_pos-self.min_pos) / self._pos_disc
-        self._vel_step = (self.max_vel-self.min_vel)/self._vel_disc
+        self._vel_step = (self.max_vel-self.min_vel) / self._vel_disc
 
-        initial_state_distr = {self.to_state_id(MountainCarState(s, 0)): 1.0/len(initial_states) for s in initial_states}
-        super(MountainCar, self).__init__(self._pos_disc*self._vel_disc, 3, initial_state_distr)
-        self.observation_space = gym.spaces.Box(low=np.array([self.min_pos,-self.max_vel]), high=np.array([self.max_pos,self.max_vel]), dtype=np.float32)
+        initial_state_distr = {self.to_state_id(MountainCarState(s, 0)): 1.0/len(initial_states)
+                                for s in initial_states}
+        super(MountainCar, self).__init__(self._pos_disc*self._vel_disc,
+                                        action_discretization, initial_state_distr)
+        self.observation_space = gym.spaces.Box(low=np.array([self.min_pos,-self.max_vel]),
+                                high=np.array([self.max_pos,self.max_vel]), dtype=np.float32)
 
     cdef map[int, double] transitions_cy(self, int state, int action):
         self._transition_map.clear()
