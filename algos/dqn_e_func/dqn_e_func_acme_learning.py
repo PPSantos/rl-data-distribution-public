@@ -155,28 +155,25 @@ class DQN_E_func_Learner(acme.Learner, tf2_savers.TFSaveable):
     # Unpack data.
     observation, action, reward, discount, next_observation, _, _, targets = data
 
+    """
+    # Oracle version.
     q_tm1 = self._network(observation) # [B,A]
     qa_tm1 = trfl.indexing_ops.batched_index(q_tm1, action) # [B]
     error = targets - qa_tm1 # [B]
     q_loss = losses.huber(error, self._huber_loss_parameter)
     # Rescale and clip Q-loss.
     #q_loss = 0.01 * q_loss
-    #q_loss = tf.clip_by_value(q_loss, -1., 1.)
+    #q_loss = tf.clip_by_value(q_loss, -1., 1.) """
 
-    """ q_tm1 = self._network(observation) # [B,A]
-    q_t_value = self._target_network(next_observation)
-    q_t_selector = self._network(next_observation)
-
-    # The rewards and discounts have to have the same type as network values.
+    # TD-error version.
+    q_tm1 = self._network(observation) # [B,A]
+    q_t = self._network(next_observation) # [B,A]
     r_t = tf.cast(reward, q_tm1.dtype)
     r_t = tf.clip_by_value(r_t, -1., 1.)
     d_t = tf.cast(tf.ones_like(discount), q_tm1.dtype) * tf.cast(
         self._discount, q_tm1.dtype)
-
-    # Compute the loss.
-    _, extra = trfl.double_qlearning(q_tm1, action, r_t, d_t,
-                                      q_t_value, q_t_selector)
-    q_loss = losses.huber(extra.td_error, self._huber_loss_parameter) """
+    _, extra = trfl.qlearning(q_tm1, action, r_t, d_t, q_t)
+    q_loss = losses.huber(extra.td_error, self._huber_loss_parameter) # [B]
 
     with tf.GradientTape() as tape:
       # Evaluate E networks.
