@@ -160,8 +160,8 @@ class DQN_E_func_Learner(acme.Learner, tf2_savers.TFSaveable):
     error = targets - qa_tm1 # [B]
     q_loss = losses.huber(error, self._huber_loss_parameter)
     # Rescale and clip Q-loss.
-    q_loss = 0.01 * q_loss
-    q_loss = tf.clip_by_value(q_loss, -1., 1.)
+    #q_loss = 0.01 * q_loss
+    #q_loss = tf.clip_by_value(q_loss, -1., 1.)
 
     """ q_tm1 = self._network(observation) # [B,A]
     q_t_value = self._target_network(next_observation)

@@ -80,14 +80,16 @@ class DQN_E_func(object):
 
         Q_vals = np.zeros((num_episodes//q_vals_period,
                 self.base_env.num_states, self.base_env.num_actions))
+        E_vals = np.zeros((num_episodes//q_vals_period,
+                self.base_env.num_states, self.base_env.num_actions))
         Q_vals_episodes = []
         Q_vals_ep = 0
 
-        if compute_e_vals:
-            E_vals = np.zeros((num_episodes//q_vals_period,
-                    self.base_env.num_states, self.base_env.num_actions))
-            Q_errors = np.zeros((num_episodes//q_vals_period,
-                    self.base_env.num_states, self.base_env.num_actions))
+        # if compute_e_vals:
+        #     E_vals = np.zeros((num_episodes//q_vals_period,
+        #             self.base_env.num_states, self.base_env.num_actions))
+        #     Q_errors = np.zeros((num_episodes//q_vals_period,
+        #             self.base_env.num_states, self.base_env.num_actions))
 
         replay_buffer_counts_episodes = []
         replay_buffer_counts = []
@@ -129,50 +131,57 @@ class DQN_E_func(object):
             if episode % q_vals_period == 0:
                 print('Storing current Q-values estimates.')
                 estimated_Q_vals = np.zeros((self.env.num_states, self.env.num_actions))
+                estimated_E_vals = np.zeros((self.env.num_states, self.env.num_actions))
                 for state in range(self.base_env.num_states):
                     if self.env_grid_spec:
                         xy = self.env_grid_spec.idx_to_xy(state)
                         tile_type = self.env_grid_spec.get_value(xy)
                         if tile_type == TileType.WALL:
                             estimated_Q_vals[state,:] = 0
+                            estimated_E_vals[state,:] = 0
                         else:
                             obs = self.base_env.observation(state)
                             qvs = self.agent.get_Q_vals(obs)
                             estimated_Q_vals[state,:] = qvs
+                            evs = self.agent.get_E_vals(obs)
+                            estimated_E_vals[state,:] = evs
                     else:
                         obs = self.base_env.observation(state)
                         qvs = self.agent.get_Q_vals(obs)
                         estimated_Q_vals[state,:] = qvs
+                        evs = self.agent.get_E_vals(obs)
+                        estimated_E_vals[state,:] = evs
 
                 Q_vals_episodes.append(episode)
                 Q_vals[Q_vals_ep,:,:] = estimated_Q_vals
-
+                E_vals[Q_vals_ep,:,:] = estimated_E_vals
+            
                 # Estimate E-values for the current set of Q-values.
-                if compute_e_vals:
-                    print('Estimating E-values for the current set of Q-values.')
-                    _E_vals = np.zeros((self.env.num_states, self.env.num_actions))
-                    _q_errors =  np.zeros((self.env.num_states, self.env.num_actions))
-                    _samples_counts = np.zeros((self.env.num_states, self.env.num_actions))
+                # if compute_e_vals:
+                #     print('Estimating E-values for the current set of Q-values.')
+                #     _E_vals = np.zeros((self.env.num_states, self.env.num_actions))
+                #     _q_errors =  np.zeros((self.env.num_states, self.env.num_actions))
+                #     _samples_counts = np.zeros((self.env.num_states, self.env.num_actions))
 
-                    for _ in range(10_000):
+                #     for _ in range(10_000):
 
-                        # Sample from replay buffer.
-                        data = self.agent.sample_replay_buffer_batch()
-                        _, actions, rewards, _, _, states, next_states, _ = data
+                #         # Sample from replay buffer.
+                #         data = self.agent.sample_replay_buffer_batch()
+                #         _, actions, rewards, _, _, states, next_states, _ = data
 
-                        for i in range(self.batch_size):
-                            s_t, a_t, r_t1, s_t1 = states[i], actions[i], rewards[i], next_states[i]
-                            # e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - self.oracle_q_vals[s_t, a_t]) # oracle target
-                            e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - (r_t1 + self.discount*np.max(estimated_Q_vals[s_t1,:]))) # TD target.
+                #         for i in range(self.batch_size):
+                #             s_t, a_t, r_t1, s_t1 = states[i], actions[i], rewards[i], next_states[i]
+                #             # e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - self.oracle_q_vals[s_t, a_t]) # oracle target
+                #             e_t1 = np.abs(estimated_Q_vals[s_t, a_t] - (r_t1 + self.discount*np.max(estimated_Q_vals[s_t1,:]))) # TD target.
 
-                            _E_vals[s_t][a_t] += 0.05 * \
-                            (e_t1 + self.discount * np.max(_E_vals[s_t1,:]) - _E_vals[s_t][a_t])
+                #             _E_vals[s_t][a_t] += 0.05 * \
+                #             (e_t1 + self.discount * np.max(_E_vals[s_t1,:]) - _E_vals[s_t][a_t])
 
-                            _samples_counts[s_t,a_t] += 1
-                            _q_errors[s_t,a_t] += e_t1
+                #             _samples_counts[s_t,a_t] += 1
+                #             _q_errors[s_t,a_t] += e_t1
 
-                    E_vals[Q_vals_ep,:,:] = _E_vals
-                    Q_errors[Q_vals_ep,:,:] = _q_errors / (_samples_counts + 1e-05)
+                #     E_vals[Q_vals_ep,:,:] = _E_vals
+                #     Q_errors[Q_vals_ep,:,:] = _q_errors / (_samples_counts + 1e-05)
 
                 Q_vals_ep += 1
 
@@ -198,7 +207,6 @@ class DQN_E_func(object):
         data['states_counts'] = states_counts
         data['Q_vals_episodes'] = Q_vals_episodes
         data['Q_vals'] = Q_vals
-        data['Q_errors'] = Q_errors
         data['E_vals'] = E_vals
         data['max_Q_vals'] = np.max(Q_vals[-1], axis=1)
         data['policy'] = np.argmax(Q_vals[-1], axis=1)
@@ -206,9 +214,9 @@ class DQN_E_func(object):
         data['replay_buffer_counts'] = replay_buffer_counts
         data['rollouts_episodes'] = rollouts_episodes
         data['rollouts_rewards'] = rollouts_rewards
-        if compute_e_vals:
-            data['E_vals'] = E_vals
-            data['Q_errors'] = Q_errors
+        # if compute_e_vals:
+        #     data['E_vals'] = E_vals
+        #     data['Q_errors'] = Q_errors
 
         return data
 
