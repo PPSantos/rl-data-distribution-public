@@ -19,7 +19,8 @@ matplotlib.rcParams['text.usetex'] = True
 
 FIGURE_X = 6.0
 FIGURE_Y = 4.0
-
+RED_COLOR = (0.886, 0.29, 0.20)
+GRAY_COLOR = (0.2,0.2,0.2)
 
 SHOW_PLOTS = False
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/bounds_plots/plots/'
@@ -164,6 +165,7 @@ if __name__ == '__main__':
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
     aux = np.array([to_plot[k] for k in sorted(to_plot.keys())])
+    print('aux shapeeeeeeeeee', aux.shape)
     averaged = np.mean(aux, axis=0)
     stds = np.std(aux, axis=0)
 
@@ -223,3 +225,40 @@ if __name__ == '__main__':
     plt.yscale("log")
     plt.savefig('{0}/plot_2_4.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/plot_2_4.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+
+
+    ####################################################################################################
+    # Linear y-scale (averaged).
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    p_50 = np.percentile(aux, 50, axis=0)
+
+    p_75 = np.percentile(aux, 75, axis=0)
+    p_25 = np.percentile(aux, 25, axis=0)
+
+    p_37_5 = np.percentile(aux, 37.5, axis=0)
+    p_62_5 = np.percentile(aux, 62.5, axis=0)
+
+    p_12_5 = np.percentile(aux, 12.5, axis=0)
+    p_87_5 = np.percentile(aux, 87.5, axis=0)
+
+    plt.fill_between(entropies, p_37_5, p_62_5, color=RED_COLOR, alpha=0.6, label='Pct25')
+    plt.fill_between(entropies, p_25, p_75, color=RED_COLOR, alpha=0.25, label='Pct50')
+    plt.fill_between(entropies, p_12_5, p_87_5, color=RED_COLOR, alpha=0.1, label='Pct75')
+
+    plt.scatter(entropies, p_50, color=GRAY_COLOR)
+    p = plt.plot(entropies, p_50, label='Median', color=GRAY_COLOR)
+
+    plt.xlabel(r'$\mathcal{H}(\mu)$')
+    plt.ylabel(r'$C_1$')
+
+    plt.legend()
+
+    plt.savefig('{0}/plot_perc_1.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/plot_perc_1.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+
+    # Log y-scale (averaged).
+    plt.yscale("log")
+    plt.savefig('{0}/plot_perc_2.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/plot_perc_2.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)

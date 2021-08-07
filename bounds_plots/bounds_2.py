@@ -20,15 +20,17 @@ matplotlib.rcParams['text.usetex'] = True
 FIGURE_X = 6.0
 FIGURE_Y = 4.0
 
+RED_COLOR = (0.886, 0.29, 0.20)
+GRAY_COLOR = (0.2,0.2,0.2)
+
 
 SHOW_PLOTS = False
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/bounds_plots/plots_2/'
 
 args = {
 
+    # MDP args.
     'gamma': 0.9,
-
-    # P^pi matrices args.
     'num_states': 10,
     'mdp_dirichlet_alphas': [0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0],
     'num_mdps': 50,
@@ -39,7 +41,7 @@ args = {
 
     # mu dists args.
     'mu_dirichlet_alphas': [0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0],
-    'num_trials': 50,
+    'num_trials': 10_000, # TODO: increae
 }
 
 
@@ -54,7 +56,7 @@ if __name__ == '__main__':
     sampled_entropies = []
     coverages_1 = []
     coverages_2 = []
-    for alpha in args['mu_dirichlet_alphas']:
+    for alpha in sorted(args['mu_dirichlet_alphas']):
         expected_entropy = scipy.special.digamma(args['num_states']*alpha + 1) - scipy.special.digamma(alpha + 1)
         entropies.append(expected_entropy)
 
@@ -125,6 +127,7 @@ if __name__ == '__main__':
 
     to_plot = {}
     for mu_alpha in args['mu_dirichlet_alphas']:
+        print('mu_alpha=', mu_alpha)
 
         Cs = []
         for trial in range(args['num_trials']):
@@ -136,122 +139,88 @@ if __name__ == '__main__':
             mu_dist = np.random.dirichlet([mu_alpha]*args['num_states']) # [S]
 
             # Calculate c(m) for m=1.
-            P = Ps[np.random.choice(init_dists.shape[0])] # [S,S]
+            P = Ps[np.random.choice(Ps.shape[0])] # [S,S]
             Ps_product = np.dot(init_dist,P) # [S]
 
-            c_1 = np.max(Ps_product / (mu_dist + 1e-04))
-            #cms = [c_1]
-            C_value = c_1
-
+            C_value = np.max(Ps_product / (mu_dist + 1e-04))
             for m in range(2,50): # number of MDP timesteps.
                 
                 # Randomly select P^pi matrix.
-                P = Ps[np.random.choice(init_dists.shape[0])]
+                P = Ps[np.random.choice(Ps.shape[0])]
                 Ps_product = np.dot(Ps_product,P)
 
                 c_m = np.max(Ps_product / (mu_dist + 1e-04))
-                #cms.append(c_m)
 
                 C_value += m * c_m * args['gamma']**(m-1)
 
             # Calculate bound C value.
             C_value = (1-args['gamma'])**2 * C_value
-
-            print('C_val', C_value)
-
             Cs.append(C_value)
 
         to_plot[mu_alpha] = Cs
 
-    print(to_plot)
-
-    exit()
-
-    """
-        X Axis = Alpha (Dirichlet parameter)
-    """
-    # Linear y-scale.
-    fig = plt.figure()
-    fig.set_size_inches(FIGURE_X, FIGURE_Y)
-
-    for mdp_alpha in args['mdp_dirichlet_alphas']:
-
-        plt.scatter(args['mu_dirichlet_alphas'], to_plot[mdp_alpha])
-        plt.plot(args['mu_dirichlet_alphas'], to_plot[mdp_alpha], label=f'MDP alpha={mdp_alpha}')
-    
-    plt.xlabel('Alpha (Dirichlet parameter)')
-    plt.ylabel('Average C value')
-    plt.legend()
-
-    plt.savefig('{0}/plot_1_1.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/plot_1_1.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
-
-    # Log y-scale.
-    plt.yscale("log")
-    plt.savefig('{0}/plot_1_2.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/plot_1_2.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
-
-    # Log y-scale (averaged).
-    fig = plt.figure()
-    fig.set_size_inches(FIGURE_X, FIGURE_Y)
-
     aux = np.array([to_plot[k] for k in sorted(to_plot.keys())])
-    averaged = np.mean(aux, axis=0)
-    stds = np.std(aux, axis=0)
+    print('aux', aux.shape)
 
-    plt.scatter(args['mu_dirichlet_alphas'], averaged)
-    plt.plot(args['mu_dirichlet_alphas'], averaged)
-    
-    plt.xlabel('Alpha (Dirichlet parameter)')
-    plt.ylabel('Average C value')
-    plt.yscale("log")
-
-    plt.savefig('{0}/plot_1_3.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/plot_1_3.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
-
-
-    """
-        X Axis = Sampling dist. entropy
-    """
-    # Linear y-scale.
-    fig = plt.figure()
-    fig.set_size_inches(FIGURE_X, FIGURE_Y)
-
-    for mdp_alpha in args['mdp_dirichlet_alphas']:
-
-        plt.scatter(entropies, to_plot[mdp_alpha])
-        plt.plot(entropies, to_plot[mdp_alpha], label=f'MDP alpha={mdp_alpha}')
-    
-    plt.xlabel('Sampling dist. entropy')
-    plt.ylabel('Average C value')
-    plt.legend()
-
-    plt.savefig('{0}/plot_2_1.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/plot_2_1.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
-
-    # Log y-scale.
-    plt.yscale("log")
-    plt.savefig('{0}/plot_2_2.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/plot_2_2.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
-
-    # Linear y-scale (averaged).
+    """ # Linear y-scale (averaged).
+    averaged = np.mean(aux, axis=1)
+    stds = np.std(aux, axis=1)
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
     plt.scatter(entropies, averaged)
     p = plt.plot(entropies, averaged, label='Mean')
 
+    print(averaged-stds)
+    print(averaged+stds)
+
     plt.fill_between(entropies, averaged-stds, averaged+stds, color=p[0].get_color(), alpha=0.3, label='Std')
 
     plt.xlabel(r'$\mathcal{H}(\mu)$')
-    plt.ylabel(r'$C_1$')
+    plt.ylabel(r'$C_2$')
 
     plt.legend()
 
-    plt.savefig('{0}/plot_2_3.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/plot_2_3.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    #plt.savefig('{0}/plot_2_3.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    #plt.savefig('{0}/plot_2_3.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
 
     # Log y-scale (averaged).
     plt.yscale("log")
     plt.savefig('{0}/plot_2_4.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/plot_2_4.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/plot_2_4.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0) """
+
+    ####################################################################################################
+    # Linear y-scale (averaged).
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    p_50 = np.percentile(aux, 50, axis=1)
+
+    p_75 = np.percentile(aux, 75, axis=1)
+    p_25 = np.percentile(aux, 25, axis=1)
+
+    p_37_5 = np.percentile(aux, 37.5, axis=1)
+    p_62_5 = np.percentile(aux, 62.5, axis=1)
+
+    p_12_5 = np.percentile(aux, 12.5, axis=1)
+    p_87_5 = np.percentile(aux, 87.5, axis=1)
+
+    plt.fill_between(entropies, p_37_5, p_62_5, color=RED_COLOR, alpha=0.6, label='Pct25')
+    plt.fill_between(entropies, p_25, p_75, color=RED_COLOR, alpha=0.25, label='Pct50')
+    plt.fill_between(entropies, p_12_5, p_87_5, color=RED_COLOR, alpha=0.1, label='Pct75')
+
+    plt.scatter(entropies, p_50, color=GRAY_COLOR)
+    p = plt.plot(entropies, p_50, label='Median', color=GRAY_COLOR)
+
+    plt.xlabel(r'$\mathcal{H}(\mu)$')
+    plt.ylabel(r'$C_2$')
+
+    plt.legend()
+
+    plt.savefig('{0}/plot_perc_1.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/plot_perc_1.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+
+    # Log y-scale (averaged).
+    plt.yscale("log")
+    plt.savefig('{0}/plot_perc_2.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/plot_perc_2.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
