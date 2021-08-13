@@ -14,13 +14,15 @@ from acme.utils import loggers
 from algos.dqn_e_func import dqn_e_func_acme
 from rlutil.envs.gridcraft.grid_spec_cy import TileType
 
+
 def _make_network(env_spec : dm_env,
-                  hidden_layers : Sequence[int] = [10,10]):
+                  hidden_layers : Sequence[int] = [10,10],
+                  name : str = None):
     layers = hidden_layers + [env_spec.actions.num_values]
     print('network layers:', layers)
     network = snt.Sequential([
         snt.nets.MLP(layers, activate_final=False),
-    ])
+    ], name=name)
     return network
 
 def wrap_env(env):
@@ -42,9 +44,11 @@ class DQN_E_func(object):
         env_spec = acme.make_environment_spec(self.env)
 
         network = _make_network(env_spec,
-                        hidden_layers=dqn_e_func_args['hidden_layers'])
+                        hidden_layers=dqn_e_func_args['hidden_layers'],
+                        name='q_network')
         e_network = _make_network(env_spec,
-                        hidden_layers=dqn_e_func_args['e_net_hidden_layers'])
+                        hidden_layers=dqn_e_func_args['e_net_hidden_layers'],
+                        name='e_network')
 
         self.agent = dqn_e_func_acme.DQN_E_func(environment_spec=env_spec,
                                         network=network,
@@ -108,11 +112,11 @@ class DQN_E_func(object):
             while not timestep.last():
 
                 action = self.agent.select_action(timestep.observation)
-
                 timestep = self.env.step(action)
 
-                oracle_q_val = np.float32(self.oracle_q_vals[env_state,action])
-                extras_to_insert = (np.int32(env_state), np.int32(self.base_env.get_state()), oracle_q_val)
+                extras_to_insert = (np.int32(env_state),
+                                    np.int32(self.base_env.get_state()),
+                                    np.float32(self.oracle_q_vals[env_state,action]))
                 self.agent.observe_with_extras(action,
                     next_timestep=timestep, extras=extras_to_insert)
 
