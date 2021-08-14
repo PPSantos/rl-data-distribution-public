@@ -5,6 +5,7 @@ analysis/plots
 gen_errors/plots
 bounds_plots/plots
 bounds_plots/plots_2
+bounds_plots/plots_mdp1
 
 # cython
 *.c

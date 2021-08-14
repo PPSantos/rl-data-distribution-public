@@ -34,7 +34,7 @@ cdict = {'red':   [[0.0,  0.0, 0.0],
                    [1.0,  1.0, 1.0]]}
 
 SHOW_PLOTS = False
-PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/bounds_plots/mdp1/'
+PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/bounds_plots/plots_mdp1/'
 
 
 if __name__ == '__main__':
