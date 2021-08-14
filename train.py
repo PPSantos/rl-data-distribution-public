@@ -38,8 +38,8 @@ DEFAULT_TRAIN_ARGS = {
     #           (and vice versa) and 'val_iter' algorithms.
 
     # General arguments.
-    'num_runs': 10,
-    'num_processors': 10,
+    'num_runs': 1,
+    'num_processors': 1,
     'algo': 'dqn_e_func',
     'num_episodes': 20_000,
     'gamma': 0.9, # discount factor.
@@ -144,8 +144,8 @@ DEFAULT_TRAIN_ARGS = {
         'e_net_hidden_layers': [25,50,25],
         'e_net_learning_rate': 1e-02,
         'target_e_net_update_period': 1_000,
-        'epsilon_init': 1.0,
-        'epsilon_final': 0.0,
+        'epsilon_init': 0.7,
+        'epsilon_final': 0.7,
         'epsilon_schedule_timesteps': 1_000_000,
     },
 

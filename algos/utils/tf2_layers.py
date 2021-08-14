@@ -64,15 +64,15 @@ class EpsilonGreedyExploration(snt.Module):
     """ Sonnet module for epsilon-greedy exploration. """
 
     def __init__(self,
-                 epsilon_init: int,
-                 epsilon_final: int,
+                 epsilon_init: float,
+                 epsilon_final: float,
                  epsilon_schedule_timesteps: int):
         """ Initialise EpsilonGreedyExploration class.
             Parameters:
             ----------
-            * epsilon_init: int
+            * epsilon_init: float
                 Initial epsilon value.
-            * epsilon_final: int
+            * epsilon_final: float
                 Final epsilon value.
             * epsilon_schedule_timesteps: int
                 Number of timesteps to decay epsilon from 'epsilon_init'
@@ -206,3 +206,66 @@ class ConvexCombination(snt.Module):
         out = (1 - delta) * out_1 + delta * out_2
 
         return out
+
+class CustomExplorationNet(snt.Module):
+
+    def __init__(self,
+                 q_network: TensorTransformation,
+                 e_network: TensorTransformation,
+                 delta: float,
+                 epsilon_init: float,
+                 epsilon_final: float,
+                 epsilon_schedule_timesteps: int):
+        super().__init__(name='custom_exploration_net')
+
+        self._q_network = q_network
+        self._e_network = e_network
+
+        # Internalise parameters.
+        self._delta = delta
+        self._epsilon_init = epsilon_init
+        self._epsilon_final = epsilon_final
+        self._epsilon_schedule_timesteps = epsilon_schedule_timesteps
+
+        # Internal counter.
+        self._counter = tf.Variable(0.0)
+
+    def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
+
+        q_vals = self._q_network(inputs)
+        e_vals = self._e_network(inputs)
+
+        # Greedy action distribution w.r.t. Q-values, breaking ties uniformly at random.
+        max_value_q = tf.reduce_max(q_vals, axis=-1, keepdims=True)
+        greedy_probs_q = tf.cast(tf.equal(q_vals, max_value_q),
+                            q_vals.dtype)
+        greedy_probs_q /= tf.reduce_sum(greedy_probs_q, axis=-1, keepdims=True)
+
+        # Greedy action distribution w.r.t. E-values, breaking ties uniformly at random.
+        max_value_e = tf.reduce_max(e_vals, axis=-1, keepdims=True)
+        greedy_probs_e = tf.cast(tf.equal(e_vals, max_value_e),
+                            e_vals.dtype)
+        greedy_probs_e /= tf.reduce_sum(greedy_probs_e, axis=-1, keepdims=True)
+
+        # Weight distribution by delta coefficient.
+        net_probs = self._delta * greedy_probs_e + (1 - self._delta) * greedy_probs_q
+
+        # Dithering action distribution.
+        num_actions = tf.cast(tf.shape(q_vals)[-1], q_vals.dtype)
+        dither_probs = 1 / num_actions * tf.ones_like(q_vals)
+
+        # Calculate new epsilon value.
+        self._counter.assign(self._counter + 1.0)
+        fraction = tf.math.minimum(self._counter / self._epsilon_schedule_timesteps, 1.0)
+        epsilon = self._epsilon_init + fraction * (self._epsilon_final - self._epsilon_init)
+
+        # Epsilon-greedy action distribution.
+        probs = epsilon * dither_probs + (1 - epsilon) * net_probs
+
+        # Construct the policy.
+        policy = tfp.distributions.Categorical(probs=probs)
+
+        # Sample from policy.
+        sample = policy.sample()
+
+        return sample

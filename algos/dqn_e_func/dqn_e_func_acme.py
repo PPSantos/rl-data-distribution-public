@@ -15,7 +15,7 @@ from tf_agents.specs import tensor_spec
 from algos import agent_acme, actors
 from algos.tf_uniform_replay_buffer import TFUniformReplayBuffer
 from algos.utils import tf2_savers, spec_converter
-from algos.utils.tf2_layers import EpsilonGreedyExploration
+from algos.utils.tf2_layers import EpsilonGreedyExploration, CustomExplorationNet
 from algos.dqn_e_func.dqn_e_func_acme_learning import DQN_E_func_Learner
 from algos.tf_adder import TFAdder
 
@@ -97,12 +97,10 @@ class DQN_E_func(agent_acme.Agent):
         self._adder = TFAdder(self._replay_buffer, transition_spec)
 
         # Create a epsilon-greedy policy network.
-        policy_network = snt.Sequential([
-            e_network,
-            EpsilonGreedyExploration(epsilon_init=epsilon_init,
-                                     epsilon_final=epsilon_final,
-                                     epsilon_schedule_timesteps=epsilon_schedule_timesteps)
-        ])
+        policy_network = CustomExplorationNet(network, e_network, delta=0.5,
+                                            epsilon_init=epsilon_init,
+                                            epsilon_final=epsilon_final,
+                                            epsilon_schedule_timesteps=epsilon_schedule_timesteps)
 
         # Create the target networks.
         target_network = copy.deepcopy(network)

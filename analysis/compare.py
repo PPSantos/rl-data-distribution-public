@@ -27,20 +27,20 @@ FIGURE_Y = 4.0
 GRAY_COLOR = (0.3,0.3,0.3)
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
-PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/stat_test/'
+PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/compare/'
 
 
 # SETUP VARIABLES.
 ENV_NAME = 'gridEnv1'
 VAL_ITER_DATA = 'gridEnv1_val_iter_2021-05-14-15-54-10'
 EXPS_DATA = [
-            {'id': 'gridEnv1_dqn_e_tab_2021-07-23-01-38-08.tar.gz', 'label': 'dqn_e_tab'},
-            {'id': 'gridEnv1_dqn_e_func_2021-08-08-15-15-58.tar.gz', 'label': 'dqn_e_func'},
-            {'id': 'gridEnv1_dqn_2021-07-21-04-29-40.tar.gz', 'label': 'dqn'},
+            {'id': 'gridEnv1_dqn_e_tab_2021-07-25-01-17-48.tar.gz', 'label': 'dqn_e_tab'},
+            # {'id': 'gridEnv1_dqn_e_func_2021-08-08-15-15-58.tar.gz', 'label': 'dqn_e_func'},
+            {'id': 'gridEnv1_dqn_2021-07-24-12-56-09.tar.gz', 'label': 'dqn'},
             ]
 
 
-def calculate_CI_bootstrap(x_hat, samples, num_resamples=20000):
+def calculate_CI_bootstrap(x_hat, samples, num_resamples=20_000):
     """
         Calculates 95 % interval using bootstrap.
         REF: https://ocw.mit.edu/courses/mathematics/
