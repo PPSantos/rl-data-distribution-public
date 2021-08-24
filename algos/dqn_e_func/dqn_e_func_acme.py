@@ -34,6 +34,7 @@ class DQN_E_func(agent_acme.Agent):
             target_update_period: int = 100,
             target_e_net_update_period: int = 100,
             samples_per_insert: float = 32.0,
+            e_net_updates_per_q_net_update: int = 2,
             min_replay_size: int = 20,
             max_replay_size: int = 1_000_000,
             epsilon_init: float = 1.0,
@@ -42,6 +43,7 @@ class DQN_E_func(agent_acme.Agent):
             learning_rate: float = 1e-3,
             e_net_learning_rate: float = 1e-4,
             discount: float = 0.99,
+            delta: float = 0.2,
             max_gradient_norm: Optional[float] = None,
             logger: loggers.Logger = None,
             num_states: int = None,
@@ -59,9 +61,9 @@ class DQN_E_func(agent_acme.Agent):
             the E-values target network.
         samples_per_insert: number of samples to take from replay for every insert
             that is made.
-        min_replay_size: minimum replay size before updating. This and all
-            following arguments are related to dataset construction and will be
-            ignored if a dataset argument is passed.
+        e_net_updates_per_q_net_update:  E-network number of updates to perform per
+            Q-network update.
+        min_replay_size: minimum replay size before updating.
         max_replay_size: maximum replay size.
         epsilon_init: Initial epsilon value (probability of taking a random action)
         epsilon_final: Final epsilon value (probability of taking a random action)
@@ -70,8 +72,10 @@ class DQN_E_func(agent_acme.Agent):
         learning_rate: learning rate for the q-network update.
         e_net_learning_rate: E-values network learning rate.
         discount: discount to use for TD updates.
-        logger: logger object to be used by learner.
+        delta: hyperparameter that combines Q-values and E-values in the creation of
+            the exploratory policy.
         max_gradient_norm: used for gradient clipping.
+        logger: logger object to be used by learner.
         num_states: the number of states of the environment (MDP states).
         num_states: the number of actions of the environment (MDP actions).
         """
@@ -97,7 +101,7 @@ class DQN_E_func(agent_acme.Agent):
         self._adder = TFAdder(self._replay_buffer, transition_spec)
 
         # Create a epsilon-greedy policy network.
-        policy_network = CustomExplorationNet(network, e_network, delta=0.5,
+        policy_network = CustomExplorationNet(network, e_network, delta=delta,
                                             epsilon_init=epsilon_init,
                                             epsilon_final=epsilon_final,
                                             epsilon_schedule_timesteps=epsilon_schedule_timesteps)
@@ -126,6 +130,7 @@ class DQN_E_func(agent_acme.Agent):
             e_net_learning_rate=e_net_learning_rate,
             target_update_period=target_update_period,
             target_e_net_update_period=target_e_net_update_period,
+            e_net_updates_per_q_net_update=e_net_updates_per_q_net_update,
             dataset=dataset,
             max_gradient_norm=max_gradient_norm,
             logger=logger,

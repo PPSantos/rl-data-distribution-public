@@ -57,6 +57,7 @@ class DQN_E_func(object):
                                         target_update_period=dqn_e_func_args['target_update_period'],
                                         target_e_net_update_period=dqn_e_func_args['target_e_net_update_period'],
                                         samples_per_insert=dqn_e_func_args['samples_per_insert'],
+                                        e_net_updates_per_q_net_update=dqn_e_func_args['e_net_updates_per_q_net_update'],
                                         min_replay_size=dqn_e_func_args['min_replay_size'],
                                         max_replay_size=dqn_e_func_args['max_replay_size'],
                                         epsilon_init=dqn_e_func_args['epsilon_init'],
@@ -65,6 +66,7 @@ class DQN_E_func(object):
                                         learning_rate=dqn_e_func_args['learning_rate'],
                                         e_net_learning_rate=dqn_e_func_args['e_net_learning_rate'],
                                         discount=dqn_e_func_args['discount'],
+                                        delta=dqn_e_func_args['delta'],
                                         num_states=self.base_env.num_states,
                                         num_actions=self.base_env.num_actions,
                                         logger=loggers.CSVLogger(directory_or_file=log_path, label='learner'))

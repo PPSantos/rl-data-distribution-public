@@ -135,18 +135,20 @@ DEFAULT_TRAIN_ARGS = {
         'batch_size': 100,
         'target_update_period': 1_000,
         'samples_per_insert': 25.0,
-        'min_replay_size': 20_000,
+        'min_replay_size': 50_000,
         'max_replay_size': 1_000_000,
         'learning_rate': 1e-03,
-        'hidden_layers': [25,50,25],
+        'hidden_layers': [20,40,20],
         # Specific deep E-network args.
         # (By default args are equal to the above (DQN) args).
-        'e_net_hidden_layers': [25,50,25],
-        'e_net_learning_rate': 1e-02,
+        'e_net_hidden_layers': [20,40,20],
+        'e_net_learning_rate': 1e-03,
+        'e_net_updates_per_q_net_update': 3,
         'target_e_net_update_period': 1_000,
         'epsilon_init': 1.0,
         'epsilon_final': 0.0,
         'epsilon_schedule_timesteps': 1_000_000,
+        'delta': 0.2,
     },
 
     # FQI arguments.

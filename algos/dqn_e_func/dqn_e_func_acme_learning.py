@@ -30,6 +30,7 @@ class DQN_E_func_Learner(acme.Learner, tf2_savers.TFSaveable):
       e_net_learning_rate: float,
       target_update_period: int,
       target_e_net_update_period: int,
+      e_net_updates_per_q_net_update: int,
       dataset: tf.data.Dataset,
       huber_loss_parameter: float = 1.,
       counter: counting.Counter = None,
@@ -53,6 +54,8 @@ class DQN_E_func_Learner(acme.Learner, tf2_savers.TFSaveable):
         the E-values target network.
       dataset: dataset to learn from, whether fixed or from a replay buffer (see
         `acme.datasets.reverb.make_dataset` documentation).
+      e_net_updates_per_q_net_update:  E-network number of updates to perform per
+          Q-network update.
       huber_loss_parameter: Quadratic-linear boundary for Huber loss.
       counter: Counter object for (potentially distributed) counting.
       logger: Logger object for writing logs to.
@@ -76,6 +79,7 @@ class DQN_E_func_Learner(acme.Learner, tf2_savers.TFSaveable):
     if max_gradient_norm is None:
       max_gradient_norm = 1e10  # A very large number. Infinity results in NaNs.
     self._max_gradient_norm = tf.convert_to_tensor(max_gradient_norm)
+    self._e_net_updates_per_q_net_update = e_net_updates_per_q_net_update
 
     # Learner state.
     self._variables: List[List[tf.Tensor]] = [network.trainable_variables,
@@ -206,8 +210,13 @@ class DQN_E_func_Learner(acme.Learner, tf2_savers.TFSaveable):
   def step(self):
     # Do a batch of SGD.
     result = {}
+
+    # Update Q-network.
     result.update(self._step_q())
-    result.update(self._step_e())
+
+    # Update E-network.
+    for _ in range(self._e_net_updates_per_q_net_update):
+      result.update(self._step_e())
 
     # Compute elapsed time.
     timestamp = time.time()
