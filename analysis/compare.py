@@ -34,9 +34,12 @@ PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/comp
 ENV_NAME = 'gridEnv1'
 VAL_ITER_DATA = 'gridEnv1_val_iter_2021-05-14-15-54-10'
 EXPS_DATA = [
-            {'id': 'gridEnv1_dqn_e_tab_2021-07-25-01-17-48.tar.gz', 'label': 'dqn_e_tab'},
-            # {'id': 'gridEnv1_dqn_e_func_2021-08-08-15-15-58.tar.gz', 'label': 'dqn_e_func'},
-            {'id': 'gridEnv1_dqn_2021-07-24-12-56-09.tar.gz', 'label': 'dqn'},
+            {'id': 'gridEnv1_dqn_e_func_2021-08-24-23-45-07.tar.gz', 'label': 'delta=0.0'},
+            {'id': 'gridEnv1_dqn_e_func_2021-08-25-02-07-21.tar.gz', 'label': 'delta=0.2'},
+            {'id': 'gridEnv1_dqn_e_func_2021-08-25-04-30-54.tar.gz', 'label': 'delta=0.4'},
+            {'id': 'gridEnv1_dqn_e_func_2021-08-25-06-54-06.tar.gz', 'label': 'delta=0.6'},
+            {'id': 'gridEnv1_dqn_e_func_2021-08-25-09-17-57.tar.gz', 'label': 'delta=0.8'},
+            {'id': 'gridEnv1_dqn_e_func_2021-08-25-11-41-22.tar.gz', 'label': 'delta=1.0'},
             ]
 
 
@@ -105,9 +108,12 @@ def main():
 
         # rollouts_rewards field.
         parsed_data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts_types,num_rollouts]
-        
+
         data[exp['id']] = parsed_data
 
+    # Load additional variables from last experiment file.
+    Q_vals_episodes = exp_data[0]['Q_vals_episodes'] # [(E)]
+    rollouts_episodes = exp_data[0]['rollouts_episodes'] # [(E)]
 
     """
         Q-values errors.
@@ -128,7 +134,7 @@ def main():
         errors = np.abs(val_iter_data['Q_vals'] - exp_data['Q_vals']) # [R,E,S,A]
         errors = np.mean(errors, axis=0) # [E,S,A]
         Y = np.mean(errors, axis=(1,2)) # [E]
-        X = np.linspace(1, len(Y), len(Y))
+        X = Q_vals_episodes
         p = plt.plot(X, Y, label=exp['label'])
 
         # Calculate and plot mean confidence interval.
@@ -152,13 +158,13 @@ def main():
     plt.close()
 
 
-    # Means distribution plot for the last episode.
+    # Means distribution plot for the last episode(s).
     errors_list = []
     for exp in EXPS_DATA:
         exp_data = data[exp['id']]
         errors = np.abs(val_iter_data['Q_vals'] - exp_data['Q_vals']) # [R,E,S,A]
-        errors = errors[:,-1,:,:] # [R,S,A]
-        errors = np.mean(errors, axis=(1,2)) # [R]
+        errors = errors[:,-10:,:,:] # [R,(E),S,A]
+        errors = np.mean(errors, axis=(1,2,3)) # [R]
         errors_list.append(errors)
 
         print(f'{exp["label"]} (last episode): {np.mean(errors)} ')
@@ -182,13 +188,13 @@ def main():
     plt.savefig('{0}/qvals_avg_error_final.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
     plt.close()
 
-    # Statistical tests for last episode Q-values errors.
+    # Statistical tests for last episode(s) Q-values errors.
     processed_data = {}
     for exp in EXPS_DATA:
         exp_data = data[exp['id']]
         errors = np.abs(val_iter_data['Q_vals'] - exp_data['Q_vals']) # [R,E,S,A]
-        errors = errors[:,-1,:,:] # [R,S,A]
-        errors = np.mean(errors, axis=(1,2)) # [R]
+        errors = errors[:,-10:,:,:] # [R,(E),S,A]
+        errors = np.mean(errors, axis=(1,2,3)) # [R]
         processed_data[exp['id']] = errors
 
     # Shapiro test (asserts that data is normally distributed for all groups).
@@ -250,7 +256,7 @@ def main():
             rollout_averaged_per_run = np.average(rollout_type_data, axis=2) # [R,(E)]
             rollout_averaged = np.average(rollout_averaged_per_run, axis=0) # [(E)]
             Y = rollout_averaged
-            X = np.linspace(1, len(Y), len(Y))
+            X = rollouts_episodes
             p = plt.plot(X, Y, label=exp['label'])
 
             # Calculate and plot confidence interval.
@@ -271,16 +277,17 @@ def main():
         plt.savefig('{0}/{1}_episodes.png'.format(PLOTS_FOLDER_PATH, rollout_type), bbox_inches='tight', pad_inches=0)
         plt.close()
 
-        # Means distribution plot (last episode).
+        # Means distribution plot (last episode(s)).
         errors_list = []
         for exp in EXPS_DATA:
             exp_data = data[exp['id']]
             rollout_type_data = exp_data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
             rollout_averaged_per_run = np.average(rollout_type_data, axis=2) # [R,(E)]
-            last_eps_data = rollout_averaged_per_run[:,-1] # [R]
+            last_eps_data = rollout_averaged_per_run[:,-10:] # [R,(E)]
+            last_eps_data = np.mean(last_eps_data, axis=1) # [R]
             errors_list.append(last_eps_data)
 
-            print(f'{exp["label"]} (last episode): {np.mean(last_eps_data)} ')
+            print(f'{exp["label"]} (last episode(s)): {np.mean(last_eps_data)} ')
 
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
@@ -306,7 +313,7 @@ def main():
             exp_data = data[exp['id']]
             rollout_type_data = exp_data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
             rollout_averaged_per_run = np.average(rollout_type_data, axis=2) # [R,(E)]
-            processed_data[exp['id']] = rollout_averaged_per_run[:,-1] # [R]
+            processed_data[exp['id']] = np.mean(rollout_averaged_per_run[:,-10:], axis=1) # [R]
 
         # Shapiro test (asserts that data is normally distributed for all groups).
         print('Shapiro tests:')
