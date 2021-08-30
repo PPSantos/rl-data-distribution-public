@@ -430,7 +430,11 @@ def get_env(name, seed):
     elif name == 'mdp1':
         env = tabular_env.MDP1()
         env = time_limit_wrapper.TimeLimitWrapper(env, time_limit=5)
-        return env, []
+
+        r_env = tabular_env.MDP1()
+        r_env = time_limit_wrapper.TimeLimitWrapper(r_env, time_limit=5)
+
+        return env, [r_env]
 
     else:
         raise NotImplementedError('Unknown env id: %s' % name)

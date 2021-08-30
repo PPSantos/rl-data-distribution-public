@@ -34,13 +34,15 @@ PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/comp
 ENV_NAME = 'gridEnv1'
 VAL_ITER_DATA = 'gridEnv1_val_iter_2021-05-14-15-54-10'
 EXPS_DATA = [
-            {'id': 'gridEnv1_dqn_e_func_2021-08-24-23-45-07.tar.gz', 'label': 'delta=0.0'},
-            {'id': 'gridEnv1_dqn_e_func_2021-08-25-02-07-21.tar.gz', 'label': 'delta=0.2'},
-            {'id': 'gridEnv1_dqn_e_func_2021-08-25-04-30-54.tar.gz', 'label': 'delta=0.4'},
-            {'id': 'gridEnv1_dqn_e_func_2021-08-25-06-54-06.tar.gz', 'label': 'delta=0.6'},
-            {'id': 'gridEnv1_dqn_e_func_2021-08-25-09-17-57.tar.gz', 'label': 'delta=0.8'},
-            {'id': 'gridEnv1_dqn_e_func_2021-08-25-11-41-22.tar.gz', 'label': 'delta=1.0'},
+            {'id': 'gridEnv1_dqn_e_func_2021-08-25-16-42-24.tar.gz', 'label': 'delta=0.0'},
+            {'id': 'gridEnv1_dqn_e_func_2021-08-25-19-52-29.tar.gz', 'label': 'delta=0.2'},
+            {'id': 'gridEnv1_dqn_e_func_2021-08-25-23-04-01.tar.gz', 'label': 'delta=0.4'},
+            {'id': 'gridEnv1_dqn_e_func_2021-08-26-02-17-03.tar.gz', 'label': 'delta=0.6'},
+            {'id': 'gridEnv1_dqn_e_func_2021-08-26-05-30-13.tar.gz', 'label': 'delta=0.8'},
+            {'id': 'gridEnv1_dqn_e_func_2021-08-26-08-42-05.tar.gz', 'label': 'delta=1.0'},
             ]
+
+EXPS_DATA_2 = None
 
 
 def calculate_CI_bootstrap(x_hat, samples, num_resamples=20_000):
@@ -56,9 +58,7 @@ def calculate_CI_bootstrap(x_hat, samples, num_resamples=20_000):
     means = np.mean(resampled, axis=0)
     diffs = means - x_hat
     bounds = [x_hat - np.percentile(diffs, 5), x_hat - np.percentile(diffs, 95)]
-
     return bounds
-
 
 
 def main():
@@ -110,6 +110,41 @@ def main():
         parsed_data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts_types,num_rollouts]
 
         data[exp['id']] = parsed_data
+
+    # Load and parse additional data.
+    if EXPS_DATA_2:
+        for exp, exp_2 in zip(EXPS_DATA, EXPS_DATA_2):
+
+            exp_path = DATA_FOLDER_PATH + exp_2['id']
+            print(f"Opening experiment {exp_2['id']}")
+            if pathlib.Path(exp_path).suffix == '.gz':
+
+                exp_name = pathlib.Path(exp_path).stem
+                exp_name = '.'.join(exp_name.split('.')[:-1])
+                print('exp_name', exp_name)
+
+                tar = tarfile.open(exp_path)
+                data_file = tar.extractfile("{0}/train_data.json".format(exp_name))
+
+                exp_data = json.load(data_file)
+                exp_data = json.loads(exp_data)
+
+            else:
+                with open(exp_path + "/train_data.json", 'r') as f:
+                    exp_data = json.load(f)
+                    exp_data = json.loads(exp_data)
+                f.close()
+
+            # Parse data for each train run.
+            parsed_data = {}
+
+            # Q_vals field.
+            parsed_data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,E,S,A]
+            data[exp['id']]['Q_vals'] = np.concatenate([data[exp['id']]['Q_vals'], parsed_data['Q_vals']])
+
+            # rollouts_rewards field.
+            parsed_data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts_types,num_rollouts]
+            data[exp['id']]['rollouts_rewards'] = np.concatenate([data[exp['id']]['rollouts_rewards'], parsed_data['rollouts_rewards']])
 
     # Load additional variables from last experiment file.
     Q_vals_episodes = exp_data[0]['Q_vals_episodes'] # [(E)]

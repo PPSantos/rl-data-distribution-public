@@ -497,7 +497,7 @@ cdef class MDP1(TabularEnv):
     def __init__(self):
         super(MDP1, self).__init__(4, 2, {0: 1.0})
 
-        self._reward_matrix = np.array([[1.0,-0.1],[-0.5,0.3],[0.0,0.0],[0.0,0.0]])
+        self._reward_matrix = np.array([[1.0,-0.1],[-0.35,0.3],[0.0,0.0],[0.0,0.0]])
 
         self._transition_matrix = np.array([ [[0.0, 0.01, 0.99, 0.0], [0.0, 1.0, 0.0, 0.0]],
                                              [[0.0, 0.0,  0.0,  1.0], [0.0, 0.0, 1.0, 0.0]],

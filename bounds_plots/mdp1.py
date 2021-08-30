@@ -1,20 +1,16 @@
 import os
-import json
 import numpy as np 
-import scipy
-from scipy.spatial import distance
 import pathlib
-from datetime import datetime
 
 import matplotlib.pyplot as plt
 import matplotlib
 import seaborn as sns
 plt.style.use('ggplot')
 
-# matplotlib.rcParams['mathtext.fontset'] = 'stix'
-# matplotlib.rcParams['font.family'] = 'STIXGeneral'
-# matplotlib.pyplot.title(r'ABC123 vs $\mathrm{ABC123}^{123}$')
-# matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['mathtext.fontset'] = 'stix'
+matplotlib.rcParams['font.family'] = 'STIXGeneral'
+matplotlib.pyplot.title(r'ABC123 vs $\mathrm{ABC123}^{123}$')
+matplotlib.rcParams['text.usetex'] = True
 
 
 FIGURE_X = 6.0
@@ -43,6 +39,8 @@ if __name__ == '__main__':
     output_folder = PLOTS_FOLDER_PATH
     os.makedirs(output_folder, exist_ok=True)
 
+    # (Old) 2D plot.
+    """
     alpha = 1.2
     w_3 = 30
 
@@ -94,4 +92,164 @@ if __name__ == '__main__':
     #plt.legend()
 
     plt.savefig('{0}/grid.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    # plt.savefig('{0}/grid.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    # plt.savefig('{0}/grid.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0) """
+
+    # code to generate 'correct_actions' plot (oracle version).
+    """ alphas = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5] # [1.25] # np.linspace(1.0, 1.0, 1001)
+    x_dim = 101
+    X = np.linspace(0.0,1.0,x_dim)
+    Z = np.zeros((len(alphas), x_dim))        
+
+    w_3 = 30.0
+
+    for a, alpha in enumerate(alphas):
+        for x, mu_s1_a1 in enumerate(X):
+
+            mu_s2_a1 = (1 - mu_s1_a1)
+
+            print('mu_s1_a1:', mu_s1_a1)
+            print('mu_s2_a1:', mu_s2_a1)
+
+            w_1 = (mu_s1_a1*100.3 + alpha*mu_s2_a1*(-35.0)) / (mu_s1_a1 + alpha*alpha*mu_s2_a1)
+            w_2 = 20 # -10 + max(alpha*w_1, w_3)
+
+            correct_actions = 0
+            if w_1 > w_2:
+                correct_actions += 1
+
+            if alpha*w_1 < w_3:
+                correct_actions += 1
+
+            Z[a,x] = correct_actions
+
+            print('correct_actions:', correct_actions)
+
+
+    fig, ax = plt.subplots(constrained_layout=True)
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    for a, alpha in enumerate(alphas):
+        ax.plot(X, Z[a,:], label=r'$\alpha=$ ' + str(alpha))
+
+    ax.set_xlabel('$\mu(s_1,a_1)$')
+    ax.set_ylabel('\# correct actions')
+    plt.legend()
+
+    ax.set_ylim(-0.1,2.1)
+    ax.set_yticks([0.0, 1.0, 2.0])
+    ax.set_yticklabels(['0', '1', '2'])
+    plt.xticks(ticks=[0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+
+    sec_ax = ax.secondary_xaxis('top')
+    sec_ax.set_xticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+    sec_ax.set_xticklabels(['1.0', '0.8', '0.6', '0.4', '0.2', '0.0'])
+    sec_ax.set_xlabel('$\mu(s_2,a_1)$')
+
+    plt.savefig('{0}/2d_plot.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/2d_plot.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+
+    # averaged (for different alphas) plot.
+    print(X)
+    averaged = np.average(Z, axis=0)
+    print(averaged)
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+    plt.plot(X, averaged)
+    plt.xlabel('mus1a1')
+    plt.ylabel('Correct actions')
+    plt.legend()
+    plt.savefig('{0}/2d_averaged_plot.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    # plt.savefig('{0}/2d_averaged_plot.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0) """
+
+
+    """ # One-step TD version (fixed point calculation).
+    alphas = [1.25] # [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
+    x_dim = 100
+    Y = np.zeros((len(alphas), x_dim))        
+    X = np.linspace(0.0, 1.0, x_dim)
+
+    for a, alpha in enumerate(alphas):
+
+        num_iters = 5_000
+        w_1 = 0.0
+        w_2 = 0.0
+        w_3 = 0.0
+
+        #w1_s = []
+        #w2_s = []
+        #w3_s = []
+
+        eta = 0.01
+
+        for x, mu_s1_a1 in enumerate(X):
+
+            mu_s2_a1 = (1 - mu_s1_a1)
+
+            #print('mu_s1_a1:', mu_s1_a1)
+            #print('mu_s2_a1:', mu_s2_a1)
+
+            for i in range(num_iters):
+
+                w_1 += eta * (mu_s1_a1*(100 + 0.01*max(alpha*w_1, w_3) - w_1) + mu_s2_a1*alpha*(-35 - alpha*w_1))
+                w_2 += eta * (-10 + max(alpha*w_1, w_3) - w_2)
+                w_3 += eta * (30 - w_3)
+
+                #w1_s.append(w_1)
+                #w2_s.append(w_2)
+                #w3_s.append(w_3)
+
+            print('w_1', w_1)
+            print('w_2', w_2)
+            print('w_3', w_3)
+
+            correct_actions = 0
+            if w_1 > w_2:
+                correct_actions += 1
+
+            if alpha*w_1 < w_3:
+                correct_actions += 1
+
+            Y[a,x] = correct_actions
+
+            # if x>0 and Y[a,x-1] != Y[a,x]:
+            #     print('changeddd')
+            #     print(Y[a,x-1])
+            #     print(Y[a,x])
+            #     print(x)
+            #     print(mu_s1_a1)
+
+
+    #fig = plt.figure()
+    #fig.set_size_inches(FIGURE_X, FIGURE_Y)
+    #X = np.arange(num_iters)
+    #plt.plot(X, w1_s, label='w1')
+    #plt.plot(X, w2_s, label='w2')
+    #plt.plot(X, w3_s, label='w3')
+    #plt.xlabel('Iteration')
+    #plt.ylabel('Value')
+    #plt.legend()
+    #plt.savefig('{0}/iterations.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    # plt.savefig('{0}/iterations.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+
+    fig, ax = plt.subplots(constrained_layout=True)
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    for a, alpha in enumerate(alphas):
+        ax.plot(X, Y[a,:], label=r'$\alpha=$ ' + str(alpha))
+
+    ax.set_xlabel('$\mu(s_1,a_1)$')
+    ax.set_ylabel('\# correct actions')
+    plt.legend()
+
+    ax.set_ylim(-0.1,2.1)
+    ax.set_yticks([0.0, 1.0, 2.0])
+    ax.set_yticklabels(['0', '1', '2'])
+    plt.xticks(ticks=[0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+
+    sec_ax = ax.secondary_xaxis('top')
+    sec_ax.set_xticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+    sec_ax.set_xticklabels(['1.0', '0.8', '0.6', '0.4', '0.2', '0.0'])
+    sec_ax.set_xlabel('$\mu(s_2,a_1)$')
+
+    plt.savefig('{0}/iterations_2.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/iterations_2.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0) """
