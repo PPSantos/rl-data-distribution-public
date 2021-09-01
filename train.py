@@ -25,7 +25,7 @@ from algos.fqi.fqi import FQI
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 
 VAL_ITER_DATA = {
-    'mdp1': 'mdp1_val_iter_2021-06-10-15-55-52',
+    'mdp1': 'mdp1_val_iter_2021-08-27-17-49-23',
     'gridEnv1': 'gridEnv1_val_iter_2021-05-14-15-54-10',
     'gridEnv4': 'gridEnv4_val_iter_2021-06-16-10-08-44',
     'multiPathsEnv': 'multiPathsEnv_val_iter_2021-06-04-19-31-25',
@@ -83,14 +83,16 @@ DEFAULT_TRAIN_ARGS = {
 
     # Linear function approximator arguments.
     'linear_approximator_args': {
-        'alpha': 1e-04,
-        'expl_eps_init': 0.9,
-        'expl_eps_final': 0.0,
-        'expl_eps_episodes': 3_500,
-        'synthetic_replay_buffer': True,
+        'alpha_init': 1e-04,
+        'alpha_final': 1e-04,
+        'alpha_schedule_episodes': 20_000,
+        'expl_eps_init': 1.0,
+        'expl_eps_final': 1.0,
+        'expl_eps_episodes': 20_000,
+        'synthetic_replay_buffer': False,
         'synthetic_replay_buffer_alpha': 1_000,
-        'replay_size': 20_000,
-        'batch_size': 100,
+        'replay_size': 10_000,
+        'batch_size': 200,
     },
 
     # DQN arguments.
@@ -216,13 +218,14 @@ def train_run(run_args):
     # print('\n')
 
     # Load optimal (oracle) policy/Q-values.
-    val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA[env_name]
-    print(f"Opening experiment {VAL_ITER_DATA[env_name]} to get oracle Q-vals")
-    with open(val_iter_path + "/train_data.json", 'r') as f:
-        val_iter_data = json.load(f)
-        val_iter_data = json.loads(val_iter_data)
-        val_iter_data = val_iter_data[0]
-    f.close()
+    if args['algo'] != 'val_iter':
+        val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA[env_name]
+        print(f"Opening experiment {VAL_ITER_DATA[env_name]} to get oracle Q-vals")
+        with open(val_iter_path + "/train_data.json", 'r') as f:
+            val_iter_data = json.load(f)
+            val_iter_data = json.loads(val_iter_data)
+            val_iter_data = val_iter_data[0]
+        f.close()
 
     # Instantiate algorithm.
     if args['algo'] == 'val_iter':
@@ -324,7 +327,7 @@ if __name__ == "__main__":
     # Train (uses DEFAULT_TRAIN_ARGS).
     exp_path, exp_id = train()
 
-    if DEFAULT_TRAIN_ARGS['algo'] != 'val_iter':
+    if DEFAULT_TRAIN_ARGS['algo'] not in ('val_iter', 'linear_approximator'):
 
         from analysis.plots import main as plots
         env_name = DEFAULT_TRAIN_ARGS['env_args']['env_name']

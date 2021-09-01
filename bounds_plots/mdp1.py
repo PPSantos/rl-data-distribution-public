@@ -161,6 +161,33 @@ if __name__ == '__main__':
     plt.savefig('{0}/2d_averaged_plot.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     # plt.savefig('{0}/2d_averaged_plot.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0) """
 
+    # single fixed point calculation.
+    """ alpha = 1.2
+    mu_s1_a1 = 0.7
+    mu_s2_a1 = (1 - mu_s1_a1)
+    
+    num_iters = 5_000
+    w_1 = 0.0
+    w_2 = 0.0
+    w_3 = 0.0
+    eta = 0.01
+    for i in range(num_iters):
+
+        w_1 += eta * (mu_s1_a1*(100 + 0.01*max(alpha*w_1, w_3) - w_1) + mu_s2_a1*alpha*(-35 - alpha*w_1))
+        w_2 += eta * (-10 + max(alpha*w_1, w_3) - w_2)
+        w_3 += eta * (30 - w_3)
+
+    correct_actions = 0
+    if w_1 > w_2:
+        correct_actions += 1
+
+    if alpha*w_1 < w_3:
+        correct_actions += 1
+
+    print('w_1', w_1)
+    print('w_2', w_2)
+    print('w_3', w_3)
+    print('correct_actions:', correct_actions) """
 
     """ # One-step TD version (fixed point calculation).
     alphas = [1.25] # [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
