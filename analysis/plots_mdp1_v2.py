@@ -126,7 +126,28 @@ if __name__ == "__main__":
     """
         Q-values plots.
     """
-    # Sum plot.
+    for (d, k) in zip(data, KEYS):
+
+        # Average error plot.
+        fig = plt.figure()
+        fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+        q_vals_averaged = np.mean(d['Q_vals'], axis=0) # [E,S,A]
+        plt.plot(Q_vals_episodes, 100*q_vals_averaged[:,0,0], label=r'$Q_w(s_1,a_1)$')
+        plt.plot(Q_vals_episodes, 100*q_vals_averaged[:,0,1], label=r'$Q_w(s_1,a_2)$')
+        plt.plot(Q_vals_episodes, 100*q_vals_averaged[:,1,0], label=r'$Q_w(s_2,a_1)$')
+        plt.plot(Q_vals_episodes, 100*q_vals_averaged[:,1,1], label=r'$Q_w(s_2,a_2)$')
+
+        plt.xlabel('Episode')
+        plt.ylabel('Q-value')
+        #plt.ylim([-0.02, 0.32])
+        plt.legend()
+
+        plt.savefig('{0}/{1}_q_values.pdf'.format(PLOTS_FOLDER_PATH, k), bbox_inches='tight', pad_inches=0)
+        plt.savefig('{0}/{1}_q_values.png'.format(PLOTS_FOLDER_PATH, k), bbox_inches='tight', pad_inches=0)
+        plt.close()
+
+    # Average error plot.
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
@@ -152,9 +173,9 @@ if __name__ == "__main__":
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-        plt.plot(np.mean(d['weights'], axis=0)[:,0], label='w_1')
-        plt.plot(np.mean(d['weights'], axis=0)[:,1], label='w_2')
-        plt.plot(np.mean(d['weights'], axis=0)[:,2], label='w_3')
+        plt.plot(100*np.mean(d['weights'], axis=0)[:,0], label='$w_1$')
+        plt.plot(100*np.mean(d['weights'], axis=0)[:,1], label='$w_2$')
+        plt.plot(100*np.mean(d['weights'], axis=0)[:,2], label='$w_3$')
 
         plt.xlabel('Episode')
         plt.ylabel('Weight value')
@@ -179,7 +200,7 @@ if __name__ == "__main__":
         #counts_3 = run_data[:,1,1] / np.sum(run_data, axis=(1,2))
 
         plt.plot(replay_buffer_counts_episodes, counts_0, label='$\mu(s_1, a_1$)')
-        #plt.plot(replay_buffer_counts_episodes, counts_1, label='mu_s1_a2')
+        #plt.plot(replay_buffer_counts_episodes, counts_1, label='$\mu(s_1,a_2)$')
         plt.plot(replay_buffer_counts_episodes, counts_2, label='$\mu(s_2, a_1$)')
         #plt.plot(replay_buffer_counts_episodes, counts_3, label='mu_s2_a2')
 
