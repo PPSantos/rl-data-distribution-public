@@ -38,9 +38,9 @@ DEFAULT_TRAIN_ARGS = {
     #           (and vice versa) and 'val_iter' algorithms.
 
     # General arguments.
-    'num_runs': 10,
+    'num_runs': 20,
     'num_processors': 10,
-    'algo': 'dqn_e_func',
+    'algo': 'dqn',
     'num_episodes': 20_000,
     'gamma': 0.9, # discount factor.
 

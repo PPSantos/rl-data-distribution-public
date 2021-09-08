@@ -231,6 +231,8 @@ class DQN(object):
                                     np.arange(self.base_env.num_actions)))
         sa_combinations = mesh.T.reshape(-1, 2)
 
+        sa_counts = np.zeros((self.base_env.num_states, self.base_env.num_actions))
+
         for _ in range(dataset_size):
 
             # Randomly sample (state, action) pair.
@@ -244,6 +246,8 @@ class DQN(object):
             else:
                 sampled_idx = np.random.choice(np.arange(self.sampling_dist_size), p=self.sampling_dist)
                 state, action = sa_combinations[sampled_idx]
+
+            sa_counts[state, action] += 1
 
             observation = self.base_env.observation(state)
 
@@ -260,6 +264,25 @@ class DQN(object):
             static_dataset.append((transition, extras))
 
             self.base_env.reset()
+
+        # Correct dataset in order to ensure coverage over all (state, action) pairs.
+        # (this corection barely changes the data dist. entropy).
+        zero_positions = np.where(sa_counts == 0)
+        for (state,action) in zip(*zero_positions):
+
+            observation = self.base_env.observation(state)
+
+            # Sample next state, observation and reward.
+            self.base_env.set_state(state)
+            next_observation, reward, done, info = self.base_env.step(action)
+
+            transition = (observation, np.array(action, dtype=np.int32),
+                            np.array(reward, dtype=np.float32),
+                            np.array(1.0, dtype=np.float32),
+                            next_observation)
+            extras = (np.int32(state), np.int32(self.base_env.get_state()))
+
+            static_dataset.append((transition, extras))
 
         print(f'Static dataset created containing {len(static_dataset)} transitions.')
 
