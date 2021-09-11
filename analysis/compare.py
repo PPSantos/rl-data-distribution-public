@@ -19,26 +19,28 @@ from analysis.rliable import library as rly
 
 from envs import env_suite
 
+#####################################################################
+########################## SCRIPT ARGUMENTS #########################
+#####################################################################
+ENV_NAME = 'gridEnv1'
+VAL_ITER_DATA = 'gridEnv1_val_iter_2021-05-14-15-54-10'
+EXPS_DATA = [
+    {'id': 'gridEnv1_dqn_e_func_2021-08-25-16-42-24.tar.gz', 'label': r'$\delta=0.0$'},
+    {'id': 'gridEnv1_dqn_e_func_2021-08-25-19-52-29.tar.gz', 'label': r'$\delta=0.2$'},
+    {'id': 'gridEnv1_dqn_e_func_2021-08-25-23-04-01.tar.gz', 'label': r'$\delta=0.4$'},
+    {'id': 'gridEnv1_dqn_e_func_2021-08-26-02-17-03.tar.gz', 'label': r'$\delta=0.6$'},
+    {'id': 'gridEnv1_dqn_e_func_2021-08-26-05-30-13.tar.gz', 'label': r'$\delta=0.8$'},
+    {'id': 'gridEnv1_dqn_e_func_2021-08-26-08-42-05.tar.gz', 'label': r'$\delta=1.0$'},]
+EXPS_DATA_2 = None # Allows to concatenate additional experiments.
+STAT_TESTS = False # Whether to compute statistical tests.
+#####################################################################
+
 FIGURE_X = 6.0
 FIGURE_Y = 4.0
 GRAY_COLOR = (0.3,0.3,0.3)
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/compare/'
-
-
-# SETUP VARIABLES.
-ENV_NAME = 'gridEnv1'
-VAL_ITER_DATA = 'gridEnv1_val_iter_2021-05-14-15-54-10'
-EXPS_DATA = [
-            {'id': 'gridEnv1_dqn_e_func_2021-08-25-16-42-24.tar.gz', 'label': r'$\delta=0.0$'},
-            {'id': 'gridEnv1_dqn_e_func_2021-08-25-19-52-29.tar.gz', 'label': r'$\delta=0.2$'},
-            {'id': 'gridEnv1_dqn_e_func_2021-08-25-23-04-01.tar.gz', 'label': r'$\delta=0.4$'},
-            {'id': 'gridEnv1_dqn_e_func_2021-08-26-02-17-03.tar.gz', 'label': r'$\delta=0.6$'},
-            {'id': 'gridEnv1_dqn_e_func_2021-08-26-05-30-13.tar.gz', 'label': r'$\delta=0.8$'},
-            {'id': 'gridEnv1_dqn_e_func_2021-08-26-08-42-05.tar.gz', 'label': r'$\delta=1.0$'},
-            ]
-EXPS_DATA_2 = None
 
 
 def mean(samples: np.ndarray, num_resamples: int=25_000):
@@ -52,7 +54,8 @@ def mean(samples: np.ndarray, num_resamples: int=25_000):
                                 size=(len(samples), num_resamples),
                                 replace=True)
     point_estimations = np.mean(resampled, axis=0)
-    confidence_interval = [np.percentile(point_estimations, 5), np.percentile(point_estimations, 95)]
+    confidence_interval = [np.percentile(point_estimations, 5),
+                           np.percentile(point_estimations, 95)]
     return point_estimate, confidence_interval
 
 def median(samples: np.ndarray, num_resamples=25_000):
@@ -66,7 +69,8 @@ def median(samples: np.ndarray, num_resamples=25_000):
                                 size=(len(samples), num_resamples),
                                 replace=True)
     point_estimations = np.median(resampled, axis=0)
-    confidence_interval = [np.percentile(point_estimations, 5), np.percentile(point_estimations, 95)]
+    confidence_interval = [np.percentile(point_estimations, 5),
+                           np.percentile(point_estimations, 95)]
     return point_estimate, confidence_interval
 
 def iqm(samples: np.ndarray, num_resamples=25_000):
@@ -80,7 +84,8 @@ def iqm(samples: np.ndarray, num_resamples=25_000):
                                 size=(len(samples), num_resamples),
                                 replace=True)
     point_estimations = scipy.stats.trim_mean(resampled, proportiontocut=0.25, axis=0)
-    confidence_interval = [np.percentile(point_estimations, 5), np.percentile(point_estimations, 95)]
+    confidence_interval = [np.percentile(point_estimations, 5),
+                           np.percentile(point_estimations, 95)]
     return point_estimate, confidence_interval
 
 def optimality_gap(samples: np.ndarray, threshold: float, num_resamples=25_000):
@@ -94,7 +99,8 @@ def optimality_gap(samples: np.ndarray, threshold: float, num_resamples=25_000):
                                 size=(len(samples), num_resamples),
                                 replace=True)
     point_estimations = np.mean((resampled < threshold), axis=0)
-    confidence_interval = [np.percentile(point_estimations, 5), np.percentile(point_estimations, 95)]
+    confidence_interval = [np.percentile(point_estimations, 5),
+                           np.percentile(point_estimations, 95)]
     return point_estimate, confidence_interval
 
 
@@ -143,7 +149,8 @@ def main():
         parsed_data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,E,S,A]
 
         # rollouts_rewards field.
-        parsed_data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts_types,num_rollouts]
+        parsed_data['rollouts_rewards'] = np.array([e['rollouts_rewards']
+                        for e in exp_data]) # [R,(E),num_rollouts_types,num_rollouts]
 
         data[exp['id']] = parsed_data
 
@@ -176,36 +183,42 @@ def main():
 
             # Q_vals field.
             parsed_data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,E,S,A]
-            data[exp['id']]['Q_vals'] = np.concatenate([data[exp['id']]['Q_vals'], parsed_data['Q_vals']])
+            data[exp['id']]['Q_vals'] = np.concatenate([data[exp['id']]['Q_vals'],
+                                                        parsed_data['Q_vals']])
 
             # rollouts_rewards field.
-            parsed_data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts_types,num_rollouts]
-            data[exp['id']]['rollouts_rewards'] = np.concatenate([data[exp['id']]['rollouts_rewards'], parsed_data['rollouts_rewards']])
+            parsed_data['rollouts_rewards'] = np.array([e['rollouts_rewards']
+                            for e in exp_data]) # [R,(E),num_rollouts_types,num_rollouts]
+            data[exp['id']]['rollouts_rewards'] = np.concatenate([data[exp['id']]['rollouts_rewards'],
+                                                        parsed_data['rollouts_rewards']])
 
     # Load additional variables from last experiment file.
     Q_vals_episodes = exp_data[0]['Q_vals_episodes'] # [(E)]
     rollouts_episodes = exp_data[0]['rollouts_episodes'] # [(E)]
 
+    aggregate_funcs = {'mean': mean, 'median': median, 'iqm': iqm}
+
     """
         Q-values errors.
     """
-    print('-'*20)
-    print('Q-values:')
-    print('-'*20)
+    print('Computing Q-values errors plots...')
 
-    # Q-values error throughout training.
-    # (with bootstrapped confidence interval).
-    aggregate_funcs = {'mean': mean, 'median': median, 'iqm': iqm}
-    for func_lbl, agg_func in aggregate_funcs.items():
+    # Pre-process Q-values data.
+    q_vals_processed_data = {}
+    for exp in EXPS_DATA:
+        exp_data = data[exp['id']]
+        errors = np.abs(val_iter_data['Q_vals'] - exp_data['Q_vals']) # [R,E,S,A]
+        errors = np.mean(errors, axis=(2,3)) # [R,E]
+        q_vals_processed_data[exp['id']] = errors
+
+    # Q-values error throughout training (with bootstrapped confidence interval).
+    for (func_lbl, agg_func) in aggregate_funcs.items():
 
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
         for exp in EXPS_DATA:
-            exp_data = data[exp['id']]
-
-            errors = np.abs(val_iter_data['Q_vals'] - exp_data['Q_vals']) # [R,E,S,A]
-            errors = np.mean(errors, axis=(2,3)) # [R,E]
+            errors = q_vals_processed_data[exp['id']] # [R,E]
 
             # Calculate for each episode.
             point_estimations, conf_intervals = [], []
@@ -224,12 +237,13 @@ def main():
         plt.ylabel(r'$Q$-values error')
         plt.legend()
 
-        plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_episodes_{func_lbl}.pdf', bbox_inches='tight', pad_inches=0)
-        plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_episodes_{func_lbl}.png', bbox_inches='tight', pad_inches=0)
+        plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_episodes_{func_lbl}.pdf',
+                    bbox_inches='tight', pad_inches=0)
+        plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_episodes_{func_lbl}.png',
+                    bbox_inches='tight', pad_inches=0)
         plt.close()
 
-    # Q-values error at the end of training.
-    # (with bootstrapped confidence interval).
+    # Q-values error at the end of training (with bootstrapped confidence interval).
     for (func_lbl, agg_func) in aggregate_funcs.items():
 
         fig = plt.figure()
@@ -237,25 +251,20 @@ def main():
 
         ci_lower_bounds, ci_upper_bounds = [], []
         for exp_idx, exp in enumerate(EXPS_DATA):
-            exp_data = data[exp['id']]
-
-            errors = np.abs(val_iter_data['Q_vals'] - exp_data['Q_vals']) # [R,E,S,A]
-            errors = np.mean(errors, axis=(2,3)) # [R,E]
+            errors = q_vals_processed_data[exp['id']] # [R,E]
             errors = np.mean(errors[:,-10:], axis=1) # [R] (use last 10 episodes data)
 
-            point_est, c_int = agg_func(errors)
+            point_est, (lower_ci, upper_ci) = agg_func(errors)
 
-            lower, upper = c_int
-            ci_lower_bounds.append(lower)
-            ci_upper_bounds.append(upper)
             # Plot confidence interval.
             plt.bar(
                 x=exp_idx,
                 width=0.5,
-                height=upper - lower,
-                bottom=lower,
+                height=upper_ci - lower_ci,
+                bottom=lower_ci,
                 alpha=0.75,
                 label=exp['label'])
+
             # Plot point estimate.
             plt.hlines(
                 y=point_est,
@@ -265,25 +274,30 @@ def main():
                 color='k',
                 alpha=0.65)
 
-        y_lim_lower = np.min(ci_lower_bounds)-(0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
+            ci_lower_bounds.append(lower_ci)
+            ci_upper_bounds.append(upper_ci)
+
+        y_lim_lower = np.min(ci_lower_bounds) - \
+                    (0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
         y_lim_lower = max(y_lim_lower, 0.0)
-        y_lim_upper = np.max(ci_upper_bounds)+(0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
+        y_lim_upper = np.max(ci_upper_bounds) + \
+                    (0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
         plt.ylim(y_lim_lower, y_lim_upper)
 
         plt.xticks(list(range(len(EXPS_DATA))), [exp['label'] for exp in EXPS_DATA])
         plt.ylabel(r'$Q$-values error')
 
-        plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_final_{func_lbl}.pdf', bbox_inches='tight', pad_inches=0)
-        plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_final_{func_lbl}.png', bbox_inches='tight', pad_inches=0)
+        plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_final_{func_lbl}.pdf',
+                    bbox_inches='tight', pad_inches=0)
+        plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_final_{func_lbl}.png',
+                    bbox_inches='tight', pad_inches=0)
         plt.close()
 
-    # Distribution plot for the last episode(s).
+    # Q-values error distribution plot for the last episode(s).
     errors_list = []
     for exp in EXPS_DATA:
-        exp_data = data[exp['id']]
-        errors = np.abs(val_iter_data['Q_vals'] - exp_data['Q_vals']) # [R,E,S,A]
-        errors = errors[:,-10:,:,:] # [R,(E),S,A]
-        errors = np.mean(errors, axis=(1,2,3)) # [R]
+        errors = q_vals_processed_data[exp['id']] # [R,E]
+        errors = np.mean(errors[:,-10:], axis=1) # [R] (use last 10 episodes data)
         errors_list.append(errors)
 
     fig = plt.figure()
@@ -293,37 +307,37 @@ def main():
     plt.violinplot(errors_list, positions=x_ticks_pos, showextrema=True)
 
     for i in range(len(EXPS_DATA)):
-        plt.scatter([x_ticks_pos[i]]*len(errors_list[i]), errors_list[i], color=GRAY_COLOR, zorder=100, alpha=0.6)
+        plt.scatter([x_ticks_pos[i]]*len(errors_list[i]), errors_list[i],
+                        color=GRAY_COLOR, zorder=100, alpha=0.6)
 
     plt.ylabel(r'$Q$-values error')
     plt.xticks(ticks=x_ticks_pos, labels=[e['label'] for e in EXPS_DATA])
 
-    plt.savefig('{0}/qvals_final_distribution.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/qvals_final_distribution.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_final_distribution.pdf',
+                bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_final_distribution.png',
+                bbox_inches='tight', pad_inches=0)
     plt.close()
 
-    # Performance profile plot for the last episode(s).
-    # (lower is better)
+    # Performance profile plot for the last episode(s) (lower is better).
     scores_dict = {}
     max_q_vals_errors = []
     for exp in EXPS_DATA:
-        exp_data = data[exp['id']]
-        errors = np.abs(val_iter_data['Q_vals'] - exp_data['Q_vals']) # [R,E,S,A]
-        errors = errors[:,-10:,:,:] # [R,(E),S,A]
-        errors = np.mean(errors, axis=(1,2,3)) # [R]
+        errors = q_vals_processed_data[exp['id']] # [R,E]
+        errors = np.mean(errors[:,-10:], axis=1) # [R] (use last 10 episodes data)
         max_q_vals_errors.append(np.max(errors))
         errors = errors[:,np.newaxis]
         scores_dict[exp['label']] = errors
 
-    max_threshold = max(max_q_vals_errors)
+    max_threshold = max(max_q_vals_errors) # Maximum Q-value error.
     thresholds = np.linspace(0.0, max_threshold, 101)
     score_distributions, score_distributions_cis = rly.create_performance_profile(
                                                         scores_dict, thresholds)
 
-    # Plot.
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
+    # Plot.
     for exp in EXPS_DATA:
         score = score_distributions[exp['label']]
         lower_ci, upper_ci = score_distributions_cis[exp['label']]
@@ -335,45 +349,47 @@ def main():
     plt.ylabel(r'Fraction of runs with error > $\tau$')
     plt.legend()
 
-    plt.savefig('{0}/qvals_final_performance_profile.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/qvals_final_performance_profile.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_final_performance_profile.pdf',
+                bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_final_performance_profile.png',
+                bbox_inches='tight', pad_inches=0)
     plt.close()
 
-    # Statistical tests for last episode(s) Q-values errors.
-    processed_data = {}
-    for exp in EXPS_DATA:
-        exp_data = data[exp['id']]
-        errors = np.abs(val_iter_data['Q_vals'] - exp_data['Q_vals']) # [R,E,S,A]
-        errors = errors[:,-10:,:,:] # [R,(E),S,A]
-        errors = np.mean(errors, axis=(1,2,3)) # [R]
-        processed_data[exp['id']] = errors
+    if STAT_TESTS:
+        # Statistical tests for last episode(s) Q-values errors.
+        stat_test_data = {}
+        for exp in EXPS_DATA:
+            errors = q_vals_processed_data[exp['id']] # [R,E]
+            errors = np.mean(errors[:,-10:], axis=1) # [R] (use last 10 episodes data)
+            stat_test_data[exp['id']] = errors
 
-    # Shapiro test (asserts that data is normally distributed for all groups).
-    print('Shapiro tests:')
-    for exp in EXPS_DATA:
-        shapiro_test = stats.shapiro(processed_data[exp['id']])
-        print(f'\t{exp["label"]}: {shapiro_test}')
+        # Shapiro test (asserts that data is normally distributed for all groups).
+        print('Shapiro tests:')
+        for exp in EXPS_DATA:
+            shapiro_test = stats.shapiro(stat_test_data[exp['id']])
+            print(f'\t{exp["label"]}: {shapiro_test}')
 
-    # Parametric Levene test (asserts that all groups share the same variance).
-    t_args = [processed_data[exp['id']] for exp in EXPS_DATA]
-    print(f'\nLevene\'s test: {stats.levene(*t_args)}')
+        # Parametric Levene test (asserts that all groups share the same variance).
+        t_args = [stat_test_data[exp['id']] for exp in EXPS_DATA]
+        print(f'\nLevene\'s test: {stats.levene(*t_args)}')
 
-    # Parametric ANOVA test (test whether all groups share the same mean value or not).
-    print(f'\nANOVA test: {stats.f_oneway(*t_args)}')
+        # Parametric ANOVA test (test whether all groups share the same mean value or not).
+        print(f'\nANOVA test: {stats.f_oneway(*t_args)}')
 
-    # Tukey HSD test (pairwise comparisons between all groups).
-    t_data, groups = [], []
-    for exp in EXPS_DATA:
-        groups.extend([exp['label'] for _ in range(len(processed_data[exp['id']]))])
-        t_data.extend(processed_data[exp['id']])
-    print('\nTukeyHSD:', pairwise_tukeyhsd(t_data, groups))
+        # Tukey HSD test (pairwise comparisons between all groups).
+        t_data, groups = [], []
+        for exp in EXPS_DATA:
+            groups.extend([exp['label'] for _ in range(len(stat_test_data[exp['id']]))])
+            t_data.extend(stat_test_data[exp['id']])
+        print('\nTukeyHSD:', pairwise_tukeyhsd(t_data, groups))
 
-    # Non-parametric test.
-    print('\nKruskal (non-parametric) test:', stats.kruskal(*t_args))
+        # Non-parametric test.
+        print('\nKruskal (non-parametric) test:', stats.kruskal(*t_args))
 
-    # Post-hoc non-parametric comparisons.
-    t_data = [processed_data[exp['id']] for exp in EXPS_DATA]
-    print(sp.posthoc_conover(t_data, p_adjust='holm'))
+        # Post-hoc non-parametric comparisons.
+        t_data = [stat_test_data[exp['id']] for exp in EXPS_DATA]
+        print(sp.posthoc_conover(t_data, p_adjust='holm'))
+
 
     """
         Rollouts rewards.
@@ -390,26 +406,24 @@ def main():
         raise ValueError(f'Env. {ENV_NAME} does not have rollout types defined.')
 
     for t, rollout_type in enumerate(rollouts_types):
+        print(f'Computing rollout {rollout_type} plots...')
 
-        print('-'*20)
-        print(f'Rollouts ({rollout_type}):')
-        print('-'*20)
+        # Pre-process rollout rewards data.
+        rollout_processed_data = {}
+        for exp in EXPS_DATA:
+            exp_data = data[exp['id']]
+            rollout_data = exp_data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
+            rollout_data = np.average(rollout_data, axis=2) # [R,(E)]
+            rollout_processed_data[exp['id']] = rollout_data
 
-        aggregate_funcs = {'mean': mean, 'median': median, 'iqm': iqm}
-
-        
-        # Reward during training.
-        # (with bootstrapped confidence interval).
+        # Rollout reward during training (with bootstrapped confidence interval).
         for func_lbl, agg_func in aggregate_funcs.items():
 
             fig = plt.figure()
             fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
             for exp in EXPS_DATA:
-                exp_data = data[exp['id']]
-
-                rollout_data = exp_data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
-                rollout_data = np.average(rollout_data, axis=2) # [R,(E)]
+                rollout_data = rollout_processed_data[exp['id']] # [R,(E)]
 
                 # Calculate for each episode.
                 point_estimations, conf_intervals = [], []
@@ -428,12 +442,13 @@ def main():
             plt.ylabel('Reward')
             plt.legend()
 
-            plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_episodes_{func_lbl}.pdf', bbox_inches='tight', pad_inches=0)
-            plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_episodes_{func_lbl}.png', bbox_inches='tight', pad_inches=0)
+            plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_episodes_{func_lbl}.pdf',
+                        bbox_inches='tight', pad_inches=0)
+            plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_episodes_{func_lbl}.png',
+                        bbox_inches='tight', pad_inches=0)
             plt.close()
 
-        # Reward at the end of training.
-        # (with bootstrapped confidence interval).
+        # Rollout reward at the end of training (with bootstrapped confidence interval).
         for (func_lbl, agg_func) in aggregate_funcs.items():
 
             fig = plt.figure()
@@ -441,26 +456,21 @@ def main():
 
             ci_lower_bounds, ci_upper_bounds = [], []
             for exp_idx, exp in enumerate(EXPS_DATA):
-                exp_data = data[exp['id']]
-
-                rollout_data = exp_data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
-                rollout_data = np.average(rollout_data, axis=2) # [R,(E)]
+                rollout_data = rollout_processed_data[exp['id']] # [R,(E)]
                 rollout_data = rollout_data[:,-10:] # [R,(E)]
                 rollout_data = np.mean(rollout_data, axis=1) # [R]
 
-                point_est, c_int = agg_func(rollout_data)
+                point_est, (lower_ci, upper_ci) = agg_func(rollout_data)
 
-                lower, upper = c_int
-                ci_lower_bounds.append(lower)
-                ci_upper_bounds.append(upper)
                 # Plot confidence interval.
                 plt.bar(
                     x=exp_idx,
                     width=0.5,
-                    height=upper - lower,
-                    bottom=lower,
+                    height=upper_ci - lower_ci,
+                    bottom=lower_ci,
                     alpha=0.75,
                     label=exp['label'])
+
                 # Plot point estimate.
                 plt.hlines(
                     y=point_est,
@@ -470,33 +480,35 @@ def main():
                     color='k',
                     alpha=0.65)
 
-            y_lim_lower = np.min(ci_lower_bounds)-(0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
+                ci_lower_bounds.append(lower_ci)
+                ci_upper_bounds.append(upper_ci)
+
+            y_lim_lower = np.min(ci_lower_bounds) - \
+                        (0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
             y_lim_lower = max(y_lim_lower, 0.0)
-            y_lim_upper = np.max(ci_upper_bounds)+(0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
+            y_lim_upper = np.max(ci_upper_bounds) + \
+                        (0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
             plt.ylim(y_lim_lower, y_lim_upper)
 
             plt.xticks(list(range(len(EXPS_DATA))), [exp['label'] for exp in EXPS_DATA])
             plt.ylabel('Reward')
 
-            plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_{func_lbl}.pdf', bbox_inches='tight', pad_inches=0)
-            plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_{func_lbl}.png', bbox_inches='tight', pad_inches=0)
+            plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_{func_lbl}.pdf',
+                        bbox_inches='tight', pad_inches=0)
+            plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_{func_lbl}.png',
+                        bbox_inches='tight', pad_inches=0)
             plt.close()
 
         # Calculate max reward (for optimality gap calculation).
         max_rewards = []
         for exp in EXPS_DATA:
-            exp_data = data[exp['id']]
-            rollout_data = exp_data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
-            rollout_data = np.average(rollout_data, axis=2) # [R,(E)]
+            rollout_data = rollout_processed_data[exp['id']] # [R,(E)]
             rollout_data = rollout_data[:,-10:] # [R,(E)]
             rollout_data = np.mean(rollout_data, axis=1) # [R]
             max_rewards.append(np.max(rollout_data))
         max_reward = max(max_rewards)
-        # print('Max reward:', max_reward)
 
-        # Optimality gap.
-        # (the number of runs that failed to reach tau*max_reward).
-        # (lower is better)
+        # Optimality gap (the number of runs that fail to reach tau*max_reward).
         tau = 0.5
 
         fig = plt.figure()
@@ -505,26 +517,22 @@ def main():
         # Calculate optimality gap.
         ci_lower_bounds, ci_upper_bounds = [], []
         for exp_idx, exp in enumerate(EXPS_DATA):
-            exp_data = data[exp['id']]
-
-            rollout_data = exp_data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
-            rollout_data = np.average(rollout_data, axis=2) # [R,(E)]
+            rollout_data = rollout_processed_data[exp['id']] # [R,(E)]
             rollout_data = rollout_data[:,-10:] # [R,(E)]
             rollout_data = np.mean(rollout_data, axis=1) # [R]
 
-            point_est, c_int = optimality_gap(rollout_data, threshold=tau*max_reward)
+            point_est, (lower_ci, upper_ci) = optimality_gap(rollout_data,
+                                                threshold=tau*max_reward)
 
-            lower, upper = c_int
-            ci_lower_bounds.append(lower)
-            ci_upper_bounds.append(upper)
             # Plot confidence interval.
             plt.bar(
                 x=exp_idx,
                 width=0.5,
-                height=upper - lower,
-                bottom=lower,
+                height=upper_ci - lower_ci,
+                bottom=lower_ci,
                 alpha=0.75,
                 label=exp['label'])
+
             # Plot point estimate.
             plt.hlines(
                 y=point_est,
@@ -534,25 +542,30 @@ def main():
                 color='k',
                 alpha=0.65)
 
-        y_lim_lower = np.min(ci_lower_bounds)-(0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
+            ci_lower_bounds.append(lower_ci)
+            ci_upper_bounds.append(upper_ci)
+
+        y_lim_lower = np.min(ci_lower_bounds) - \
+                    (0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
         y_lim_lower = max(y_lim_lower, 0.0)
-        y_lim_upper = np.max(ci_upper_bounds)+(0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
+        y_lim_upper = np.max(ci_upper_bounds) + \
+                    (0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
         plt.ylim(y_lim_lower, y_lim_upper)
 
         plt.xticks(list(range(len(EXPS_DATA))), [exp['label'] for exp in EXPS_DATA])
         plt.ylabel('Optimality gap')
 
-        plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_optimality_gap.pdf', bbox_inches='tight', pad_inches=0)
-        plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_optimality_gap.png', bbox_inches='tight', pad_inches=0)
+        plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_optimality_gap.pdf',
+                    bbox_inches='tight', pad_inches=0)
+        plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_optimality_gap.png',
+                    bbox_inches='tight', pad_inches=0)
         plt.close()
 
-        # Distribution plot (last episode(s)).
+        # Rollout rewards distribution plot (last episode(s)).
         errors_list = []
         for exp in EXPS_DATA:
-            exp_data = data[exp['id']]
-            rollout_type_data = exp_data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
-            rollout_averaged_per_run = np.average(rollout_type_data, axis=2) # [R,(E)]
-            last_eps_data = rollout_averaged_per_run[:,-10:] # [R,(E)]
+            rollout_data = rollout_processed_data[exp['id']] # [R,(E)]
+            last_eps_data = rollout_data[:,-10:] # [R,(E)]
             last_eps_data = np.mean(last_eps_data, axis=1) # [R]
             errors_list.append(last_eps_data)
 
@@ -563,27 +576,25 @@ def main():
         plt.violinplot(errors_list, positions=x_ticks_pos, showextrema=True)
 
         for i in range(len(EXPS_DATA)):
-            plt.scatter([x_ticks_pos[i]]*len(errors_list[i]), errors_list[i], color=GRAY_COLOR, zorder=100, alpha=0.6)
+            plt.scatter([x_ticks_pos[i]]*len(errors_list[i]), errors_list[i],
+                        color=GRAY_COLOR, zorder=100, alpha=0.6)
 
-        #plt.xlabel('Algorithm')
         plt.ylabel('Reward')
 
         plt.xticks(ticks=x_ticks_pos, labels=[e['label'] for e in EXPS_DATA])
 
-        plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_distribution.pdf', bbox_inches='tight', pad_inches=0)
-        plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_distribution.png', bbox_inches='tight', pad_inches=0)
+        plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_distribution.pdf',
+                    bbox_inches='tight', pad_inches=0)
+        plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_distribution.png',
+                    bbox_inches='tight', pad_inches=0)
         plt.close()
 
-        # Performance profile plot for the last episode(s).
-        # (higher is better)
+        # Rollout rewards performance profile plot for the last episode(s).
         scores_dict = {}
         max_rewards = []
         for exp in EXPS_DATA:
-
-            exp_data = data[exp['id']]
-            rollout_type_data = exp_data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
-            rollout_averaged_per_run = np.average(rollout_type_data, axis=2) # [R,(E)]
-            last_eps_data = rollout_averaged_per_run[:,-10:] # [R,(E)]
+            rollout_data = rollout_processed_data[exp['id']] # [R,(E)]
+            last_eps_data = rollout_data[:,-10:] # [R,(E)]
             last_eps_data = np.mean(last_eps_data, axis=1) # [R]
             last_eps_data = last_eps_data[:,np.newaxis]
             max_rewards.append(np.max(last_eps_data))
@@ -609,44 +620,46 @@ def main():
         plt.ylabel(r'Fraction of runs with reward > $\tau$')
         plt.legend()
 
-        plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_performance_profile.pdf', bbox_inches='tight', pad_inches=0)
-        plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_performance_profile.png', bbox_inches='tight', pad_inches=0)
+        plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_performance_profile.pdf',
+                    bbox_inches='tight', pad_inches=0)
+        plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_performance_profile.png',
+                    bbox_inches='tight', pad_inches=0)
         plt.close()
 
-        # Statistical tests for last episode.
-        processed_data = {}
-        for exp in EXPS_DATA:
-            exp_data = data[exp['id']]
-            rollout_type_data = exp_data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
-            rollout_averaged_per_run = np.average(rollout_type_data, axis=2) # [R,(E)]
-            processed_data[exp['id']] = np.mean(rollout_averaged_per_run[:,-10:], axis=1) # [R]
+        if STAT_TESTS:
+            # Statistical tests for last episode.
+            stat_test_data = {}
+            for exp in EXPS_DATA:
+                rollout_data = rollout_processed_data[exp['id']] # [R,(E)]
+                rollout_averaged_per_run = np.average(rollout_data, axis=2) # [R,(E)]
+                stat_test_data[exp['id']] = np.mean(rollout_averaged_per_run[:,-10:], axis=1) # [R]
 
-        # Shapiro test (asserts that data is normally distributed for all groups).
-        print('Shapiro tests:')
-        for exp in EXPS_DATA:
-            shapiro_test = stats.shapiro(processed_data[exp['id']])
-            print(f'\t{exp["label"]}: {shapiro_test}')
+            # Shapiro test (asserts that data is normally distributed for all groups).
+            print('Shapiro tests:')
+            for exp in EXPS_DATA:
+                shapiro_test = stats.shapiro(stat_test_data[exp['id']])
+                print(f'\t{exp["label"]}: {shapiro_test}')
 
-        # Parametric Levene test (asserts that all groups share the same variance).
-        t_args = [processed_data[exp['id']] for exp in EXPS_DATA]
-        print(f'\nLevene\'s test: {stats.levene(*t_args)}')
+            # Parametric Levene test (asserts that all groups share the same variance).
+            t_args = [stat_test_data[exp['id']] for exp in EXPS_DATA]
+            print(f'\nLevene\'s test: {stats.levene(*t_args)}')
 
-        # Parametric ANOVA test (test whether all groups share the same mean value or not).
-        print(f'\nANOVA test: {stats.f_oneway(*t_args)}')
+            # Parametric ANOVA test (test whether all groups share the same mean value or not).
+            print(f'\nANOVA test: {stats.f_oneway(*t_args)}')
 
-        # Tukey HSD test (pairwise comparisons between all groups).
-        t_data, groups = [], []
-        for exp in EXPS_DATA:
-            groups.extend([exp['label'] for _ in range(len(processed_data[exp['id']]))])
-            t_data.extend(processed_data[exp['id']])
-        print('\nTukeyHSD:', pairwise_tukeyhsd(t_data, groups))
+            # Tukey HSD test (pairwise comparisons between all groups).
+            t_data, groups = [], []
+            for exp in EXPS_DATA:
+                groups.extend([exp['label'] for _ in range(len(stat_test_data[exp['id']]))])
+                t_data.extend(stat_test_data[exp['id']])
+            print('\nTukeyHSD:', pairwise_tukeyhsd(t_data, groups))
 
-        # Non-parametric test.
-        print('\nKruskal (non-parametric) test:', stats.kruskal(*t_args))
+            # Non-parametric test.
+            print('\nKruskal (non-parametric) test:', stats.kruskal(*t_args))
 
-        # Post-hoc non-parametric comparisons.
-        t_data = [processed_data[exp['id']] for exp in EXPS_DATA]
-        print(sp.posthoc_conover(t_data, p_adjust='holm'))
+            # Post-hoc non-parametric comparisons.
+            t_data = [stat_test_data[exp['id']] for exp in EXPS_DATA]
+            print(sp.posthoc_conover(t_data, p_adjust='holm'))
 
 
 if __name__ == "__main__":
