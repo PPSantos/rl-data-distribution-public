@@ -358,6 +358,11 @@ def main(exp_id, val_iter_exp):
     scalar_metrics['train_qvals_summed_error_total'] = np.mean(errors)
     scalar_metrics['train_qvals_summed_error_final'] = np.mean(errors[:,-1])
 
+    errors = np.abs(val_iter_data['Q_vals'] - data['Q_vals']) # [R,E,S,A]
+    errors = np.mean(errors, axis=(2,3)) # [R,E]
+    scalar_metrics['train_qvals_avg_error_total'] = np.mean(errors)
+    scalar_metrics['train_qvals_avg_error_final'] = np.mean(errors[:,-1])
+
     """
         `q_values_mean_error` plot.
     """

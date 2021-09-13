@@ -12,3 +12,4 @@ tqdm
 statsmodels
 tf-agents==0.7.1
 scikit-posthocs==0.6.7
+arch==4.17
