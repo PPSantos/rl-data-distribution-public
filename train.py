@@ -13,13 +13,7 @@ from envs import env_suite
 
 # Import algorithms.
 from algos.value_iteration import ValueIteration
-from algos.q_learning import QLearning
-from algos.linear_approximator import LinearApproximator
-from algos.dqn.dqn import DQN
-from algos.dqn_e_tab.dqn_e_tab import DQN_E_tab
-from algos.dqn_e_func.dqn_e_func import DQN_E_func
-from algos.oracle_fqi.oracle_fqi import OracleFQI
-from algos.fqi.fqi import FQI
+from algos.dqn.offline_dqn import OfflineDQN
 
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
@@ -34,25 +28,19 @@ VAL_ITER_DATA = {
 }
 
 DEFAULT_TRAIN_ARGS = {
-    # WARNING: 'mdp1' only works with the 'linear_approximator'
-    #           (and vice versa) and 'val_iter' algorithms.
 
     # General arguments.
-    'num_runs': 5,
-    'num_processors': 5,
-    'algo': 'dqn',
-    'num_episodes': 20_000,
+    'num_runs': 1,
+    'num_processors': 1,
+    'algo': 'offline_dqn',
     'gamma': 0.9, # discount factor.
 
     # Period at which the Q-values are stored.
-    'q_vals_period': 100,
+    'q_vals_period': 200,
 
-    # Period at which replay buffer counts are calculated and stored.
-    'replay_buffer_counts_period': 100,
-
-    # Whether to estimate and store the E-vals at each
-    # 'q_vals_period' steps for the current set of Q-values.
-    'compute_e_vals': False,
+    # Evaluation rollouts arguments.
+    'rollouts_period': 200,
+    'num_rollouts': 5,
 
     # Env. arguments.
     'env_args': {
@@ -64,127 +52,29 @@ DEFAULT_TRAIN_ARGS = {
         'one_hot_obs': False, # (for grid env. only).
     },
 
-    # Evaluation rollouts arguments.
-    'rollouts_period': 100,
-    'num_rollouts': 5,
-
     # Value iteration arguments.
     'val_iter_args': {
         'epsilon': 0.05
     },
 
-    # Q-learning arguments.
-    'q_learning_args': {
-        'alpha': 0.05,
-        'expl_eps_init': 0.9,
-        'expl_eps_final': 0.01,
-        'expl_eps_episodes': 9_000,
-    },
-
-    # Linear function approximator arguments.
-    'linear_approximator_args': {
-        'alpha_init': 1e-04,
-        'alpha_final': 1e-04,
-        'alpha_schedule_episodes': 20_000,
-        'expl_eps_init': 1.0,
-        'expl_eps_final': 1.0,
-        'expl_eps_episodes': 20_000,
-        'synthetic_replay_buffer': False,
-        'synthetic_replay_buffer_alpha': 1_000,
-        'replay_size': 10_000,
-        'batch_size': 200,
-    },
-
-    # DQN arguments.
-    # (Standard DQN algorithm).
-    'dqn_args': {
+    # Offline DQN algorithm arguments.
+    'offline_dqn_args': {
         'batch_size': 100,
         'target_update_period': 1_000,
-        'samples_per_insert': 25.0,
-        'min_replay_size': 20_000,
-        'max_replay_size': 1_000_000,
-        'epsilon_init': 1.0,
-        'epsilon_final': 0.0,
-        'epsilon_schedule_timesteps': 1_000_000,
         'learning_rate': 1e-03,
+        'num_learning_steps': 5_000,
         'hidden_layers': [20,40,20],
-        'synthetic_replay_buffer': True,
-        'custom_sampling_dist': None, # Full path to json data file.
-        'synthetic_replay_buffer_alpha': 1_000, # Ignored if `custom_sampling_dist` is set.
-    },
+        'dataset_size': 5_000,
 
-    # DQN + E_tab arguments.
-    # (DQN version featuring tabular E-values driven exploration).
-    'dqn_e_tab_args': {
-        # Default DQN args.
-        'batch_size': 100,
-        'target_update_period': 1_000,
-        'samples_per_insert': 25.0,
-        'min_replay_size': 20_000,
-        'max_replay_size': 1_000_000,
-        'learning_rate': 1e-03,
-        'hidden_layers': [25,50,25],
-        # E-learning args.
-        'lr_lambda': 0.05,
-        'epsilon_init': 1.0,
-        'epsilon_final': 0.0,
-        'epsilon_schedule_episodes': 20_000,
-    },
+        # Full path to json data file.
+        'dataset_custom_sampling_dist': None,
 
-    # DQN + E_func arguments.
-    # (DQN version featuring a function approx. E-values driven exploration).
-    'dqn_e_func_args': {
-        # Default DQN args.
-        'batch_size': 100,
-        'target_update_period': 1_000,
-        'samples_per_insert': 25.0,
-        'min_replay_size': 50_000,
-        'max_replay_size': 1_000_000,
-        'learning_rate': 1e-03,
-        'hidden_layers': [20,40,20],
-        # Specific deep E-network args.
-        # (By default args are equal to the above (DQN) args).
-        'e_net_hidden_layers': [20,40,20],
-        'e_net_learning_rate': 1e-03,
-        'e_net_updates_per_q_net_update': 3,
-        'target_e_net_update_period': 1_000,
-        'epsilon_init': 1.0,
-        'epsilon_final': 0.0,
-        'epsilon_schedule_timesteps': 1_000_000,
-        'delta': 0.2,
-    },
+        # Ignored if `dataset_custom_sampling_dist` is set. 
+        'dataset_sampling_dist_alpha': 1_000,
 
-    # FQI arguments.
-    'fqi_args': {
-        'batch_size': 100,
-        'num_sampling_steps': 1_000,
-        'num_gradient_steps': 20,
-        'max_replay_size': 1_000_000,
-        'epsilon_init': 0.9,
-        'epsilon_final': 0.0,
-        'epsilon_schedule_timesteps': 500_000,
-        'learning_rate': 1e-03,
-        'hidden_layers': [20,40,20],
-        'reweighting_type': 'default', # default, actions or full.
-        'synthetic_replay_buffer': True,
-        'synthetic_replay_buffer_alpha': 1_000,
+        # Whether to force coverage over all (s,a) pairs.
+        'dataset_force_full_coverage': True,
     },
-
-    # Oracle FQI arguments.
-    'oracle_fqi_args': {
-        'batch_size': 100,
-        'num_sampling_steps': 1_000,
-        'num_gradient_steps': 20,
-        'max_replay_size': 1_000_000,
-        'epsilon_init': 0.9,
-        'epsilon_final': 0.0,
-        'epsilon_schedule_timesteps': 500_000,
-        'learning_rate': 1e-03,
-        'hidden_layers': [20,40,20],
-        'reweighting_type': 'default', # default, actions or full.
-        'synthetic_replay_buffer': True,
-        'synthetic_replay_buffer_alpha': 1_000,
-    }
 
 }
 
@@ -209,76 +99,22 @@ def train_run(run_args):
         env, rollouts_envs = env_suite.get_env(env_name, seed=time_delay)
         env_grid_spec = None
 
-    # print('Env num states:', env.num_states)
-    # print('Env num actions:', env.num_actions)
-    # print('Env transition matrix shape:', env.transition_matrix().shape)
-    # print('Env initial state distribution:', env.initial_state_distribution)
-    # print('Env render:')
-    # env.reset()
-    # env.render()
-    # print('\n')
-
-    # Load optimal (oracle) policy/Q-values.
-    if args['algo'] != 'val_iter':
-        val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA[env_name]
-        print(f"Opening experiment {VAL_ITER_DATA[env_name]} to get oracle Q-vals")
-        with open(val_iter_path + "/train_data.json", 'r') as f:
-            val_iter_data = json.load(f)
-            val_iter_data = json.loads(val_iter_data)
-            val_iter_data = val_iter_data[0]
-        f.close()
 
     # Instantiate algorithm.
     if args['algo'] == 'val_iter':
         args['val_iter_args']['gamma'] = args['gamma']
         agent = ValueIteration(env, **args['val_iter_args'])
-
-    elif args['algo'] == 'q_learning':
-        raise ValueError('Not implemented.')
-        args['q_learning_args']['gamma'] = args['gamma']
-        agent = QLearning(env, **args['q_learning_args'])
-
-    elif args['algo'] == 'linear_approximator':
-        args['linear_approximator_args']['gamma'] = args['gamma']
-        agent = LinearApproximator(env, env_grid_spec, **args['linear_approximator_args'])
-
-    elif args['algo'] == 'dqn':
-        args['dqn_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
-        args['dqn_args']['discount'] = args['gamma']
-        agent = DQN(env, env_grid_spec, log_path, args['dqn_args'])
-
-    elif args['algo'] == 'dqn_e_tab':
-        args['dqn_e_tab_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
-        args['dqn_e_tab_args']['discount'] = args['gamma']
-        agent = DQN_E_tab(env, env_grid_spec, log_path, args['dqn_e_tab_args'])
-
-    elif args['algo'] == 'dqn_e_func':
-        args['dqn_e_func_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
-        args['dqn_e_func_args']['discount'] = args['gamma']
-        agent = DQN_E_func(env, env_grid_spec, log_path, args['dqn_e_func_args'])
-
-    elif args['algo'] == 'fqi':
-        raise ValueError('Not implemented.')
-        args['fqi_args']['discount'] = args['gamma']
-        agent = FQI(env, env_grid_spec, args['fqi_args'])
-
-    elif args['algo'] == 'oracle_fqi':
-        raise ValueError('Not implemented.')
-        args['oracle_fqi_args']['oracle_q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
-        args['oracle_fqi_args']['discount'] = args['gamma']
-        agent = OracleFQI(env, env_grid_spec, args['oracle_fqi_args'])
-
+    elif args['algo'] == 'offline_dqn':
+        args['offline_dqn_args']['discount'] = args['gamma']
+        agent = OfflineDQN(env, env_grid_spec, log_path, args['offline_dqn_args'])
     else:
         raise ValueError("Unknown algorithm.")
 
     # Train agent.
-    train_data = agent.train(num_episodes=args['num_episodes'],
-                             q_vals_period=args['q_vals_period'],
-                             replay_buffer_counts_period=args['replay_buffer_counts_period'],
-                             num_rollouts=args['num_rollouts'],
+    train_data = agent.train(q_vals_period=args['q_vals_period'],
                              rollouts_period=args['rollouts_period'],
-                             rollouts_envs=rollouts_envs,
-                             compute_e_vals=args['compute_e_vals'])
+                             num_rollouts=args['num_rollouts'],
+                             rollouts_envs=rollouts_envs)
 
     return train_data
 
@@ -328,7 +164,7 @@ if __name__ == "__main__":
     # Train (uses DEFAULT_TRAIN_ARGS).
     exp_path, exp_id = train()
 
-    if DEFAULT_TRAIN_ARGS['algo'] not in ('val_iter', 'linear_approximator'):
+    if DEFAULT_TRAIN_ARGS['algo'] not in ('val_iter',):
 
         from analysis.plots import main as plots
         env_name = DEFAULT_TRAIN_ARGS['env_args']['env_name']

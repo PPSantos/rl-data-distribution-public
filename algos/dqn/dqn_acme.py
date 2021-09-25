@@ -45,7 +45,6 @@ class DQN(agent_acme.Agent):
             discount: float = 0.99,
             max_gradient_norm: Optional[float] = None,
             logger: loggers.Logger = None,
-            synthetic_replay_buffer: bool = False,
             num_states: int = None,
             num_actions: int = None,
         ):
@@ -70,11 +69,8 @@ class DQN(agent_acme.Agent):
         discount: discount to use for TD updates.
         max_gradient_norm: used for gradient clipping.
         logger: logger object to be used by learner.
-        synthetic_replay_buffer: whether to use a synthesized replay buffer instead
-            of using the default replay buffer. The synthesized replay buffer is built
-            by generating env. transitions using the generative model of the environment.
         num_states: the number of states of the environment (MDP states).
-        num_states: the number of actions of the environment (MDP actions).
+        num_actions: the number of actions of the environment (MDP actions).
 
         """
         # Create replay buffer.
@@ -111,10 +107,7 @@ class DQN(agent_acme.Agent):
         tf2_utils.create_variables(target_network, [environment_spec.observations])
 
         # Create the actor which defines how we take actions.
-        if synthetic_replay_buffer:
-            actor = actors.FeedForwardActor(policy_network)
-        else:
-            actor = actors.FeedForwardActor(policy_network, self._adder)
+        actor = actors.FeedForwardActor(policy_network, self._adder)
 
         # The learner updates the parameters (and initializes them).
         learner = DQNLearner(
@@ -147,6 +140,9 @@ class DQN(agent_acme.Agent):
 
     def update(self):
         super().update()
+
+    def learner_step(self):
+        super().learner_step()
 
     def get_Q_vals(self, obs: types.NestedArray) -> types.NestedArray:
         return self._Q_vals_actor.select_action(obs)

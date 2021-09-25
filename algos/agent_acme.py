@@ -93,5 +93,9 @@ class Agent(core.Actor, core.VariableSource):
             # Update the actor weights when learner updates.
             self._actor.update()
 
+    def learner_step(self):
+        self._learner.step()
+        self._actor.update()
+
     def get_variables(self, names: List[str]) -> List[List[np.ndarray]]:
         return self._learner.get_variables(names)
