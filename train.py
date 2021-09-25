@@ -38,8 +38,8 @@ DEFAULT_TRAIN_ARGS = {
     #           (and vice versa) and 'val_iter' algorithms.
 
     # General arguments.
-    'num_runs': 20,
-    'num_processors': 10,
+    'num_runs': 5,
+    'num_processors': 5,
     'algo': 'dqn',
     'num_episodes': 20_000,
     'gamma': 0.9, # discount factor.
@@ -107,9 +107,10 @@ DEFAULT_TRAIN_ARGS = {
         'epsilon_final': 0.0,
         'epsilon_schedule_timesteps': 1_000_000,
         'learning_rate': 1e-03,
-        'hidden_layers': [25,50,25],
-        'synthetic_replay_buffer': False,
-        'synthetic_replay_buffer_alpha': 1_000,
+        'hidden_layers': [20,40,20],
+        'synthetic_replay_buffer': True,
+        'custom_sampling_dist': None, # Full path to json data file.
+        'synthetic_replay_buffer_alpha': 1_000, # Ignored if `custom_sampling_dist` is set.
     },
 
     # DQN + E_tab arguments.

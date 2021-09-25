@@ -1,3 +1,4 @@
+import json
 from typing import Sequence
 
 from tqdm import tqdm
@@ -71,7 +72,18 @@ class DQN(object):
         if self.synthetic_replay_buffer:
             self.synthetic_static_dataset_size = 500 # in episodes.
             self.sampling_dist_size = self.base_env.num_states * self.base_env.num_actions
-            self.sampling_dist = np.random.dirichlet([dqn_args['synthetic_replay_buffer_alpha']]*self.sampling_dist_size)
+            if dqn_args['custom_sampling_dist'] is None:
+                self.sampling_dist = np.random.dirichlet([dqn_args['synthetic_replay_buffer_alpha']]*self.sampling_dist_size)
+            else:
+                # Load custom sampling dist.
+                custom_sampling_dist_path = dqn_args['custom_sampling_dist']
+                print(f'Loading custom sampling dist from {custom_sampling_dist_path}')    
+                with open(custom_sampling_dist_path, 'r') as f:
+                    sampling_dist_data = json.load(f)
+                    sampling_dist_data = json.loads(sampling_dist_data)
+                f.close()
+                self.sampling_dist = sampling_dist_data['stationary_dist']
+
             print('self.sampling_dist (synthetic replay buffer dataset):', self.sampling_dist)
             print('self.sampling_dist_size (S*A):', self.sampling_dist_size)
 

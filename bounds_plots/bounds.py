@@ -11,11 +11,12 @@ import matplotlib
 import seaborn as sns
 plt.style.use('ggplot')
 
-matplotlib.rcParams['mathtext.fontset'] = 'stix'
-matplotlib.rcParams['font.family'] = 'STIXGeneral'
-matplotlib.pyplot.title(r'ABC123 vs $\mathrm{ABC123}^{123}$')
+#matplotlib.rcParams['mathtext.fontset'] = 'stix'
+#matplotlib.rcParams['font.family'] = 'STIXGeneral'
+#matplotlib.pyplot.title(r'ABC123 vs $\mathrm{ABC123}^{123}$')
 matplotlib.rcParams['text.usetex'] = True
-
+matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
+matplotlib.rcParams.update({'font.size': 13})
 
 FIGURE_X = 6.0
 FIGURE_Y = 4.0
@@ -26,9 +27,9 @@ SHOW_PLOTS = False
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/bounds_plots/plots/'
 
 args = {
-    'num_states': 10,
-    'mdp_dirichlet_alphas': [0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0],
-    'mu_dirichlet_alphas': [0.05, 0.1, 0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 10.0],
+    'num_states': 5376,
+    'mdp_dirichlet_alphas': [0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 1000.0],
+    'mu_dirichlet_alphas': np.linspace(0.01, 10.0, 1000),
     'num_mdps': 50,
     'num_trials': 50,
 }
@@ -42,35 +43,47 @@ if __name__ == '__main__':
 
     # Entropy plot.
     entropies = []
-    sampled_entropies = []
-    coverages_1 = []
-    coverages_2 = []
+    #sampled_entropies = []
+    #coverages_1 = []
+    #coverages_2 = []
     for alpha in args['mu_dirichlet_alphas']:
         expected_entropy = scipy.special.digamma(args['num_states']*alpha + 1) - scipy.special.digamma(alpha + 1)
         entropies.append(expected_entropy)
 
-        samples = np.zeros(1_000)
-        covs_1 = np.zeros(1_000)
-        covs_2 = np.zeros(1_000)
-        for s in range(1_000):
-            dist = np.random.dirichlet([alpha]*args['num_states'])
-            samples[s] = scipy.stats.entropy(dist)
-            covs_1[s] = np.sum(dist > 1e-02)
-            covs_2[s] = np.sum(dist > 1e-03)
+        #print('alpha', alpha)
+        #print('expected_entropy', expected_entropy)
 
-        sampled_entropies.append(np.mean(samples))
-        coverages_1.append(np.mean(covs_1))
-        coverages_2.append(np.mean(covs_2))
+        #samples = np.zeros(1_000)
+        #covs_1 = np.zeros(1_000)
+        #covs_2 = np.zeros(1_000)
+        #for s in range(1_000):
+        #    dist = np.random.dirichlet([alpha]*args['num_states'])
+        #    samples[s] = scipy.stats.entropy(dist)
+        #    covs_1[s] = np.sum(dist > 1e-02)
+        #    covs_2[s] = np.sum(dist > 1e-03)
+
+        #sampled_entropies.append(np.mean(samples))
+        #coverages_1.append(np.mean(covs_1))
+        #coverages_2.append(np.mean(covs_2))
+
+    # Calculate unifrom dist entropy.
+    unif_dist = np.ones(args['num_states']) / args['num_states']
+    unif_dist_entropy = scipy.stats.entropy(unif_dist)
+    print('unif dist entropy:', unif_dist_entropy)
 
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
-    plt.plot(args['mu_dirichlet_alphas'], entropies, label='Expected entropy')
-    plt.plot(args['mu_dirichlet_alphas'], sampled_entropies, label='Sampled entropy')
-    plt.xlabel('Alpha (Dirichlet parameter)')
-    plt.ylabel('Entropy')
+    plt.plot(args['mu_dirichlet_alphas'], entropies) #, label='Expected entropy')
+    #plt.plot(args['mu_dirichlet_alphas'], sampled_entropies, label='Sampled entropy')
+    plt.hlines(unif_dist_entropy, xmin=np.min(args['mu_dirichlet_alphas']), xmax=np.max(args['mu_dirichlet_alphas']),
+                colors='black', linestyles='dashed', label='Uniform dist.')
+    plt.xlabel(r'$\alpha$ (Dirichlet parameter)')
+    plt.ylabel(r'$\mathbb{E}[\mathcal{H}(\mu)]$')
     plt.legend()
     plt.savefig('{0}/entropy.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/entropy.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+
+    exit()
 
     # Coverage plot.
     fig = plt.figure()
