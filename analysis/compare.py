@@ -10,6 +10,9 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 plt.style.use('ggplot')
+matplotlib.rcParams['text.usetex'] =  True
+matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
+matplotlib.rcParams.update({'font.size': 13})
 
 from scipy import stats
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
@@ -25,14 +28,16 @@ from envs import env_suite
 ENV_NAME = 'gridEnv1'
 VAL_ITER_DATA = 'gridEnv1_val_iter_2021-05-14-15-54-10'
 EXPS_DATA = [
-    {'id': 'gridEnv1_dqn_e_func_2021-08-25-16-42-24.tar.gz', 'label': r'$\delta=0.0$'},
-    {'id': 'gridEnv1_dqn_e_func_2021-08-25-19-52-29.tar.gz', 'label': r'$\delta=0.2$'},
-    {'id': 'gridEnv1_dqn_e_func_2021-08-25-23-04-01.tar.gz', 'label': r'$\delta=0.4$'},
-    {'id': 'gridEnv1_dqn_e_func_2021-08-26-02-17-03.tar.gz', 'label': r'$\delta=0.6$'},
-    {'id': 'gridEnv1_dqn_e_func_2021-08-26-05-30-13.tar.gz', 'label': r'$\delta=0.8$'},
-    {'id': 'gridEnv1_dqn_e_func_2021-08-26-08-42-05.tar.gz', 'label': r'$\delta=1.0$'},]
+    {'id': 'gridEnv1_dqn_2021-09-08-11-20-42.tar.gz', 'label_1': '3.9', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 3.9$'},
+    {'id': 'gridEnv1_dqn_2021-09-08-13-14-15.tar.gz', 'label_1': '4.6', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 4.6$'},
+    {'id': 'gridEnv1_dqn_2021-09-08-15-19-03.tar.gz', 'label_1': '5.0', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 5.0$'},
+    {'id': 'gridEnv1_dqn_2021-09-08-17-28-48.tar.gz', 'label_1': '5.3', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 5.3$'},
+    {'id': 'gridEnv1_dqn_2021-09-08-19-39-03.tar.gz', 'label_1': '5.6', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 5.6$'},
+    {'id': 'gridEnv1_dqn_2021-09-08-21-52-27.tar.gz', 'label_1': '5.7', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 5.7$'},
+]
 EXPS_DATA_2 = None # Allows to concatenate additional experiments.
 STAT_TESTS = False # Whether to compute statistical tests.
+
 #####################################################################
 
 FIGURE_X = 6.0
@@ -229,7 +234,7 @@ def main():
             conf_intervals = np.array(conf_intervals)
 
             # Plot.
-            p = plt.plot(Q_vals_episodes, point_estimations, label=exp['label'])
+            p = plt.plot(Q_vals_episodes, point_estimations, label=exp['label_2'])
             plt.fill_between(Q_vals_episodes, conf_intervals[:,0], conf_intervals[:,1],
                             color=p[0].get_color(), alpha=0.15)
 
@@ -263,14 +268,14 @@ def main():
                 height=upper_ci - lower_ci,
                 bottom=lower_ci,
                 alpha=0.75,
-                label=exp['label'])
+                label=exp['label_1'])
 
             # Plot point estimate.
             plt.hlines(
                 y=point_est,
                 xmin=exp_idx - 0.25,
                 xmax=exp_idx + 0.25,
-                label=exp['label'],
+                label=exp['label_1'],
                 color='k',
                 alpha=0.65)
 
@@ -284,8 +289,9 @@ def main():
                     (0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
         plt.ylim(y_lim_lower, y_lim_upper)
 
-        plt.xticks(list(range(len(EXPS_DATA))), [exp['label'] for exp in EXPS_DATA])
+        plt.xticks(list(range(len(EXPS_DATA))), [exp['label_1'] for exp in EXPS_DATA])
         plt.ylabel(r'$Q$-values error')
+        plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)]$')
 
         plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_final_{func_lbl}.pdf',
                     bbox_inches='tight', pad_inches=0)
@@ -311,7 +317,8 @@ def main():
                         color=GRAY_COLOR, zorder=100, alpha=0.6)
 
     plt.ylabel(r'$Q$-values error')
-    plt.xticks(ticks=x_ticks_pos, labels=[e['label'] for e in EXPS_DATA])
+    plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)]$')
+    plt.xticks(ticks=x_ticks_pos, labels=[e['label_1'] for e in EXPS_DATA])
 
     plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_final_distribution.pdf',
                 bbox_inches='tight', pad_inches=0)
@@ -327,7 +334,7 @@ def main():
         errors = np.mean(errors[:,-10:], axis=1) # [R] (use last 10 episodes data)
         max_q_vals_errors.append(np.max(errors))
         errors = errors[:,np.newaxis]
-        scores_dict[exp['label']] = errors
+        scores_dict[exp['label_1']] = errors
 
     max_threshold = max(max_q_vals_errors) # Maximum Q-value error.
     thresholds = np.linspace(0.0, max_threshold, 101)
@@ -339,14 +346,14 @@ def main():
 
     # Plot.
     for exp in EXPS_DATA:
-        score = score_distributions[exp['label']]
-        lower_ci, upper_ci = score_distributions_cis[exp['label']]
-        p = plt.plot(thresholds, score, label=exp['label'])
+        score = score_distributions[exp['label_1']]
+        lower_ci, upper_ci = score_distributions_cis[exp['label_1']]
+        p = plt.plot(thresholds, score, label=exp['label_1'])
         plt.fill_between(thresholds, lower_ci, upper_ci,
                             color=p[0].get_color(), alpha=0.15)
 
     plt.xlabel(r'$Q$-values error $(\tau)$')
-    plt.ylabel(r'Fraction of runs with error > $\tau$')
+    plt.ylabel(r'Fraction of runs with error $> \tau$')
     plt.legend()
 
     plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_final_performance_profile.pdf',
@@ -434,7 +441,7 @@ def main():
                 conf_intervals = np.array(conf_intervals)
 
                 # Plot.
-                p = plt.plot(rollouts_episodes, point_estimations, label=exp['label'])
+                p = plt.plot(rollouts_episodes, point_estimations, label=exp['label_2'])
                 plt.fill_between(rollouts_episodes, conf_intervals[:,0], conf_intervals[:,1],
                                 color=p[0].get_color(), alpha=0.15)
 
@@ -469,14 +476,14 @@ def main():
                     height=upper_ci - lower_ci,
                     bottom=lower_ci,
                     alpha=0.75,
-                    label=exp['label'])
+                    label=exp['label_1'])
 
                 # Plot point estimate.
                 plt.hlines(
                     y=point_est,
                     xmin=exp_idx - 0.25,
                     xmax=exp_idx + 0.25,
-                    label=exp['label'],
+                    label=exp['label_1'],
                     color='k',
                     alpha=0.65)
 
@@ -490,8 +497,9 @@ def main():
                         (0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
             plt.ylim(y_lim_lower, y_lim_upper)
 
-            plt.xticks(list(range(len(EXPS_DATA))), [exp['label'] for exp in EXPS_DATA])
+            plt.xticks(list(range(len(EXPS_DATA))), [exp['label_1'] for exp in EXPS_DATA])
             plt.ylabel('Reward')
+            plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)]$')
 
             plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_{func_lbl}.pdf',
                         bbox_inches='tight', pad_inches=0)
@@ -531,14 +539,14 @@ def main():
                 height=upper_ci - lower_ci,
                 bottom=lower_ci,
                 alpha=0.75,
-                label=exp['label'])
+                label=exp['label_1'])
 
             # Plot point estimate.
             plt.hlines(
                 y=point_est,
                 xmin=exp_idx - 0.25,
                 xmax=exp_idx + 0.25,
-                label=exp['label'],
+                label=exp['label_1'],
                 color='k',
                 alpha=0.65)
 
@@ -552,8 +560,9 @@ def main():
                     (0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
         plt.ylim(y_lim_lower, y_lim_upper)
 
-        plt.xticks(list(range(len(EXPS_DATA))), [exp['label'] for exp in EXPS_DATA])
+        plt.xticks(list(range(len(EXPS_DATA))), [exp['label_1'] for exp in EXPS_DATA])
         plt.ylabel('Optimality gap')
+        plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)]$')
 
         plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_optimality_gap.pdf',
                     bbox_inches='tight', pad_inches=0)
@@ -580,8 +589,9 @@ def main():
                         color=GRAY_COLOR, zorder=100, alpha=0.6)
 
         plt.ylabel('Reward')
+        plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)]$')
 
-        plt.xticks(ticks=x_ticks_pos, labels=[e['label'] for e in EXPS_DATA])
+        plt.xticks(ticks=x_ticks_pos, labels=[e['label_1'] for e in EXPS_DATA])
 
         plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_distribution.pdf',
                     bbox_inches='tight', pad_inches=0)
@@ -598,7 +608,7 @@ def main():
             last_eps_data = np.mean(last_eps_data, axis=1) # [R]
             last_eps_data = last_eps_data[:,np.newaxis]
             max_rewards.append(np.max(last_eps_data))
-            scores_dict[exp['label']] = last_eps_data
+            scores_dict[exp['label_1']] = last_eps_data
 
         max_threshold = max(max_rewards)
         thresholds = np.linspace(0.0, max_threshold, 501)
@@ -610,14 +620,14 @@ def main():
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
         for exp in EXPS_DATA:
-            score = score_distributions[exp['label']]
-            lower_ci, upper_ci = score_distributions_cis[exp['label']]
-            p = plt.plot(thresholds, score, label=exp['label'])
+            score = score_distributions[exp['label_1']]
+            lower_ci, upper_ci = score_distributions_cis[exp['label_1']]
+            p = plt.plot(thresholds, score, label=exp['label_1'])
             plt.fill_between(thresholds, lower_ci, upper_ci,
                                 color=p[0].get_color(), alpha=0.15)
 
         plt.xlabel(r'Reward $(\tau)$')
-        plt.ylabel(r'Fraction of runs with reward > $\tau$')
+        plt.ylabel(r'Fraction of runs with reward $> \tau$')
         plt.legend()
 
         plt.savefig(f'{PLOTS_FOLDER_PATH}/rollout_{rollout_type}_final_performance_profile.pdf',
