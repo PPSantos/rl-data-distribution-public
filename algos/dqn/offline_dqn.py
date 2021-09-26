@@ -82,7 +82,9 @@ class OfflineDQN(object):
         self._create_dataset(offline_dqn_args['dataset_size'],
                 offline_dqn_args['dataset_force_full_coverage'])
 
-    def train(self, q_vals_period, rollouts_period, num_rollouts, rollouts_envs):
+    def train(self, q_vals_period, rollouts_period,
+                    num_rollouts, rollouts_envs,
+                    replay_buffer_counts_period):
 
         rollouts_envs = [wrap_env(e) for e in rollouts_envs]
 
@@ -91,8 +93,11 @@ class OfflineDQN(object):
         Q_vals_steps = []
         Q_vals_steps_idx = 0
 
-        rollouts_rewards = []
         rollouts_steps = []
+        rollouts_rewards = []
+
+        replay_buffer_counts_steps = []
+        replay_buffer_counts = []
 
         for step in tqdm(range(self._num_learning_steps)):
 
@@ -133,16 +138,24 @@ class OfflineDQN(object):
                 rollouts_steps.append(step)
                 rollouts_rewards.append(r_rewards)
 
+            # Get replay buffer statistics.
+            if (step > 1) and (step % replay_buffer_counts_period == 0):
+                print('Getting replay buffer statistics.')
+                replay_buffer_counts_steps.append(step)
+                replay_buffer_counts.append(self._agent.get_replay_buffer_counts())
+
         data = {}
         data['Q_vals'] = Q_vals
         data['Q_vals_steps'] = Q_vals_steps
         data['rollouts_rewards'] = rollouts_rewards
         data['rollouts_steps'] = rollouts_steps
+        data['replay_buffer_counts'] = replay_buffer_counts
+        data['replay_buffer_counts_steps'] = replay_buffer_counts_steps
 
         return data
 
     def _create_dataset(self, dataset_size, force_full_coverage):
-        print('Pre-filling replay buffer...')
+        print('Pre-filling replay buffer.')
 
         mesh = np.array(np.meshgrid(np.arange(self._base_env.num_states),
                                     np.arange(self._base_env.num_actions)))

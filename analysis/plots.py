@@ -148,35 +148,23 @@ def main(exp_id, val_iter_exp):
     # Parse data.
     data = {}
 
-    # episode_rewards field.
-    data['episode_rewards'] = np.array([e['episode_rewards'] for e in exp_data]) # [R,E]
-
-    # Q_vals_episodes field.
-    data['Q_vals_episodes'] = exp_data[0]['Q_vals_episodes'] # [(E)]
+    # Q_vals_steps field.
+    data['Q_vals_steps'] = exp_data[0]['Q_vals_steps'] # [(S)]
 
     # Q_vals field.
-    data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,(E),S,A]
-    
-    # max_Q_vals field.
-    data['max_Q_vals'] = np.array([e['max_Q_vals'] for e in exp_data]) # [R,S]
-
-    # policy field.
-    data['policies'] = np.array([e['policy'] for e in exp_data]) # [R,S]
-
-    # states_counts field.
-    data['states_counts'] = np.array([e['states_counts'] for e in exp_data]) # [R,S]
+    data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,(S),S,A]
 
     # replay_buffer_counts_episodes field.
-    data['replay_buffer_counts_episodes'] = exp_data[0]['replay_buffer_counts_episodes'] # [(E)]
+    data['replay_buffer_counts_steps'] = exp_data[0]['replay_buffer_counts_steps'] # [(S)]
 
     # replay_buffer_counts field.
-    data['replay_buffer_counts'] = np.array([e['replay_buffer_counts'] for e in exp_data]) # [R,(E),S,A]
+    data['replay_buffer_counts'] = np.array([e['replay_buffer_counts'] for e in exp_data]) # [R,(S),S,A]
 
-    # rollouts_episodes field.
-    data['rollouts_episodes'] = exp_data[0]['rollouts_episodes'] # [(E)]
+    # rollouts_steps field.
+    data['rollouts_steps'] = exp_data[0]['rollouts_steps'] # [(S)]
 
     # rollouts_rewards field.
-    data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(E),num_rollouts_types,num_rollouts]
+    data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(S),num_rollouts_types,num_rollouts]
 
     # Scalar metrics dict.
     scalar_metrics = {}
@@ -190,63 +178,6 @@ def main(exp_id, val_iter_exp):
     learner_csv_files = [str(p) for p in list(pathlib.Path(exp_path).rglob('logs.csv'))]
     print('Number of learner csv (logs.csv) files found: {0}'.format(len(learner_csv_files)))
     print(learner_csv_files)
-
-    """
-        Print policies.
-    """
-    if is_grid_env:
-        print(f'{val_iter_exp} policy:')
-        print_env(val_iter_data['policy'], (lateral_size, lateral_size))
-        for (i, policy) in enumerate(data['policies']):
-            print(f"{exp_id} policy (run {i}):")
-            print_env(policy, (lateral_size, lateral_size))
-
-    """
-        Print max Q-values.
-    """
-    if is_grid_env:
-        print('\n')
-        print(f'{val_iter_exp} max Q-values:')
-        print_env(val_iter_data['max_Q_vals'], (lateral_size, lateral_size), float_format="{:.1f} ")
-        for i, qs in enumerate(data['max_Q_vals']):
-            print(f"{exp_id} max Q-values (run {i}):")
-            print_env(qs, (lateral_size, lateral_size), float_format="{:.1f} ")
-
-    """
-        Print states counts.
-    """
-    if is_grid_env:
-        print('\n')
-        for i, counts in enumerate(data['states_counts']):
-            print(f"{exp_id} states_counts (run {i}):")
-            print_env(counts, (lateral_size, lateral_size), float_format="{:.0f} ")
-
-    """
-        `episode_rewards_avg` plot.
-    """
-    print('Computing `episode_rewards_avg` plot.')
-    fig = plt.figure()
-    fig.set_size_inches(FIGURE_X, FIGURE_Y)
-
-    for (i, run_rewards) in enumerate(data['episode_rewards']):
-        Y = run_rewards # [E]
-        X = np.linspace(1, len(Y), len(Y))
-        lowess = sm.nonparametric.lowess(Y, X, frac=0.10, is_sorted=True, it=0)
-
-        p = plt.plot(X, Y, alpha=0.20)
-        plt.plot(X, lowess[:,1], color=p[0].get_color(), label=f'Run {i}', zorder=10)
-
-    plt.xlabel('Episode')
-    plt.ylabel('Reward')
-    plt.legend()
-
-    plt.savefig('{0}/episode_rewards_avg.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.close()
-
-    """
-        Scalar train rewards metrics.
-    """
-    scalar_metrics['train_rewards_total'] = np.mean(data['episode_rewards'])
 
     """
         `rollouts_rewards` plot.
@@ -267,15 +198,15 @@ def main(exp_id, val_iter_exp):
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-        rollout_type_data = data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
+        rollout_type_data = data['rollouts_rewards'][:,:,t,:] # [R,(S),num_rollouts]
 
-        for (i, run_rollouts) in enumerate(rollout_type_data): # run_rollouts = [(E),num_rollouts]
-            X = data['rollouts_episodes'] # [(E)]
-            Y = np.mean(run_rollouts, axis=1) # [(E)]
+        for (i, run_rollouts) in enumerate(rollout_type_data): # run_rollouts = [(S),num_rollouts]
+            X = data['rollouts_steps'] # [(S)]
+            Y = np.mean(run_rollouts, axis=1) # [(S)]
 
             plt.plot(X, Y, label=f'Run {i}')
 
-        plt.xlabel('Episode')
+        plt.xlabel('Learning step')
         plt.ylabel('Rollouts average reward')
         plt.legend()
 
@@ -309,13 +240,13 @@ def main(exp_id, val_iter_exp):
 
                 state_data = run_data[:,state,:] # [E,A]
                 Y = np.argmax(state_data, axis=1) # [E]
-                X = data['Q_vals_episodes']
+                X = data['Q_vals_steps']
 
                 ax.plot(X, Y)
 
                 ax.set_ylim([-0.1,data['Q_vals'].shape[-1]+0.1])
                 ax.set_ylabel('Maximizing action')
-                ax.set_xlabel('Episode')
+                ax.set_xlabel('Learning step')
                 ax.set_title(f'Run {i}')
 
                 i += 1
@@ -338,11 +269,11 @@ def main(exp_id, val_iter_exp):
     for (i, run_Q_vals) in enumerate(data['Q_vals']):
         errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
         Y = np.sum(errors, axis=(1,2)) # [E]
-        X = data['Q_vals_episodes']
+        X = data['Q_vals_steps']
 
         plt.plot(X, Y, label=f'Run {i}')
 
-    plt.xlabel('Episode')
+    plt.xlabel('Learning step')
     plt.ylabel('Q-values error')
     plt.title('sum(abs(val_iter_Q_vals - Q_vals))')
     plt.legend()
@@ -378,7 +309,7 @@ def main(exp_id, val_iter_exp):
 
         errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
         Y = np.mean(errors, axis=(1,2)) # [E]
-        X = data['Q_vals_episodes']
+        X = data['Q_vals_steps']
         # Y_std = np.std(errors, axis=(1,2))
 
         # CI calculation.
@@ -400,7 +331,7 @@ def main(exp_id, val_iter_exp):
         errors = errors[x,y,maximizing_actions] # [E,S]
 
         Y = np.mean(errors, axis=1) # [E]
-        X = data['Q_vals_episodes']
+        X = data['Q_vals_steps']
         # CI calculation.
         # X_CI = np.arange(0, len(Y), 100)
         # CI_bootstrap = [calculate_CI_bootstrap(Y[x], errors[x,:]) for x in X_CI]
@@ -413,7 +344,7 @@ def main(exp_id, val_iter_exp):
 
         #ax.set_ylim(y_axis_range)
         ax.set_ylabel('Q-values error')
-        ax.set_xlabel('Episode')
+        ax.set_xlabel('Learning step')
         ax.set_title(f'Run {i}')
 
         i += 1
@@ -439,8 +370,8 @@ def main(exp_id, val_iter_exp):
         errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
         errors = errors.reshape(errors.shape[0], -1) # [E,S*A]
 
-        X = np.arange(0, data['Q_vals_episodes'][-1], 500)
-        idxs = np.searchsorted(data['Q_vals_episodes'], X)
+        X = np.arange(0, data['Q_vals_steps'][-1], 500)
+        idxs = np.searchsorted(data['Q_vals_steps'], X)
         abs_diff_list = errors[idxs,:].tolist() # Sub-sample.
         abs_diff_mean = np.mean(errors[idxs,:], axis=1) # Sub-sample.
 
@@ -450,7 +381,7 @@ def main(exp_id, val_iter_exp):
         ax.scatter(X, abs_diff_mean, s=12)
 
         #ax.set_ylim(y_axis_range)
-        ax.set_xlabel('Episode')
+        ax.set_xlabel('Learning step')
         ax.set_ylabel('Q-values error')
         ax.set_title(label=f"Run {i}")
 
@@ -479,8 +410,8 @@ def main(exp_id, val_iter_exp):
         x, y = np.indices(maximizing_actions.shape)
         errors = errors[x,y,maximizing_actions] # [E,S]
 
-        X = np.arange(0, data['Q_vals_episodes'][-1], 500)
-        idxs = np.searchsorted(data['Q_vals_episodes'], X)
+        X = np.arange(0, data['Q_vals_steps'][-1], 500)
+        idxs = np.searchsorted(data['Q_vals_steps'], X)
         abs_diff_list = errors[idxs,:].tolist() # Sub-sample.
         abs_diff_mean = np.mean(errors[idxs,:], axis=1) # Sub-sample.
 
@@ -490,7 +421,7 @@ def main(exp_id, val_iter_exp):
         ax.scatter(X, abs_diff_mean, s=12)
 
         #ax.set_ylim(y_axis_range)
-        ax.set_xlabel('Episode')
+        ax.set_xlabel('Learning step')
         ax.set_ylabel('Q-values error')
         ax.set_title(label=f"Run {i}")
 
@@ -523,15 +454,15 @@ def main(exp_id, val_iter_exp):
                     
                     # Plot predicted Q-values.
                     Y = run_Q_vals[:,state_to_plot,action]
-                    X = data['Q_vals_episodes']
+                    X = data['Q_vals_steps']
                     l = ax.plot(X, Y, label=f'Action {action}')
 
                     # Plot true Q-values.
                     ax.hlines(val_iter_data['Q_vals'][state_to_plot,action],
-                            xmin=0, xmax=max(data['Q_vals_episodes']), linestyles='--', color=l[0].get_color())
+                            xmin=0, xmax=max(data['Q_vals_steps']), linestyles='--', color=l[0].get_color())
 
                 #ax.set_ylim(y_axis_range)
-                ax.set_xlabel('Episode')
+                ax.set_xlabel('Learning step')
                 ax.set_ylabel('Q-value')
                 ax.set_title(label=f"Run {i}")
                 ax.legend()
@@ -571,12 +502,12 @@ def main(exp_id, val_iter_exp):
 
                 for a in range(action_probs.shape[1]):
                     Y = action_probs[:,a]
-                    X = data['replay_buffer_counts_episodes']
+                    X = data['replay_buffer_counts_steps']
                     ax.plot(X, Y, label=f'Action {a}')
 
                 ax.set_ylim([0, 1.1])
                 ax.set_ylabel('P(a|s)')
-                ax.set_xlabel('Episode')
+                ax.set_xlabel('Learning step')
                 ax.set_title(f'Run {i}')
 
                 ax.legend()
@@ -614,12 +545,12 @@ def main(exp_id, val_iter_exp):
                 action_probs = state_data / (row_sums[:, np.newaxis] + 1e-05) # [(E), A]
 
                 Y = -np.sum(action_probs * np.log(action_probs+1e-8), axis=1)
-                X = data['replay_buffer_counts_episodes']
+                X = data['replay_buffer_counts_steps']
                 ax.plot(X, Y)
 
                 #ax.set_ylim(y_axis_range)
                 ax.set_ylabel('H[P(a|s)]')
-                ax.set_xlabel('Episode')
+                ax.set_xlabel('Learning step')
                 ax.set_title(f'Run {i}')
 
                 i += 1
@@ -647,11 +578,11 @@ def main(exp_id, val_iter_exp):
         state_probs = aggregated_data / (row_sums[:, np.newaxis] + 1e-05) # [(E), S]
 
         Y = -np.sum(state_probs * np.log(state_probs+1e-8), axis=1)
-        X = data['replay_buffer_counts_episodes'] 
+        X = data['replay_buffer_counts_steps'] 
         plt.plot(X, Y, label=f'Run {i}')
 
     plt.ylabel('H[P(s)]')
-    plt.xlabel('Episode')
+    plt.xlabel('Learning step')
 
     plt.legend()
 
@@ -707,11 +638,11 @@ def main(exp_id, val_iter_exp):
         sa_probs = run_data / (total_sum[:, np.newaxis, np.newaxis] + 1e-05) # [(E), S]
 
         Y = -np.sum(sa_probs * np.log(sa_probs+1e-8), axis=(1,2))
-        X = data['replay_buffer_counts_episodes']
+        X = data['replay_buffer_counts_steps']
         plt.plot(X, Y, label=f'Run {i}')
 
     plt.ylabel('H[P(s,a)]')
-    plt.xlabel('Episode')
+    plt.xlabel('Learning step')
 
     plt.legend()
 
@@ -732,11 +663,11 @@ def main(exp_id, val_iter_exp):
         aggregated_data = np.sum(run_data, axis=2) # [(E),S]
         masked = (aggregated_data > 0)
         Y = np.sum(masked, axis=1) / masked.shape[1] # [(E)]
-        X = data['replay_buffer_counts_episodes']
+        X = data['replay_buffer_counts_steps']
         plt.plot(X, Y, label=f'Run {i}')
 
     plt.ylabel('Coverage')
-    plt.xlabel('Episode')
+    plt.xlabel('Learning step')
     plt.legend()
 
     plt.title(f'Replay buffer: P(s) coverage')
@@ -756,11 +687,11 @@ def main(exp_id, val_iter_exp):
 
         masked = (run_data > 0) # [(E),S,A]
         Y = np.sum(masked, axis=(1,2)) / (masked.shape[1]*masked.shape[2]) # [(E)]
-        X = data['replay_buffer_counts_episodes'] 
+        X = data['replay_buffer_counts_steps'] 
         plt.plot(X, Y, label=f'Run {i}')
 
     plt.ylabel('Coverage')
-    plt.xlabel('Episode')
+    plt.xlabel('Learning step')
     plt.legend()
 
     plt.title(f'Replay buffer: P(s,a) coverage')

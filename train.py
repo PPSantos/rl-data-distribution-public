@@ -38,6 +38,9 @@ DEFAULT_TRAIN_ARGS = {
     # Period at which the Q-values are stored.
     'q_vals_period': 200,
 
+    # Period at which replay buffer counts are stored.
+    'replay_buffer_counts_period': 1_000,
+
     # Evaluation rollouts arguments.
     'rollouts_period': 200,
     'num_rollouts': 5,
@@ -114,7 +117,8 @@ def train_run(run_args):
     train_data = agent.train(q_vals_period=args['q_vals_period'],
                              rollouts_period=args['rollouts_period'],
                              num_rollouts=args['num_rollouts'],
-                             rollouts_envs=rollouts_envs)
+                             rollouts_envs=rollouts_envs,
+                             replay_buffer_counts_period=args['replay_buffer_counts_period'])
 
     return train_data
 
