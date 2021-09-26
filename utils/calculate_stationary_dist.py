@@ -55,7 +55,7 @@ DEFAULT_TRAIN_ARGS = {
 
 def create_exp_name(args):
     return args['env_args']['env_name'] + \
-        '_' + 'stationary_dist' + '_' + \
+        '_' + 'sampling_dist' + '_' + \
         str(datetime.today().strftime('%Y-%m-%d-%H-%M-%S'))
 
 def rollout():
@@ -132,7 +132,7 @@ def rollout():
     sa_dist_flattened = sa_dist.flatten() # [S]
     print(sa_dist_flattened)
     print('(S,A) dist. entropy:', scipy.stats.entropy(sa_dist_flattened))
-    data['stationary_dist'] = sa_dist_flattened
+    data['sampling_dist'] = sa_dist_flattened
 
     # 2D plot.
     s_counts = np.sum(sa_counts, axis=1)

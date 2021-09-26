@@ -74,7 +74,7 @@ class OfflineDQN(object):
                 sampling_dist_data = json.load(f)
                 sampling_dist_data = json.loads(sampling_dist_data)
             f.close()
-            self._sampling_dist = sampling_dist_data['stationary_dist']
+            self._sampling_dist = sampling_dist_data['sampling_dist']
 
         print('self._sampling_dist:', self._sampling_dist)
         print('self._sampling_dist_size:', self._sampling_dist_size)
@@ -196,6 +196,7 @@ class OfflineDQN(object):
         if force_full_coverage:
             # Correct dataset such that we have coverage over all (state, action) pairs.
             zero_positions = np.where(sa_counts == 0)
+            print('Number of missing (s,a) pairs:', np.sum((sa_counts == 0)))
             for (state, action) in zip(*zero_positions):
                 
                 # Skip walls.

@@ -14,7 +14,7 @@ import trfl
 
 from tf_agents.specs import tensor_spec
 
-from algos import agent_acme, actors
+from algos import agent, actors
 from algos.tf_uniform_replay_buffer import TFUniformReplayBuffer
 from algos.utils import tf2_savers, spec_converter
 from algos.utils.tf2_layers import EpsilonGreedyExploration
@@ -22,7 +22,7 @@ from algos.dqn.dqn_acme_learning import DQNLearner
 from algos.tf_adder import TFAdder
 
 
-class DQN(agent_acme.Agent):
+class DQN(agent.Agent):
     """DQN agent.
     This implements a single-process DQN agent. This is a simple Q-learning
     algorithm that inserts transitions into a replay buffer, and

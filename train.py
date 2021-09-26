@@ -24,25 +24,25 @@ VAL_ITER_DATA = {
     'gridEnv4': 'gridEnv4_val_iter_2021-06-16-10-08-44',
     'multiPathsEnv': 'multiPathsEnv_val_iter_2021-06-04-19-31-25',
     'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
-    'mountaincar': 'mountaincar_val_iter_2021-08-04-16-44-01',
+    'mountaincar': 'mountaincar_val_iter_2021-09-15-18-56-32',
 }
 
 DEFAULT_TRAIN_ARGS = {
 
     # General arguments.
-    'num_runs': 1,
-    'num_processors': 1,
+    'num_runs': 5,
+    'num_processors': 5,
     'algo': 'offline_dqn',
     'gamma': 0.9, # discount factor.
 
     # Period at which the Q-values are stored.
-    'q_vals_period': 200,
+    'q_vals_period': 250,
 
     # Period at which replay buffer counts are stored.
     'replay_buffer_counts_period': 1_000,
 
     # Evaluation rollouts arguments.
-    'rollouts_period': 200,
+    'rollouts_period': 250,
     'num_rollouts': 5,
 
     # Env. arguments.
@@ -69,13 +69,17 @@ DEFAULT_TRAIN_ARGS = {
         'hidden_layers': [20,40,20],
         'dataset_size': 50_000,
 
-        # Full path to json data file.
+        # Full/absolute path to json data file containing
+        # sampling dist.
         'dataset_custom_sampling_dist': None,
 
-        # Ignored if `dataset_custom_sampling_dist` is set. 
-        'dataset_sampling_dist_alpha': 1_000,
+        # Alpha coefficient of the Dirichlet distribution
+        # used to generate/sample sampling distributions.
+        # Ignored if `dataset_custom_sampling_dist` is set.
+        'dataset_sampling_dist_alpha': 1000.0,
 
-        # Whether to force coverage over all (s,a) pairs.
+        # Whether to force coverage over all (s,a) pairs, i.e.,
+        # the sampling distribution always verifies p(s,a) > 0.
         'dataset_force_full_coverage': True,
     },
 
@@ -101,7 +105,6 @@ def train_run(run_args):
     else:
         env, rollouts_envs = env_suite.get_env(env_name, seed=time_delay)
         env_grid_spec = None
-
 
     # Instantiate algorithm.
     if args['algo'] == 'val_iter':
