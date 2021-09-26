@@ -65,9 +65,9 @@ DEFAULT_TRAIN_ARGS = {
         'batch_size': 100,
         'target_update_period': 1_000,
         'learning_rate': 1e-03,
-        'num_learning_steps': 5_000,
+        'num_learning_steps': 200_000,
         'hidden_layers': [20,40,20],
-        'dataset_size': 5_000,
+        'dataset_size': 50_000,
 
         # Full path to json data file.
         'dataset_custom_sampling_dist': None,

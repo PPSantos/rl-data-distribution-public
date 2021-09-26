@@ -38,7 +38,7 @@ def policy(s):
 DEFAULT_TRAIN_ARGS = {
     # WARNING: only works with tabular/grid envs.
 
-    'num_episodes': 5_000,
+    'num_episodes': 10_000,
     'epsilon': 0.3,
 
     # Env. arguments.
