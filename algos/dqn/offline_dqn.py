@@ -46,11 +46,15 @@ class OfflineDQN(object):
         network = _make_network(env_spec,
                         hidden_layers=offline_dqn_args['hidden_layers'])
 
+        self._sampling_dist_size = self._base_env.num_states * self._base_env.num_actions
+        max_replay_size = offline_dqn_args['dataset_size'] + self._sampling_dist_size
+        print('max_replay_size:', max_replay_size)
+
         self._agent = dqn_acme.DQN(environment_spec=env_spec,
                                   network=network,
                                   batch_size=offline_dqn_args['batch_size'],
                                   target_update_period=offline_dqn_args['target_update_period'],
-                                  max_replay_size=offline_dqn_args['dataset_size'],
+                                  max_replay_size=max_replay_size,
                                   learning_rate=offline_dqn_args['learning_rate'],
                                   discount=offline_dqn_args['discount'],
                                   num_states=self._base_env.num_states,
@@ -62,7 +66,6 @@ class OfflineDQN(object):
         self._num_learning_steps = offline_dqn_args['num_learning_steps']
 
         # Synthesize dasaset using sampling distribution and pre-fill the replay buffer.
-        self._sampling_dist_size = self._base_env.num_states * self._base_env.num_actions
         if offline_dqn_args['dataset_custom_sampling_dist'] is None:
             self._sampling_dist = np.random.dirichlet(
                             [offline_dqn_args['dataset_sampling_dist_alpha']]*self._sampling_dist_size)

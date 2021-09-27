@@ -17,6 +17,32 @@ if __name__ == "__main__":
     val_iter_data = VAL_ITER_DATA[env_name]
     print('val_iter_data', val_iter_data)
 
+    for env in ['gridEnv1', 'gridEnv4', 'multiPathsEnv',
+                'pendulum', 'mountaincar']:
+
+        args['env_args']['env_name'] = env
+
+        for a in [0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 1000.0]:
+
+            print('env=', env)
+            print('alpha=', a)
+            # Run.
+            args[algo_dict_key]['dataset_sampling_dist_alpha'] = a
+            exp_path, exp_id = train(args)
+            exp_ids.append(exp_id)
+            # Compute plots.
+            plots(exp_id, val_iter_data)
+            # Compress and cleanup.
+            shutil.make_archive(exp_path,
+                                'gztar',
+                                os.path.dirname(exp_path),
+                                exp_id)
+            shutil.rmtree(exp_path)
+
+            print('Exp. ids:', exp_ids)
+
+    exit()
+
     """ # Run.
     exp_path, exp_id = train(args)
     exp_ids.append(exp_id)

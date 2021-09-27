@@ -31,8 +31,8 @@ VAL_ITER_DATA = {
 DEFAULT_TRAIN_ARGS = {
 
     # General arguments.
-    'num_runs': 5,
-    'num_processors': 5,
+    'num_runs': 20,
+    'num_processors': 10,
     'algo': 'offline_dqn',
     'gamma': 0.9, # discount factor.
 
