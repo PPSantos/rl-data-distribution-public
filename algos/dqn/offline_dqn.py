@@ -82,16 +82,15 @@ class OfflineDQN(object):
         self._create_dataset(offline_dqn_args['dataset_size'],
                 offline_dqn_args['dataset_force_full_coverage'])
 
-    def train(self, q_vals_period, rollouts_period,
-                    num_rollouts, rollouts_envs,
-                    replay_buffer_counts_period):
+    def train(self, q_vals_period, rollouts_period, num_rollouts,
+                rollouts_envs, replay_buffer_counts_period):
 
         rollouts_envs = [wrap_env(e) for e in rollouts_envs]
 
         Q_vals = np.zeros((self._num_learning_steps//q_vals_period,
                 self._base_env.num_states, self._base_env.num_actions))
         Q_vals_steps = []
-        Q_vals_steps_idx = 0
+        Q_vals_idx = 0
 
         rollouts_steps = []
         rollouts_rewards = []
@@ -124,8 +123,8 @@ class OfflineDQN(object):
                         estimated_Q_vals[state,:] = qvs
 
                 Q_vals_steps.append(step)
-                Q_vals[Q_vals_steps_idx,:,:] = estimated_Q_vals
-                Q_vals_steps_idx += 1
+                Q_vals[Q_vals_idx,:,:] = estimated_Q_vals
+                Q_vals_idx += 1
 
             # Execute evaluation rollouts.
             if step % rollouts_period == 0:
@@ -223,9 +222,7 @@ class OfflineDQN(object):
                 self._base_env.reset()
 
     def _execute_rollout(self, r_env):
-
         timestep = r_env.reset()
-
         rollout_cumulative_reward = 0
         while not timestep.last():
             action = self._agent.deterministic_action(timestep.observation)

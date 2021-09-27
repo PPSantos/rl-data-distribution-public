@@ -13,6 +13,7 @@ from envs import env_suite
 
 # Import algorithms.
 from algos.value_iteration import ValueIteration
+from algos.dqn.dqn import DQN
 from algos.dqn.offline_dqn import OfflineDQN
 
 
@@ -36,12 +37,18 @@ DEFAULT_TRAIN_ARGS = {
     'gamma': 0.9, # discount factor.
 
     # Period at which the Q-values are stored.
+    # (the period can either be number of steps
+    # or episodes, depending on the algorihm)
     'q_vals_period': 250,
 
     # Period at which replay buffer counts are stored.
-    'replay_buffer_counts_period': 1_000,
+    # (the period can either be number of steps
+    # or episodes, depending on the algorihm)
+    'replay_buffer_counts_period': 250,
 
     # Evaluation rollouts arguments.
+    # (the period can either be number of steps
+    # or episodes, depending on the algorihm)
     'rollouts_period': 250,
     'num_rollouts': 5,
 
@@ -58,6 +65,21 @@ DEFAULT_TRAIN_ARGS = {
     # Value iteration arguments.
     'val_iter_args': {
         'epsilon': 0.05
+    },
+
+    # Standard DQN algorithm arguments.
+    'dqn_args': {
+        'num_learning_episodes': 1_000,
+        'batch_size': 100,
+        'target_update_period': 1_000,
+        'samples_per_insert': 25.0,
+        'min_replay_size': 20_000,
+        'max_replay_size': 1_000_000,
+        'epsilon_init': 1.0,
+        'epsilon_final': 0.0,
+        'epsilon_schedule_timesteps': 1_000_000,
+        'learning_rate': 1e-03,
+        'hidden_layers': [20,40,20],
     },
 
     # Offline DQN algorithm arguments.
@@ -110,6 +132,9 @@ def train_run(run_args):
     if args['algo'] == 'val_iter':
         args['val_iter_args']['gamma'] = args['gamma']
         agent = ValueIteration(env, **args['val_iter_args'])
+    elif args['algo'] == 'dqn':
+        args['dqn_args']['discount'] = args['gamma']
+        agent = DQN(env, env_grid_spec, log_path, args['dqn_args'])
     elif args['algo'] == 'offline_dqn':
         args['offline_dqn_args']['discount'] = args['gamma']
         agent = OfflineDQN(env, env_grid_spec, log_path, args['offline_dqn_args'])
