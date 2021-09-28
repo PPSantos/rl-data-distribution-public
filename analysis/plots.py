@@ -218,8 +218,7 @@ def main(exp_id, val_iter_exp):
     """
     for t, rollout_type in enumerate(rollouts_types):
         rollout_type_data = data['rollouts_rewards'][:,:,t,:] # [R,(E),num_rollouts]
-        scalar_metrics[f'eval_rewards_total_{rollout_type}'] = np.mean(rollout_type_data)
-        scalar_metrics[f'eval_rewards_final_{rollout_type}'] = np.mean(rollout_type_data[:,-1,:])
+        scalar_metrics[f'rewards_{rollout_type}'] = np.mean(rollout_type_data[:,-10:,:])
 
     """
         `maximizing_action_s_*` plots.
@@ -286,13 +285,11 @@ def main(exp_id, val_iter_exp):
     """
     errors = np.abs(val_iter_data['Q_vals'] - data['Q_vals']) # [R,E,S,A]
     errors = np.sum(errors, axis=(2,3)) # [R,E]
-    scalar_metrics['train_qvals_summed_error_total'] = np.mean(errors)
-    scalar_metrics['train_qvals_summed_error_final'] = np.mean(errors[:,-1])
+    scalar_metrics['qvals_summed_error'] = np.mean(errors[:,-10:])
 
     errors = np.abs(val_iter_data['Q_vals'] - data['Q_vals']) # [R,E,S,A]
     errors = np.mean(errors, axis=(2,3)) # [R,E]
-    scalar_metrics['train_qvals_avg_error_total'] = np.mean(errors)
-    scalar_metrics['train_qvals_avg_error_final'] = np.mean(errors[:,-1])
+    scalar_metrics['qvals_avg_error'] = np.mean(errors[:,-10:])
 
     """
         `q_values_mean_error` plot.
@@ -632,6 +629,7 @@ def main(exp_id, val_iter_exp):
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
+    final_entropies = []
     for i, run_data in enumerate(data['replay_buffer_counts']): # run_data = [(E),S,A]
 
         total_sum = np.sum(run_data, axis=(1,2)) # [(E)]
@@ -640,6 +638,8 @@ def main(exp_id, val_iter_exp):
         Y = -np.sum(sa_probs * np.log(sa_probs+1e-8), axis=(1,2))
         X = data['replay_buffer_counts_steps']
         plt.plot(X, Y, label=f'Run {i}')
+
+        final_entropies.append(np.mean(Y[-10:]))
 
     plt.ylabel('H[P(s,a)]')
     plt.xlabel('Learning step')
@@ -650,6 +650,8 @@ def main(exp_id, val_iter_exp):
 
     plt.savefig(f'{replay_buffer_plots_path}/P_sa_entropy.png', bbox_inches='tight', pad_inches=0)
     plt.close()
+
+    scalar_metrics['replay_buffer_entropy'] = np.mean(final_entropies)
 
     """
         Replay buffer statistics: P(s) coverage.
