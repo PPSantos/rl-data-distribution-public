@@ -13,18 +13,26 @@ if __name__ == "__main__":
     # Load args.
     args = DEFAULT_TRAIN_ARGS
     algo_dict_key = args['algo'] + '_args'
-    env_name = args['env_args']['env_name']
-    val_iter_data = VAL_ITER_DATA[env_name]
-    print('val_iter_data', val_iter_data)
+
+    hidden_layers = {'gridEnv1': [20,40,20],
+                     'gridEnv4': [20,40,20],
+                     'multiPathsEnv': [20,40,20],
+                     'pendulum': [32,64,32],
+                     'mountaincar': [64,128,64]}
 
     for env in ['gridEnv1', 'gridEnv4', 'multiPathsEnv',
                 'pendulum', 'mountaincar']:
 
+        print('env=', env)
         args['env_args']['env_name'] = env
 
-        for a in [0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 1000.0]:
+        val_iter_data = VAL_ITER_DATA[env]
+        print('val_iter_data', val_iter_data)
 
-            print('env=', env)
+        args[algo_dict_key]['hidden_layers'] = hidden_layers[env]
+
+        for a in [0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]:
+
             print('alpha=', a)
             # Run.
             args[algo_dict_key]['dataset_sampling_dist_alpha'] = a
