@@ -37,51 +37,64 @@ sns.set_style(style='white')
         return 1 # UP """
 
 # gridEnv2 (optimal top trajectory)
-def policy(s):
-    if s in (8,9,10,11,12,13,14,
-             16,17,18,19,20,21,22,
-             24,25,26,27,28,29,30,
-             40,41,42,43,44,45,46,
-             48,49,50,51,52,53,54,
-             56,57,58,59,60,61,62):
-        return 4 # RIGHT
-    elif s in (15,23,31):
-        return 2 # DOWN
-    elif s in(47,55,63):
-        return 1 # UP
-    elif s in (32,): # INITIAL STATE.
-        return 1 # UP
-    elif s in (39,):
-        return 4 # RIGHT
-    else:
-        raise ValueError("policy error")
+def build_policy(num_switched_actions=20):
 
-""" # gridEnv2 (optimal bottom trajectory)
-def policy(s):
-    if s in (8,9,10,11,12,13,14,
-             16,17,18,19,20,21,22,
-             24,25,26,27,28,29,30,
-             40,41,42,43,44,45,46,
-             48,49,50,51,52,53,54,
-             56,57,58,59,60,61,62):
-        return 4 # RIGHT
-    elif s in (15,23,31):
-        return 2 # DOWN
-    elif s in(47,55,63):
-        return 1 # UP
-    elif s in (32,): # INITIAL STATE.
-        return 2 # DOWN
-    elif s in (39,):
-        return # 4 RIGHT
-    else:
-        raise ValueError("policy error")
- """
+    actions = [0,0,0,0,0,0,0,0,
+               4,4,4,4,4,4,4,2,
+               4,4,4,4,4,4,4,2,
+               4,4,4,4,4,4,4,2,
+               1,0,0,0,0,0,0,4,
+               4,4,4,4,4,4,4,1,
+               4,4,4,4,4,4,4,1,
+               4,4,4,4,4,4,4,1]
+
+    print(actions)
+
+    for _ in range(num_switched_actions):
+        state = np.random.randint(low=0,high=len(actions))
+        new_action = np.random.randint(low=0,high=5)
+        print(state, new_action)
+
+        actions[state] = new_action
+
+    print(actions)
+    
+    def p(s):
+        return actions[s]
+
+    return p
+
+# gridEnv2 (optimal bottom trajectory)
+""" def policy(s):
+
+    actions = [0,0,0,0,0,0,0,0,
+               4,4,4,4,4,4,4,2,
+               4,4,4,4,4,4,4,2,
+               4,4,4,4,4,4,4,2,
+               2,0,0,0,0,0,0,4,
+               4,4,4,4,4,4,4,1,
+               4,4,4,4,4,4,4,1,
+               4,4,4,4,4,4,4,1]
+    
+    return actions[s] """
+
+
+# def random_policy(num_states, num_actions):
+
+#     actions = np.random.randint(low=0,high=num_actions, size=num_states)
+#     print('actions', actions)
+
+#     def p(s):
+#         return actions[s]
+
+#     return p
 
 DEFAULT_TRAIN_ARGS = {
     # WARNING: only works with tabular/grid envs.
 
     'num_episodes': 10_000,
-    'epsilon': 0.0,
+    'epsilon': 0.3,
+    'num_switched_actions': 60,
 
     # Env. arguments.
     'env_args': {
@@ -129,10 +142,14 @@ def rollout():
     # Test policy.
     # for s in range(env.num_states):
     #     print('s', s, policy(s))
+    # if args['random_policy'] == True:
+    #     policy = random_policy(env.num_states, env.num_actions)
+
+    policy = build_policy(args['num_switched_actions'])
 
     # Rollout policy.
     episode_rewards = []
-    sa_counts = np.zeros((env.num_states,env.num_actions))
+    sa_counts = np.zeros((env.num_states, env.num_actions))
 
     for episode in tqdm(range(args['num_episodes'])):
 
