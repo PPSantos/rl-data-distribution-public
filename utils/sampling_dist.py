@@ -40,7 +40,7 @@ sns.set_style(style='white')
 def policy(s):
     if s in (8,9,10,11,12,13,14,
              16,17,18,19,20,21,22,
-             24,25,26,27,28,29,30
+             24,25,26,27,28,29,30,
              40,41,42,43,44,45,46,
              48,49,50,51,52,53,54,
              56,57,58,59,60,61,62):
@@ -52,7 +52,7 @@ def policy(s):
     elif s in (32,): # INITIAL STATE.
         return 1 # UP
     elif s in (39,):
-        return # 4 RIGHT
+        return 4 # RIGHT
     else:
         raise ValueError("policy error")
 
@@ -60,7 +60,7 @@ def policy(s):
 def policy(s):
     if s in (8,9,10,11,12,13,14,
              16,17,18,19,20,21,22,
-             24,25,26,27,28,29,30
+             24,25,26,27,28,29,30,
              40,41,42,43,44,45,46,
              48,49,50,51,52,53,54,
              56,57,58,59,60,61,62):
@@ -81,13 +81,13 @@ DEFAULT_TRAIN_ARGS = {
     # WARNING: only works with tabular/grid envs.
 
     'num_episodes': 10_000,
-    'epsilon': 0.3,
+    'epsilon': 0.0,
 
     # Env. arguments.
     'env_args': {
         'env_name': 'gridEnv4',
         'dim_obs': 8,
-        'time_limit': 50,
+        'time_limit': 25,
         'tabular': True, # do not change.
         'smooth_obs': False,
         'one_hot_obs': False,
