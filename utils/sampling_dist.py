@@ -38,43 +38,44 @@ sns.set_style(style='white')
 
 # gridEnv2 (optimal top trajectory)
 def policy(s):
-    if s in (0,1,2,3,4,5,6,
-             8,9,10,11,12,13,14,
+    if s in (8,9,10,11,12,13,14,
              16,17,18,19,20,21,22,
-             32,33,34,35,36,37,38
-             40,41,42,43,44,45,46
-             48,49,50,51,52,53,54):
+             24,25,26,27,28,29,30
+             40,41,42,43,44,45,46,
+             48,49,50,51,52,53,54,
+             56,57,58,59,60,61,62):
         return 4 # RIGHT
-    elif s in (7,15,23):
+    elif s in (15,23,31):
         return 2 # DOWN
-    elif s in(39,47,55):
+    elif s in(47,55,63):
         return 1 # UP
-    elif s in (24,) # INITIAL STATE.
+    elif s in (32,): # INITIAL STATE.
         return 1 # UP
-    elif s in (31,)
+    elif s in (39,):
         return # 4 RIGHT
     else:
         raise ValueError("policy error")
 
 """ # gridEnv2 (optimal bottom trajectory)
 def policy(s):
-    if s in (0,1,2,3,4,5,6,
-             8,9,10,11,12,13,14,
+    if s in (8,9,10,11,12,13,14,
              16,17,18,19,20,21,22,
-             32,33,34,35,36,37,38
-             40,41,42,43,44,45,46
-             48,49,50,51,52,53,54):
+             24,25,26,27,28,29,30
+             40,41,42,43,44,45,46,
+             48,49,50,51,52,53,54,
+             56,57,58,59,60,61,62):
         return 4 # RIGHT
-    elif s in (7,15,23):
+    elif s in (15,23,31):
         return 2 # DOWN
-    elif s in(39,47,55):
+    elif s in(47,55,63):
         return 1 # UP
-    elif s in (24,) # INITIAL STATE.
+    elif s in (32,): # INITIAL STATE.
         return 2 # DOWN
-    elif s in (31,)
+    elif s in (39,):
         return # 4 RIGHT
     else:
-        raise ValueError("policy error") """
+        raise ValueError("policy error")
+ """
 
 DEFAULT_TRAIN_ARGS = {
     # WARNING: only works with tabular/grid envs.
