@@ -29,11 +29,52 @@ PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/ana
 
 sns.set_style(style='white')
 
-def policy(s):
+# gridEnv1
+""" def policy(s):
     if (s // 8) == 0:
         return 4 # RIGHT
     else:
+        return 1 # UP """
+
+# gridEnv2 (optimal top trajectory)
+def policy(s):
+    if s in (0,1,2,3,4,5,6,
+             8,9,10,11,12,13,14,
+             16,17,18,19,20,21,22,
+             32,33,34,35,36,37,38
+             40,41,42,43,44,45,46
+             48,49,50,51,52,53,54):
+        return 4 # RIGHT
+    elif s in (7,15,23):
+        return 2 # DOWN
+    elif s in(39,47,55):
         return 1 # UP
+    elif s in (24,) # INITIAL STATE.
+        return 1 # UP
+    elif s in (31,)
+        return # 4 RIGHT
+    else:
+        raise ValueError("policy error")
+
+""" # gridEnv2 (optimal bottom trajectory)
+def policy(s):
+    if s in (0,1,2,3,4,5,6,
+             8,9,10,11,12,13,14,
+             16,17,18,19,20,21,22,
+             32,33,34,35,36,37,38
+             40,41,42,43,44,45,46
+             48,49,50,51,52,53,54):
+        return 4 # RIGHT
+    elif s in (7,15,23):
+        return 2 # DOWN
+    elif s in(39,47,55):
+        return 1 # UP
+    elif s in (24,) # INITIAL STATE.
+        return 2 # DOWN
+    elif s in (31,)
+        return # 4 RIGHT
+    else:
+        raise ValueError("policy error") """
 
 DEFAULT_TRAIN_ARGS = {
     # WARNING: only works with tabular/grid envs.
@@ -43,7 +84,7 @@ DEFAULT_TRAIN_ARGS = {
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'gridEnv1',
+        'env_name': 'gridEnv4',
         'dim_obs': 8,
         'time_limit': 50,
         'tabular': True, # do not change.
