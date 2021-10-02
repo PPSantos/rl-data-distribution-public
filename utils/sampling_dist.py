@@ -1,8 +1,6 @@
-import sys
 import os
 from tqdm import tqdm
 import json
-import time
 import numpy as np
 import pathlib
 from datetime import datetime
@@ -23,22 +21,17 @@ matplotlib.rcParams.update({'font.size': 13})
 FIGURE_X = 8.0
 FIGURE_Y = 6.0
 
-
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/analysis/plots/'
 
 sns.set_style(style='white')
 
-# gridEnv1
-""" def policy(s):
-    if (s // 8) == 0:
-        return 4 # RIGHT
-    else:
-        return 1 # UP """
 
-# gridEnv2 (optimal top trajectory)
-def build_policy(num_switched_actions=20):
+def _build_policy_func(num_switched_actions=20, epsilon=0.3):
+    print('num_switched_actions=', num_switched_actions)
+    print('epsilon=', epsilon)
 
+    # gridEnv 4 top optimal trajectory.
     actions = [0,0,0,0,0,0,0,0,
                4,4,4,4,4,4,4,2,
                4,4,4,4,4,4,4,2,
@@ -47,54 +40,29 @@ def build_policy(num_switched_actions=20):
                4,4,4,4,4,4,4,1,
                4,4,4,4,4,4,4,1,
                4,4,4,4,4,4,4,1]
-
     print(actions)
 
-    for _ in range(num_switched_actions):
-        state = np.random.randint(low=0,high=len(actions))
+    switched_actions_idxs = np.random.choice(np.arange(len(actions)),
+                            size=num_switched_actions,replace=False)
+    for idx in switched_actions_idxs:
         new_action = np.random.randint(low=0,high=5)
-        print(state, new_action)
-
-        actions[state] = new_action
+        actions[idx] = new_action
 
     print(actions)
     
     def p(s):
-        return actions[s]
+        if np.random.rand() <= epsilon:
+            return np.random.randint(low=0,high=5)
+        else:
+            return actions[s]
 
     return p
 
-# gridEnv2 (optimal bottom trajectory)
-""" def policy(s):
 
-    actions = [0,0,0,0,0,0,0,0,
-               4,4,4,4,4,4,4,2,
-               4,4,4,4,4,4,4,2,
-               4,4,4,4,4,4,4,2,
-               2,0,0,0,0,0,0,4,
-               4,4,4,4,4,4,4,1,
-               4,4,4,4,4,4,4,1,
-               4,4,4,4,4,4,4,1]
-    
-    return actions[s] """
-
-
-# def random_policy(num_states, num_actions):
-
-#     actions = np.random.randint(low=0,high=num_actions, size=num_states)
-#     print('actions', actions)
-
-#     def p(s):
-#         return actions[s]
-
-#     return p
-
-DEFAULT_TRAIN_ARGS = {
+DEFAULT_SAMPLING_DIST_ARGS = {
     # WARNING: only works with tabular/grid envs.
 
     'num_episodes': 10_000,
-    'epsilon': 0.3,
-    'num_switched_actions': 60,
 
     # Env. arguments.
     'env_args': {
@@ -113,16 +81,20 @@ def create_exp_name(args):
         '_' + 'sampling_dist' + '_' + \
         str(datetime.today().strftime('%Y-%m-%d-%H-%M-%S'))
 
-def rollout():
+def main(args=None, policy=None):
 
-    args = DEFAULT_TRAIN_ARGS
+    if not args:
+        args = DEFAULT_SAMPLING_DIST_ARGS
+    
+    if not policy:
+        policy = _build_policy_func()
 
     # Setup experiment data folder.
     exp_name = create_exp_name(args)
     exp_path = DATA_FOLDER_PATH + exp_name
     os.makedirs(exp_path, exist_ok=True)
-    print('\nExperiment ID:', exp_name)
-    print('train.py arguments:')
+    print('\nSampling dist. ID:', exp_name)
+    print('utils/sampling_dist.py arguments:')
     print(args)
 
     # Setup plots folder.
@@ -139,45 +111,27 @@ def rollout():
         # env, rollouts_envs = env_suite.get_env(env_name, seed=time_delay)
         # env_grid_spec = None
 
-    # Test policy.
-    # for s in range(env.num_states):
-    #     print('s', s, policy(s))
-    # if args['random_policy'] == True:
-    #     policy = random_policy(env.num_states, env.num_actions)
-
-    policy = build_policy(args['num_switched_actions'])
-
     # Rollout policy.
     episode_rewards = []
     sa_counts = np.zeros((env.num_states, env.num_actions))
 
-    for episode in tqdm(range(args['num_episodes'])):
+    for _ in tqdm(range(args['num_episodes'])):
 
         s_t = env.reset()
-        # print('ENV RESET.')
 
         done = False
         episode_cumulative_reward = 0
         while not done:
 
-            # Pick action (epsilon-greedy policy).
-            if np.random.rand() <= args['epsilon']:
-                a_t = np.random.choice(env.num_actions)
-            else:
-                a_t = policy(s_t)
+            # Pick action.
+            a_t = policy(s_t)
 
             # Env step.
             s_t1, r_t1, done, info = env.step(a_t)
 
-            # print('s_t', s_t)
-            # print('a_t', a_t)
-            # print('r_t1', r_t1)
-
             # Log data.
             episode_cumulative_reward += r_t1
             sa_counts[s_t,a_t] += 1
-
-            # env.render()
 
             s_t = s_t1
 
@@ -187,52 +141,54 @@ def rollout():
     data['episode_rewards'] = episode_rewards
     data['sa_counts'] = sa_counts # [S,A]
 
-    sa_dist = sa_counts / np.sum(sa_counts) # [S,A]
-    sa_dist_flattened = sa_dist.flatten() # [S]
-    print(sa_dist_flattened)
-    print('(S,A) dist. entropy:', scipy.stats.entropy(sa_dist_flattened))
-    data['sampling_dist'] = sa_dist_flattened
+    sampling_dist = sa_counts / np.sum(sa_counts) # [S,A]
+    sampling_dist_flattened = sampling_dist.flatten() # [S*A]
+    #print(sampling_dist_flattened)
+    print('(S,A) dist. entropy:', scipy.stats.entropy(sampling_dist_flattened))
+    data['sampling_dist'] = sampling_dist_flattened
 
-    # 2D plot.
-    s_counts = np.sum(sa_counts, axis=1)
-    s_counts = np.reshape(s_counts, (8,-1))
-    #s_counts[0,7] = np.nan
-    #s_counts[7,0] = np.nan
-    #mask_array = np.ma.masked_invalid(s_counts).mask
-    labels = s_counts / np.nansum(s_counts) * 100
-    labels = np.around(labels, decimals=1)
-    fig = plt.figure()
-    fig.set_size_inches(FIGURE_X, FIGURE_Y)
-    sns.heatmap(s_counts, annot=labels, linewidth=0.5, cmap="coolwarm", cbar=False)
-    plt.xticks([]) # remove the tick marks by setting to an empty list
-    plt.yticks([]) # remove the tick marks by setting to an empty list
-    plt.axes().set_aspect('equal') #set the x and y axes to the same scale
-    plt.grid()
-    plt.savefig(f'{plots_folder_path}/s_counts.png', bbox_inches='tight', pad_inches=0)
-    #plt.savefig(f'{plots_folder_path}/s_counts.pdf', bbox_inches='tight', pad_inches=0)
-    plt.close()
+    if args['env_args']['env_name'] in ('gridEnv1', 'gridEnv4'):
 
-    # 3D plot.
-    fig = plt.figure()
-    fig.set_size_inches(FIGURE_X, FIGURE_Y)
-    ax = fig.add_subplot(111, projection='3d')
-    x = np.arange(8)
-    y = np.arange(8)
-    _xx, _yy = np.meshgrid(x, y)
-    x, y = _xx.ravel(), _yy.ravel()
-    labels = labels.T
-    top = labels.flatten()
-    bottom = np.zeros_like(top)
-    width = depth = 1
-    #light = matplotlib.colors.LightSource(azdeg=200., altdeg=45)
-    ax.bar3d(x, y, bottom, width, depth, top, shade=True)#, lightsource=light)
-    ax.view_init(elev=20., azim=30)
-    ax.set_zlim(0,20)
-    plt.xticks([]) # remove the tick marks by setting to an empty list
-    plt.yticks([]) # remove the tick marks by setting to an empty list
-    plt.savefig(f'{plots_folder_path}/s_counts_3d.png', bbox_inches='tight', pad_inches=0)
-    #plt.savefig(f'{plots_folder_path}/s_counts_3d.pdf', bbox_inches='tight', pad_inches=0)
-    plt.close()
+        # 2D plot.
+        s_counts = np.sum(sa_counts, axis=1) # [S]
+        s_counts = np.reshape(s_counts, (8,-1))
+        #s_counts[0,7] = np.nan
+        #s_counts[7,0] = np.nan
+        #mask_array = np.ma.masked_invalid(s_counts).mask
+        labels = s_counts / np.nansum(s_counts) * 100
+        labels = np.around(labels, decimals=1)
+        fig = plt.figure()
+        fig.set_size_inches(FIGURE_X, FIGURE_Y)
+        sns.heatmap(s_counts, annot=labels, linewidth=0.5, cmap="coolwarm", cbar=False)
+        plt.xticks([]) # remove the tick marks by setting to an empty list
+        plt.yticks([]) # remove the tick marks by setting to an empty list
+        plt.axes().set_aspect('equal') #set the x and y axes to the same scale
+        plt.grid()
+        plt.savefig(f'{plots_folder_path}/s_counts.png', bbox_inches='tight', pad_inches=0)
+        #plt.savefig(f'{plots_folder_path}/s_counts.pdf', bbox_inches='tight', pad_inches=0)
+        plt.close()
+
+        # 3D plot.
+        fig = plt.figure()
+        fig.set_size_inches(FIGURE_X, FIGURE_Y)
+        ax = fig.add_subplot(111, projection='3d')
+        x = np.arange(8)
+        y = np.arange(8)
+        _xx, _yy = np.meshgrid(x, y)
+        x, y = _xx.ravel(), _yy.ravel()
+        labels = labels.T
+        top = labels.flatten()
+        bottom = np.zeros_like(top)
+        width = depth = 1
+        #light = matplotlib.colors.LightSource(azdeg=200., altdeg=45)
+        ax.bar3d(x, y, bottom, width, depth, top, shade=True)#, lightsource=light)
+        ax.view_init(elev=20., azim=30)
+        ax.set_zlim(0,20)
+        plt.xticks([]) # remove the tick marks by setting to an empty list
+        plt.yticks([]) # remove the tick marks by setting to an empty list
+        plt.savefig(f'{plots_folder_path}/s_counts_3d.png', bbox_inches='tight', pad_inches=0)
+        #plt.savefig(f'{plots_folder_path}/s_counts_3d.pdf', bbox_inches='tight', pad_inches=0)
+        plt.close()
 
     # Store data.
     f = open(exp_path + "/data.json", "w")
@@ -240,6 +196,7 @@ def rollout():
     json.dump(dumped, f)
     f.close()
 
+    return exp_path + "/data.json", exp_name
 
 if __name__ == "__main__":
-    rollout()
+    main()

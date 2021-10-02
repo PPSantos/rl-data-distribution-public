@@ -31,30 +31,30 @@ VAL_ITER_DATA = {
 DEFAULT_TRAIN_ARGS = {
 
     # General arguments.
-    'num_runs': 20,
-    'num_processors': 10,
+    'num_runs': 5,
+    'num_processors': 5,
     'algo': 'offline_dqn',
     'gamma': 0.9, # discount factor.
 
     # Period at which the Q-values are stored.
     # (the period can either be number of steps
     # or episodes, depending on the algorihm)
-    'q_vals_period': 250,
+    'q_vals_period': 1_000,
 
     # Period at which replay buffer counts are stored.
     # (the period can either be number of steps
     # or episodes, depending on the algorihm)
-    'replay_buffer_counts_period': 250,
+    'replay_buffer_counts_period': 1_000,
 
     # Evaluation rollouts arguments.
     # (the period can either be number of steps
     # or episodes, depending on the algorihm)
-    'rollouts_period': 250,
+    'rollouts_period': 1_000,
     'num_rollouts': 5,
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'gridEnv1',
+        'env_name': 'gridEnv4',
         'dim_obs': 8, # (for grid env. only).
         'time_limit': 50, # (for grid env. only).
         'tabular': False, # (for grid env. only).
