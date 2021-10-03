@@ -14,9 +14,9 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 plt.style.use('ggplot')
-matplotlib.rcParams['text.usetex'] = True
-matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
-matplotlib.rcParams.update({'font.size': 13})
+#matplotlib.rcParams['text.usetex'] = True
+#matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
+#matplotlib.rcParams.update({'font.size': 13})
 
 FIGURE_X = 8.0
 FIGURE_Y = 6.0
