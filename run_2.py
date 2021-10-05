@@ -22,6 +22,11 @@ HIDDEN_LAYERS = {'gridEnv1': [20,40,20],
                  'multiPathsEnv': [20,40,20],
                  'pendulum': [32,64,32],
                  'mountaincar': [64,128,64]}
+
+# Additional rejection sampling args
+# (if `OPTIMAL_SAMPLING_DIST_IDS` is not None).
+OPTIMAL_SAMPLING_DIST_IDS = ['gridEnv4_sampling_dist_2021-10-05-10-52-48', 'gridEnv4_sampling_dist_2021-10-05-10-52-50', 'gridEnv4_sampling_dist_2021-10-05-10-52-53', 'gridEnv4_sampling_dist_2021-10-05-10-52-56', 'gridEnv4_sampling_dist_2021-10-05-10-52-59', 'gridEnv4_sampling_dist_2021-10-05-10-53-01', 'gridEnv4_sampling_dist_2021-10-05-10-53-04', 'gridEnv4_sampling_dist_2021-10-05-10-53-07', 'gridEnv4_sampling_dist_2021-10-05-10-53-09', 'gridEnv4_sampling_dist_2021-10-05-10-53-12', 'gridEnv4_sampling_dist_2021-10-05-10-53-15', 'gridEnv4_sampling_dist_2021-10-05-10-53-18', 'gridEnv4_sampling_dist_2021-10-05-10-53-20', 'gridEnv4_sampling_dist_2021-10-05-10-53-23', 'gridEnv4_sampling_dist_2021-10-05-10-53-26', 'gridEnv4_sampling_dist_2021-10-05-10-53-28', 'gridEnv4_sampling_dist_2021-10-05-10-53-31', 'gridEnv4_sampling_dist_2021-10-05-10-53-34', 'gridEnv4_sampling_dist_2021-10-05-10-53-37', 'gridEnv4_sampling_dist_2021-10-05-10-53-39']
+TARGET_INTERVAL = [2,10]
 #################################################################
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data'
@@ -50,18 +55,50 @@ if __name__ == "__main__":
     optimal_qvals = np.mean(qvals[:,-10:,:,:],axis=1) #[R,S,A]
     print(optimal_qvals.shape)
 
+    if OPTIMAL_SAMPLING_DIST_IDS is not None:
+        print('Loading optimal sampling dists. (rejection sampling).')
+        optimal_dists = []
+        for optimal_dist_id in OPTIMAL_SAMPLING_DIST_IDS:
+            optimal_dist_path = DATA_FOLDER_PATH + optimal_dist_id + '/data.json'
+            print(optimal_dist_path)
+            with open(optimal_dist_path, 'r') as f:
+                data = json.load(f)
+                d = np.array(json.loads(data)['sampling_dist'])
+            f.close()
+            optimal_dists.append(d)
+        print('len(optimal_dists)', len(optimal_dists))
+
     exp_ids = []
     sampling_dist_ids = []
-    for _ in range(NUM_SAMPLING_DISTS):
-
+    num_sampled_dists = 0
+    while num_sampled_dists < NUM_SAMPLING_DISTS:
+    
         # Build sampling policy.
         run_idx = np.random.choice(np.arange(optimal_qvals.shape[0])) # Randomly select the Q-values of one of the runs.
         run_qvals = optimal_qvals[run_idx,:,:] # [S,A]
-        policy = build_boltzmann_policy(run_qvals, temperature=np.random.uniform(low=-10.0,high=10.0))
+        policy = build_boltzmann_policy(run_qvals, temperature=np.random.uniform(low=-10.0, high=10.0))
 
         # Create sampling dist.
         sampling_dist_path, sampling_dist_id = sampling_dist(policy=policy, args=sampling_dist_args)
         sampling_dist_ids.append(sampling_dist_id)
+
+        if OPTIMAL_SAMPLING_DIST_IDS is not None:
+            # Only accept sampled dist if distance is inside `TARGET_INTERVAL`.
+            with open(sampling_dist_path, 'r') as f:
+                data = json.load(f)
+                sampled_dist = np.array(json.loads(data)['sampling_dist'])
+            f.close()
+
+            kl_dist = np.min([scipy.stats.entropy(optimal_dist, sampled_dist+1e-06)
+                            for optimal_dist in optimal_dists])
+            print('kl_dist', kl_dist)
+
+            if (kl_dist < TARGET_INTERVAL[0]) or (kl_dist > TARGET_INTERVAL[1]):
+                print('REJECTED')
+                continue
+
+        num_sampled_dists += 1
+        print('ACCEPTED')
 
         # Run ofline RL.
         args[algo_dict_key]['dataset_custom_sampling_dist'] = sampling_dist_path
