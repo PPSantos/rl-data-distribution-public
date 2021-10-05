@@ -21,8 +21,7 @@ OPTIMAL_QVALS_EXP_ID = 'gridEnv4_offline_dqn_2021-10-03-00-02-12'
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data'
 
-if __name__ == "__main__":
-
+def main():
     # Load default args.
     sampling_dist_args = DEFAULT_SAMPLING_DIST_ARGS
     sampling_dist_args['env_args']['env_name'] = ENV_NAME
@@ -48,3 +47,6 @@ if __name__ == "__main__":
         sampling_dist_ids.append(sampling_dist_id)
 
         print('Sampling dist. ids:', sampling_dist_ids)
+
+if __name__ == "__main__":
+    main()
