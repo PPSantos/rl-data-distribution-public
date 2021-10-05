@@ -4,6 +4,7 @@ import shutil
 import tarfile
 import pathlib
 import numpy as np
+import scipy
 
 from train import train
 from train import DEFAULT_TRAIN_ARGS, VAL_ITER_DATA
@@ -59,7 +60,7 @@ if __name__ == "__main__":
         print('Loading optimal sampling dists. (rejection sampling).')
         optimal_dists = []
         for optimal_dist_id in OPTIMAL_SAMPLING_DIST_IDS:
-            optimal_dist_path = DATA_FOLDER_PATH + optimal_dist_id + '/data.json'
+            optimal_dist_path = DATA_FOLDER_PATH + '/' + optimal_dist_id + '/data.json'
             print(optimal_dist_path)
             with open(optimal_dist_path, 'r') as f:
                 data = json.load(f)
@@ -76,7 +77,9 @@ if __name__ == "__main__":
         # Build sampling policy.
         run_idx = np.random.choice(np.arange(optimal_qvals.shape[0])) # Randomly select the Q-values of one of the runs.
         run_qvals = optimal_qvals[run_idx,:,:] # [S,A]
-        policy = build_boltzmann_policy(run_qvals, temperature=np.random.uniform(low=-10.0, high=10.0))
+        sampled_temperature = np.random.uniform(low=-10.0, high=10.0)
+        print('sampled_temperature', sampled_temperature)
+        policy = build_boltzmann_policy(run_qvals, temperature=sampled_temperature)
 
         # Create sampling dist.
         sampling_dist_path, sampling_dist_id = sampling_dist(policy=policy, args=sampling_dist_args)
@@ -88,7 +91,7 @@ if __name__ == "__main__":
                 data = json.load(f)
                 sampled_dist = np.array(json.loads(data)['sampling_dist'])
             f.close()
-
+            print(sampling_dist_path)
             kl_dist = np.min([scipy.stats.entropy(optimal_dist, sampled_dist+1e-06)
                             for optimal_dist in optimal_dists])
             print('kl_dist', kl_dist)
