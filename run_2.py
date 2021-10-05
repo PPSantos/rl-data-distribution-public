@@ -83,7 +83,6 @@ if __name__ == "__main__":
 
         # Create sampling dist.
         sampling_dist_path, sampling_dist_id = sampling_dist(policy=policy, args=sampling_dist_args)
-        sampling_dist_ids.append(sampling_dist_id)
 
         if OPTIMAL_SAMPLING_DIST_IDS is not None:
             # Only accept sampled dist if distance is inside `TARGET_INTERVAL`.
@@ -100,6 +99,7 @@ if __name__ == "__main__":
                 print('REJECTED')
                 continue
 
+        sampling_dist_ids.append(sampling_dist_id)
         num_sampled_dists += 1
         print('ACCEPTED')
 
