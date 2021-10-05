@@ -19,7 +19,7 @@ ENV_NAME = 'gridEnv4'
 OPTIMAL_QVALS_EXP_ID = 'gridEnv4_offline_dqn_2021-10-03-00-02-12'
 #################################################################
 
-DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data'
+DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data'
 
 def main():
     # Load default args.
@@ -38,6 +38,7 @@ def main():
 
     # Calculate (s,a) dist. induced by the greedy
     # policy w.r.t. the final Q-values.
+    sampling_dist_ids = []
     for run_idx in range(final_qvals.shape[0]):
         run_qvals = final_qvals[run_idx,:,:] # [S,A]
         policy = build_eps_greedy_policy(run_qvals, epsilon=0.0)
