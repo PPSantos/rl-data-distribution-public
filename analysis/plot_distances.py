@@ -15,17 +15,11 @@ plt.style.use('ggplot')
 matplotlib.rcParams.update({'font.size': 13})
 
 #################################################################
-OPTIMAL_SAMPLING_DIST_IDS = [
+OPTIMAL_SAMPLING_DIST_IDS = ['gridEnv4_sampling_dist_2021-10-05-10-52-48', 'gridEnv4_sampling_dist_2021-10-05-10-52-50', 'gridEnv4_sampling_dist_2021-10-05-10-52-53', 'gridEnv4_sampling_dist_2021-10-05-10-52-56', 'gridEnv4_sampling_dist_2021-10-05-10-52-59', 'gridEnv4_sampling_dist_2021-10-05-10-53-01', 'gridEnv4_sampling_dist_2021-10-05-10-53-04', 'gridEnv4_sampling_dist_2021-10-05-10-53-07', 'gridEnv4_sampling_dist_2021-10-05-10-53-09', 'gridEnv4_sampling_dist_2021-10-05-10-53-12', 'gridEnv4_sampling_dist_2021-10-05-10-53-15', 'gridEnv4_sampling_dist_2021-10-05-10-53-18', 'gridEnv4_sampling_dist_2021-10-05-10-53-20', 'gridEnv4_sampling_dist_2021-10-05-10-53-23', 'gridEnv4_sampling_dist_2021-10-05-10-53-26', 'gridEnv4_sampling_dist_2021-10-05-10-53-28', 'gridEnv4_sampling_dist_2021-10-05-10-53-31', 'gridEnv4_sampling_dist_2021-10-05-10-53-34', 'gridEnv4_sampling_dist_2021-10-05-10-53-37', 'gridEnv4_sampling_dist_2021-10-05-10-53-39']
 
-]
+SAMPLING_DISTS_IDS = ['gridEnv4_sampling_dist_2021-10-05-00-21-18', 'gridEnv4_sampling_dist_2021-10-05-00-32-27', 'gridEnv4_sampling_dist_2021-10-05-00-43-46', 'gridEnv4_sampling_dist_2021-10-05-00-55-01', 'gridEnv4_sampling_dist_2021-10-05-01-06-15', 'gridEnv4_sampling_dist_2021-10-05-01-17-29', 'gridEnv4_sampling_dist_2021-10-05-01-28-42', 'gridEnv4_sampling_dist_2021-10-05-01-40-01', 'gridEnv4_sampling_dist_2021-10-05-01-51-14', 'gridEnv4_sampling_dist_2021-10-05-02-02-29', 'gridEnv4_sampling_dist_2021-10-05-02-13-40', 'gridEnv4_sampling_dist_2021-10-05-02-24-54', 'gridEnv4_sampling_dist_2021-10-05-02-36-06', 'gridEnv4_sampling_dist_2021-10-05-02-47-14', 'gridEnv4_sampling_dist_2021-10-05-02-58-27', 'gridEnv4_sampling_dist_2021-10-05-03-09-38', 'gridEnv4_sampling_dist_2021-10-05-03-20-55', 'gridEnv4_sampling_dist_2021-10-05-03-32-11', 'gridEnv4_sampling_dist_2021-10-05-03-43-24', 'gridEnv4_sampling_dist_2021-10-05-03-54-36', 'gridEnv4_sampling_dist_2021-10-05-04-05-51', 'gridEnv4_sampling_dist_2021-10-05-04-17-02', 'gridEnv4_sampling_dist_2021-10-05-04-28-16', 'gridEnv4_sampling_dist_2021-10-05-04-39-24', 'gridEnv4_sampling_dist_2021-10-05-04-50-33', 'gridEnv4_sampling_dist_2021-10-05-05-01-47', 'gridEnv4_sampling_dist_2021-10-05-05-12-57', 'gridEnv4_sampling_dist_2021-10-05-05-24-08', 'gridEnv4_sampling_dist_2021-10-05-05-35-25', 'gridEnv4_sampling_dist_2021-10-05-05-46-40', 'gridEnv4_sampling_dist_2021-10-05-05-57-56', 'gridEnv4_sampling_dist_2021-10-05-06-09-11', 'gridEnv4_sampling_dist_2021-10-05-06-20-22', 'gridEnv4_sampling_dist_2021-10-05-06-31-32', 'gridEnv4_sampling_dist_2021-10-05-06-42-49', 'gridEnv4_sampling_dist_2021-10-05-06-54-02', 'gridEnv4_sampling_dist_2021-10-05-07-05-12', 'gridEnv4_sampling_dist_2021-10-05-07-16-20', 'gridEnv4_sampling_dist_2021-10-05-07-27-37', 'gridEnv4_sampling_dist_2021-10-05-07-38-52', 'gridEnv4_sampling_dist_2021-10-05-07-50-04', 'gridEnv4_sampling_dist_2021-10-05-08-01-16', 'gridEnv4_sampling_dist_2021-10-05-08-12-28', 'gridEnv4_sampling_dist_2021-10-05-08-23-46', 'gridEnv4_sampling_dist_2021-10-05-08-35-02', 'gridEnv4_sampling_dist_2021-10-05-08-46-15', 'gridEnv4_sampling_dist_2021-10-05-08-57-26', 'gridEnv4_sampling_dist_2021-10-05-09-08-42', 'gridEnv4_sampling_dist_2021-10-05-09-19-52', 'gridEnv4_sampling_dist_2021-10-05-09-32-07']
 
-SAMPLING_DISTS_IDS = [
-
-]
-
-OFFLINE_DQN_EXP_IDS = [
-
-]
+OFFLINE_DQN_EXP_IDS = ['gridEnv4_offline_dqn_2021-10-05-00-21-27', 'gridEnv4_offline_dqn_2021-10-05-00-32-36', 'gridEnv4_offline_dqn_2021-10-05-00-43-54', 'gridEnv4_offline_dqn_2021-10-05-00-55-09', 'gridEnv4_offline_dqn_2021-10-05-01-06-24', 'gridEnv4_offline_dqn_2021-10-05-01-17-38', 'gridEnv4_offline_dqn_2021-10-05-01-28-51', 'gridEnv4_offline_dqn_2021-10-05-01-40-10', 'gridEnv4_offline_dqn_2021-10-05-01-51-22', 'gridEnv4_offline_dqn_2021-10-05-02-02-37', 'gridEnv4_offline_dqn_2021-10-05-02-13-49', 'gridEnv4_offline_dqn_2021-10-05-02-25-03', 'gridEnv4_offline_dqn_2021-10-05-02-36-15', 'gridEnv4_offline_dqn_2021-10-05-02-47-23', 'gridEnv4_offline_dqn_2021-10-05-02-58-36', 'gridEnv4_offline_dqn_2021-10-05-03-09-47', 'gridEnv4_offline_dqn_2021-10-05-03-21-04', 'gridEnv4_offline_dqn_2021-10-05-03-32-20', 'gridEnv4_offline_dqn_2021-10-05-03-43-33', 'gridEnv4_offline_dqn_2021-10-05-03-54-45', 'gridEnv4_offline_dqn_2021-10-05-04-05-59', 'gridEnv4_offline_dqn_2021-10-05-04-17-11', 'gridEnv4_offline_dqn_2021-10-05-04-28-24', 'gridEnv4_offline_dqn_2021-10-05-04-39-32', 'gridEnv4_offline_dqn_2021-10-05-04-50-41', 'gridEnv4_offline_dqn_2021-10-05-05-01-55', 'gridEnv4_offline_dqn_2021-10-05-05-13-06', 'gridEnv4_offline_dqn_2021-10-05-05-24-17', 'gridEnv4_offline_dqn_2021-10-05-05-35-34', 'gridEnv4_offline_dqn_2021-10-05-05-46-49', 'gridEnv4_offline_dqn_2021-10-05-05-58-04', 'gridEnv4_offline_dqn_2021-10-05-06-09-19', 'gridEnv4_offline_dqn_2021-10-05-06-20-31', 'gridEnv4_offline_dqn_2021-10-05-06-31-41', 'gridEnv4_offline_dqn_2021-10-05-06-42-57', 'gridEnv4_offline_dqn_2021-10-05-06-54-11', 'gridEnv4_offline_dqn_2021-10-05-07-05-21', 'gridEnv4_offline_dqn_2021-10-05-07-16-28', 'gridEnv4_offline_dqn_2021-10-05-07-27-46', 'gridEnv4_offline_dqn_2021-10-05-07-39-01', 'gridEnv4_offline_dqn_2021-10-05-07-50-12', 'gridEnv4_offline_dqn_2021-10-05-08-01-24', 'gridEnv4_offline_dqn_2021-10-05-08-12-36', 'gridEnv4_offline_dqn_2021-10-05-08-23-54', 'gridEnv4_offline_dqn_2021-10-05-08-35-10', 'gridEnv4_offline_dqn_2021-10-05-08-46-24', 'gridEnv4_offline_dqn_2021-10-05-08-57-34', 'gridEnv4_offline_dqn_2021-10-05-09-08-51', 'gridEnv4_offline_dqn_2021-10-05-09-20-01', 'gridEnv4_offline_dqn_2021-10-05-09-32-15']
 #################################################################
 
 FIGURE_X = 8.0
@@ -39,7 +33,7 @@ def main():
     os.makedirs(output_folder, exist_ok=True)
 
     optimal_dists = []
-    for optimal_dist_id in OPTIMAL_DISTS_IDS:
+    for optimal_dist_id in OPTIMAL_SAMPLING_DIST_IDS:
         optimal_dist_path = DATA_FOLDER_PATH + optimal_dist_id + '/data.json'
         print(optimal_dist_path)
         with open(optimal_dist_path, 'r') as f:
@@ -77,7 +71,7 @@ def main():
                         for optimal_dist in optimal_dists])
         ratio_dist = np.min([np.max(optimal_dist/(sampling_dist+1e-06))
                         for optimal_dist in optimal_dists])
-        kl_dist = np.min([scipy.stats.entropy(optimal_dist,sampling_dist)
+        kl_dist = np.min([scipy.stats.entropy(optimal_dist,sampling_dist+1e-06)
                         for optimal_dist in optimal_dists])
 
         wass_dists.append(wass_dist)
@@ -87,8 +81,8 @@ def main():
     print('wass_dists', wass_dists)
     print('ratio_dists', ratio_dists)
     print('kl_dists', kl_dists)
-    
-    for metric in ['qvals_avg_error', 'default_rewards']:
+
+    for metric in ['qvals_avg_error', 'rewards_default']:
 
         data_to_plot = [x[metric] for x in offline_dqn_metrics]
 
@@ -96,7 +90,7 @@ def main():
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
         Y = [y for _, y in sorted(zip(kl_dists, data_to_plot))]
-        plt.plot(sorted(kl_dists), Y)
+        #plt.plot(sorted(kl_dists), Y)
         plt.scatter(sorted(kl_dists), Y)
         plt.xlabel('KL div.')
         plt.yscale('log')
@@ -110,7 +104,7 @@ def main():
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
         Y = [y for _, y in sorted(zip(ratio_dists, data_to_plot))]
-        plt.plot(sorted(ratio_dists), Y)
+        #plt.plot(sorted(ratio_dists), Y)
         plt.scatter(sorted(ratio_dists), Y)
         plt.yscale('log')
         plt.xlabel('Ratio dist.')
@@ -124,7 +118,7 @@ def main():
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
         Y = [y for _, y in sorted(zip(wass_dists, data_to_plot))]
-        plt.plot(sorted(wass_dists), Y)
+        #plt.plot(sorted(wass_dists), Y)
         plt.scatter(sorted(wass_dists), Y)
         plt.yscale('log')
         plt.xlabel('Wass. dist.')
