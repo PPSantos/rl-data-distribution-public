@@ -13,51 +13,11 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
+sns.set_style(style='white')
 plt.style.use('ggplot')
 #matplotlib.rcParams['text.usetex'] = True
 #matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
 #matplotlib.rcParams.update({'font.size': 13})
-
-FIGURE_X = 8.0
-FIGURE_Y = 6.0
-
-DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
-PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/analysis/plots/'
-
-sns.set_style(style='white')
-
-
-def _build_policy_func(num_switched_actions=20, epsilon=0.3):
-    print('num_switched_actions=', num_switched_actions)
-    print('epsilon=', epsilon)
-
-    # gridEnv 4 top optimal trajectory.
-    actions = [0,0,0,0,0,0,0,0,
-               4,4,4,4,4,4,4,2,
-               4,4,4,4,4,4,4,2,
-               4,4,4,4,4,4,4,2,
-               1,0,0,0,0,0,0,4,
-               4,4,4,4,4,4,4,1,
-               4,4,4,4,4,4,4,1,
-               4,4,4,4,4,4,4,1]
-    print(actions)
-
-    switched_actions_idxs = np.random.choice(np.arange(len(actions)),
-                            size=num_switched_actions,replace=False)
-    for idx in switched_actions_idxs:
-        new_action = np.random.randint(low=0,high=5)
-        actions[idx] = new_action
-
-    print(actions)
-    
-    def p(s):
-        if np.random.rand() <= epsilon:
-            return np.random.randint(low=0,high=5)
-        else:
-            return actions[s]
-
-    return p
-
 
 DEFAULT_SAMPLING_DIST_ARGS = {
     # WARNING: only works with tabular/grid envs.
@@ -73,21 +33,24 @@ DEFAULT_SAMPLING_DIST_ARGS = {
         'smooth_obs': False,
         'one_hot_obs': False,
     },
-
 }
+
+FIGURE_X = 8.0
+FIGURE_Y = 6.0
+
+DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
+PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/analysis/plots/'
 
 def create_exp_name(args):
     return args['env_args']['env_name'] + \
         '_' + 'sampling_dist' + '_' + \
         str(datetime.today().strftime('%Y-%m-%d-%H-%M-%S'))
 
-def main(args=None, policy=None):
+
+def main(policy, args=None):
 
     if not args:
         args = DEFAULT_SAMPLING_DIST_ARGS
-    
-    if not policy:
-        policy = _build_policy_func()
 
     # Setup experiment data folder.
     exp_name = create_exp_name(args)

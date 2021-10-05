@@ -11,30 +11,20 @@ from analysis.plots import main as plots
 
 from utils.sampling_dist import DEFAULT_SAMPLING_DIST_ARGS
 from utils.sampling_dist import main as sampling_dist
+from algos.utils.array_functions import build_boltzmann_policy
 
+#################################################################
 ENV_NAME = 'gridEnv4'
 NUM_SAMPLING_DISTS = 50
 OPTIMAL_QVALS_EXP_ID = 'gridEnv4_offline_dqn_2021-10-03-00-02-12'
-
 HIDDEN_LAYERS = {'gridEnv1': [20,40,20],
                  'gridEnv4': [20,40,20],
                  'multiPathsEnv': [20,40,20],
                  'pendulum': [32,64,32],
                  'mountaincar': [64,128,64]}
+#################################################################
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data'
-
-
-def boltzmann(x, t=10):
-    return np.exp(x*t)/np.sum(np.exp(x*t))
-
-def build_policy(qvals, temperature):
-    print('temperature=', temperature)
-    def policy(s):
-        optimal_qvals = qvals # [S,A]
-        action_probs = boltzmann(optimal_qvals[s], t=temperature)
-        return np.random.choice(np.arange(optimal_qvals.shape[-1]), p=action_probs)
-    return policy
 
 
 if __name__ == "__main__":
@@ -67,10 +57,10 @@ if __name__ == "__main__":
         # Build sampling policy.
         run_idx = np.random.choice(np.arange(optimal_qvals.shape[0])) # Randomly select the Q-values of one of the runs.
         run_qvals = optimal_qvals[run_idx,:,:] # [S,A]
-        policy = build_policy(run_qvals, temperature=np.random.uniform(low=-10.0,high=10.0))
+        policy = build_boltzmann_policy(run_qvals, temperature=np.random.uniform(low=-10.0,high=10.0))
 
         # Create sampling dist.
-        sampling_dist_path, sampling_dist_id = sampling_dist(args=sampling_dist_args, policy=policy)
+        sampling_dist_path, sampling_dist_id = sampling_dist(policy=policy, args=sampling_dist_args)
         sampling_dist_ids.append(sampling_dist_id)
 
         # Run ofline RL.
