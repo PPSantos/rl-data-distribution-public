@@ -24,11 +24,9 @@ if __name__ == "__main__":
                 'pendulum', 'mountaincar']:
 
         print('env=', env)
-        args['env_args']['env_name'] = env
 
-        val_iter_data = VAL_ITER_DATA[env]
-        print('val_iter_data', val_iter_data)
-
+        # Setup train args.
+        args['env_name'] = env
         args[algo_dict_key]['hidden_layers'] = hidden_layers[env]
 
         for a in [0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]:
@@ -39,7 +37,7 @@ if __name__ == "__main__":
             exp_path, exp_id = train(args)
             exp_ids.append(exp_id)
             # Compute plots.
-            plots(exp_id, val_iter_data)
+            plots(exp_id, VAL_ITER_DATA[env])
             # Compress and cleanup.
             shutil.make_archive(exp_path,
                                 'gztar',
@@ -155,7 +153,7 @@ if __name__ == "__main__":
 
     # Vary alpha exp.
     # (only for dqn algorithm)
-    alphas = [0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
+    """ alphas = [0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
     for a in alphas:
 
         print('a=', a)
@@ -172,4 +170,4 @@ if __name__ == "__main__":
                             exp_id)
         shutil.rmtree(exp_path)
 
-        print('Exp. ids:', exp_ids)
+        print('Exp. ids:', exp_ids) """

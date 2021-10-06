@@ -36,6 +36,9 @@ DEFAULT_TRAIN_ARGS = {
     'algo': 'offline_dqn',
     'gamma': 0.9, # discount factor.
 
+    # Environment arguments.
+    'env_name': 'gridEnv1',
+
     # Period at which the Q-values are stored.
     # (the period can either be number of steps
     # or episodes, depending on the algorihm)
@@ -51,16 +54,6 @@ DEFAULT_TRAIN_ARGS = {
     # or episodes, depending on the algorihm)
     'rollouts_period': 1_000,
     'num_rollouts': 5,
-
-    # Env. arguments.
-    'env_args': {
-        'env_name': 'gridEnv4',
-        'dim_obs': 8, # (for grid env. only).
-        'time_limit': 50, # (for grid env. only).
-        'tabular': False, # (for grid env. only).
-        'smooth_obs': False, # (for grid env. only).
-        'one_hot_obs': False, # (for grid env. only).
-    },
 
     # Value iteration arguments.
     'val_iter_args': {
@@ -108,7 +101,7 @@ DEFAULT_TRAIN_ARGS = {
 }
 
 def create_exp_name(args):
-    return args['env_args']['env_name'] + \
+    return args['env_name'] + \
         '_' + args['algo'] + '_' + \
         str(datetime.today().strftime('%Y-%m-%d-%H-%M-%S'))
 
@@ -120,13 +113,7 @@ def train_run(run_args):
     time.sleep(time_delay)
 
     # Load train (and rollouts) environment.
-    env_name = args['env_args']['env_name']
-    if env_name in env_suite.CUSTOM_GRID_ENVS.keys():
-        env, env_grid_spec, rollouts_envs = env_suite.get_custom_grid_env(**args['env_args'],
-                                                        absorb=False, seed=time_delay)
-    else:
-        env, rollouts_envs = env_suite.get_env(env_name, seed=time_delay)
-        env_grid_spec = None
+    env, env_grid_spec, rollouts_envs = env_suite.get_env(args['env_name'], seed=time_delay)
 
     # Instantiate algorithm.
     if args['algo'] == 'val_iter':
@@ -199,7 +186,7 @@ if __name__ == "__main__":
     if DEFAULT_TRAIN_ARGS['algo'] not in ('val_iter',):
 
         from analysis.plots import main as plots
-        env_name = DEFAULT_TRAIN_ARGS['env_args']['env_name']
+        env_name = DEFAULT_TRAIN_ARGS['env_name']
         val_iter_data = VAL_ITER_DATA[env_name]
 
         # Compute plots.

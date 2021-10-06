@@ -103,7 +103,7 @@ def main(exp_id, val_iter_exp):
         exp_id = c_args.exp
         val_iter_exp = c_args.val_iter_exp
 
-    print('Arguments (analysis/plots_single.py):')
+    print('Arguments (analysis/plots.py):')
     print('Exp. id: {0}'.format(exp_id))
     print('Val. iter. exp. id: {0}\n'.format(val_iter_exp))
 
@@ -169,7 +169,7 @@ def main(exp_id, val_iter_exp):
     # Scalar metrics dict.
     scalar_metrics = {}
 
-    is_grid_env = exp_args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys()
+    is_grid_env = exp_args['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys()
     print('is_grid_env:', is_grid_env)
     if is_grid_env:
         lateral_size = int(np.sqrt(len(val_iter_data['policy']))) # Assumes env. is a square.
@@ -182,16 +182,16 @@ def main(exp_id, val_iter_exp):
     """
         `rollouts_rewards` plot.
     """
-    if exp_args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys():
-        rollouts_types = sorted(env_suite.CUSTOM_GRID_ENVS[exp_args['env_args']['env_name']].keys())
-    elif exp_args['env_args']['env_name'] == 'pendulum':
+    if exp_args['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys():
+        rollouts_types = sorted(env_suite.CUSTOM_GRID_ENVS[exp_args['env_name']].keys())
+    elif exp_args['env_name'] == 'pendulum':
         rollouts_types = sorted(env_suite.PENDULUM_ENVS.keys())
-    elif exp_args['env_args']['env_name'] == 'mountaincar':
+    elif exp_args['env_name'] == 'mountaincar':
         rollouts_types = sorted(env_suite.MOUNTAINCAR_ENVS.keys())
-    elif exp_args['env_args']['env_name'] == 'multiPathsEnv':
+    elif exp_args['env_name'] == 'multiPathsEnv':
         rollouts_types = sorted(env_suite.MULTIPATHS_ENVS.keys())
     else:
-        raise ValueError(f'Env. {exp_args["env_args"]["env_name"]} does not have rollout types defined.')
+        raise ValueError(f'Env. {exp_args["env_name"]} does not have rollout types defined.')
 
     for t, rollout_type in enumerate(rollouts_types):
         print(f'Computing `rollouts_rewards_{rollout_type}` plot.')
@@ -223,7 +223,7 @@ def main(exp_id, val_iter_exp):
     """
         `maximizing_action_s_*` plots.
     """
-    if exp_args['env_args']['env_name'] not in ('pendulum', 'mountaincar'):
+    if exp_args['env_name'] not in ('pendulum', 'mountaincar'):
         print('Computing `maximizing_action_s_*` plots.')
 
         for state in range(data['Q_vals'].shape[2]):
@@ -434,7 +434,7 @@ def main(exp_id, val_iter_exp):
         `Q_values_s*-*-*` plots.
     """
     print('Computing `Q_values_s*-*-*` plots.')
-    if exp_args['env_args']['env_name'] not in ('pendulum', 'mountaincar'):
+    if exp_args['env_name'] not in ('pendulum', 'mountaincar'):
         for state_to_plot in range(data['Q_vals'].shape[2]):
 
             # Plot.
@@ -478,7 +478,7 @@ def main(exp_id, val_iter_exp):
     """
         Replay buffer statistics: P(a|s).
     """
-    if exp_args['env_args']['env_name'] not in ('pendulum', 'mountaincar'):
+    if exp_args['env_name'] not in ('pendulum', 'mountaincar'):
         print('Computing `Replay buffer: P(a|s)` plots.')
 
         for state in range(data['Q_vals'].shape[2]):
@@ -522,7 +522,7 @@ def main(exp_id, val_iter_exp):
     """
         Replay buffer statistics: H[P(a|s)].
     """
-    if exp_args['env_args']['env_name'] not in ('pendulum', 'mountaincar'):
+    if exp_args['env_name'] not in ('pendulum', 'mountaincar'):
         print('Computing `Replay buffer: P(a|s) entropy` plots.')
 
         for state in range(data['Q_vals'].shape[2]):

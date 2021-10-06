@@ -10,13 +10,12 @@ from train import train
 from train import DEFAULT_TRAIN_ARGS, VAL_ITER_DATA
 from analysis.plots import main as plots
 
-from utils.sampling_dist import DEFAULT_SAMPLING_DIST_ARGS
 from utils.sampling_dist import main as sampling_dist
 from algos.utils.array_functions import build_boltzmann_policy
 
 #################################################################
 ENV_NAME = 'gridEnv4'
-NUM_SAMPLING_DISTS = 50
+NUM_SAMPLING_DISTS = 25
 OPTIMAL_QVALS_EXP_ID = 'gridEnv4_offline_dqn_2021-10-03-00-02-12'
 HIDDEN_LAYERS = {'gridEnv1': [20,40,20],
                  'gridEnv4': [20,40,20],
@@ -24,9 +23,9 @@ HIDDEN_LAYERS = {'gridEnv1': [20,40,20],
                  'pendulum': [32,64,32],
                  'mountaincar': [64,128,64]}
 
-# Additional rejection sampling args
+# Additional rejection sampling args.
 # (if `OPTIMAL_SAMPLING_DIST_IDS` is not None).
-OPTIMAL_SAMPLING_DIST_IDS = ['gridEnv4_sampling_dist_2021-10-05-10-52-48', 'gridEnv4_sampling_dist_2021-10-05-10-52-50', 'gridEnv4_sampling_dist_2021-10-05-10-52-53', 'gridEnv4_sampling_dist_2021-10-05-10-52-56', 'gridEnv4_sampling_dist_2021-10-05-10-52-59', 'gridEnv4_sampling_dist_2021-10-05-10-53-01', 'gridEnv4_sampling_dist_2021-10-05-10-53-04', 'gridEnv4_sampling_dist_2021-10-05-10-53-07', 'gridEnv4_sampling_dist_2021-10-05-10-53-09', 'gridEnv4_sampling_dist_2021-10-05-10-53-12', 'gridEnv4_sampling_dist_2021-10-05-10-53-15', 'gridEnv4_sampling_dist_2021-10-05-10-53-18', 'gridEnv4_sampling_dist_2021-10-05-10-53-20', 'gridEnv4_sampling_dist_2021-10-05-10-53-23', 'gridEnv4_sampling_dist_2021-10-05-10-53-26', 'gridEnv4_sampling_dist_2021-10-05-10-53-28', 'gridEnv4_sampling_dist_2021-10-05-10-53-31', 'gridEnv4_sampling_dist_2021-10-05-10-53-34', 'gridEnv4_sampling_dist_2021-10-05-10-53-37', 'gridEnv4_sampling_dist_2021-10-05-10-53-39']
+OPTIMAL_SAMPLING_DIST_IDS = None
 TARGET_INTERVAL = [2,10]
 #################################################################
 
@@ -37,13 +36,10 @@ if __name__ == "__main__":
 
     # Load args.
     args = DEFAULT_TRAIN_ARGS
-    sampling_dist_args = DEFAULT_SAMPLING_DIST_ARGS
     algo_dict_key = args['algo'] + '_args'
 
-    # Setup args.
-    args['env_args']['env_name'] = ENV_NAME
-    sampling_dist_args['env_args']['env_name'] = ENV_NAME
-    val_iter_data = VAL_ITER_DATA[ENV_NAME]
+    # Setup train args.
+    args['env_name'] = ENV_NAME
     args[algo_dict_key]['hidden_layers'] = HIDDEN_LAYERS[ENV_NAME]
 
     # Load optimal Q-values.
@@ -82,7 +78,7 @@ if __name__ == "__main__":
         policy = build_boltzmann_policy(run_qvals, temperature=sampled_temperature)
 
         # Create sampling dist.
-        sampling_dist_path, sampling_dist_id = sampling_dist(policy=policy, args=sampling_dist_args)
+        sampling_dist_path, sampling_dist_id = sampling_dist(env_name=ENV_NAME, policy=policy)
 
         if OPTIMAL_SAMPLING_DIST_IDS is not None:
             # Only accept sampled dist if distance is inside `TARGET_INTERVAL`.
@@ -108,7 +104,7 @@ if __name__ == "__main__":
         exp_path, exp_id = train(args)
         exp_ids.append(exp_id)
         # Compute plots.
-        plots(exp_id, val_iter_data)
+        plots(exp_id, VAL_ITER_DATA[ENV_NAME])
         # Compress and cleanup.
         shutil.make_archive(exp_path,
                             'gztar',

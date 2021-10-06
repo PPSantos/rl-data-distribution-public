@@ -19,68 +19,43 @@ plt.style.use('ggplot')
 #matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
 #matplotlib.rcParams.update({'font.size': 13})
 
-DEFAULT_SAMPLING_DIST_ARGS = {
-    # WARNING: only works with tabular/grid envs.
-
-    'num_episodes': 10_000,
-
-    # Env. arguments.
-    'env_args': {
-        'env_name': 'gridEnv4',
-        'dim_obs': 8,
-        'time_limit': 25,
-        'tabular': True, # do not change.
-        'smooth_obs': False,
-        'one_hot_obs': False,
-    },
-}
-
 FIGURE_X = 8.0
 FIGURE_Y = 6.0
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/analysis/plots/'
 
-def create_exp_name(args):
-    return args['env_args']['env_name'] + \
+def create_exp_name(env_name):
+    return env_name + \
         '_' + 'sampling_dist' + '_' + \
         str(datetime.today().strftime('%Y-%m-%d-%H-%M-%S'))
 
 
-def main(policy, args=None):
-
-    if not args:
-        args = DEFAULT_SAMPLING_DIST_ARGS
+def main(env_name, policy, num_episodes=10_000):
 
     # Setup experiment data folder.
-    exp_name = create_exp_name(args)
+    exp_name = create_exp_name(env_name)
     exp_path = DATA_FOLDER_PATH + exp_name
     os.makedirs(exp_path, exist_ok=True)
     print('\nSampling dist. ID:', exp_name)
     print('utils/sampling_dist.py arguments:')
-    print(args)
+    print('env_name', env_name, ', num_episodes', num_episodes)
 
     # Setup plots folder.
     plots_folder_path = PLOTS_FOLDER_PATH + exp_name
     os.makedirs(plots_folder_path, exist_ok=True)
 
     # Load train (and rollouts) environment.
-    env_name = args['env_args']['env_name']
-    if env_name in env_suite.CUSTOM_GRID_ENVS.keys():
-        env, env_grid_spec, rollouts_envs = env_suite.get_custom_grid_env(**args['env_args'],
-                                                        absorb=False)
-    else:
-        raise ValueError('Only implemented for grid/tabular environments.')
-        # env, rollouts_envs = env_suite.get_env(env_name, seed=time_delay)
-        # env_grid_spec = None
+    env, env_grid_spec, rollouts_envs = env_suite.get_env(env_name, seed=time_delay)
 
     # Rollout policy.
     episode_rewards = []
     sa_counts = np.zeros((env.num_states, env.num_actions))
 
-    for _ in tqdm(range(args['num_episodes'])):
+    for _ in tqdm(range(num_episodes)):
 
-        s_t = env.reset()
+        obs = env.reset()
+        s_t = env.get_state()
 
         done = False
         episode_cumulative_reward = 0
@@ -90,7 +65,8 @@ def main(policy, args=None):
             a_t = policy(s_t)
 
             # Env step.
-            s_t1, r_t1, done, info = env.step(a_t)
+            obs_t1, r_t1, done, info = env.step(a_t)
+            s_t1 = env.get_state()
 
             # Log data.
             episode_cumulative_reward += r_t1
@@ -110,7 +86,8 @@ def main(policy, args=None):
     print('(S,A) dist. entropy:', scipy.stats.entropy(sampling_dist_flattened))
     data['sampling_dist'] = sampling_dist_flattened
 
-    if args['env_args']['env_name'] in ('gridEnv1', 'gridEnv4'):
+    # Optionally plot sampling distribution.
+    if env_name in ('gridEnv1', 'gridEnv4'):
 
         # 2D plot.
         s_counts = np.sum(sa_counts, axis=1) # [S]
@@ -160,6 +137,3 @@ def main(policy, args=None):
     f.close()
 
     return exp_path + "/data.json", exp_name
-
-if __name__ == "__main__":
-    main()

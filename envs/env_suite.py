@@ -359,10 +359,24 @@ def wrap_time(env, time_limit=50):
 
 
 # Environments suite.
-ENV_KEYS = ['pendulum', 'mountaincar', 'multiPathsEnv', 'mdp1']
+ENV_KEYS = ['gridEnv1', 'gridEnv4', 'pendulum', 'mountaincar', 'multiPathsEnv', 'mdp1']
 def get_env(name, seed):
 
-    if name == 'pendulum':
+    if name == 'gridEnv1':
+        env, env_grid_spec, rollouts_envs = get_custom_grid_env(env_name=name, dim_obs=8,
+                                                        time_limit=50, tabular=False,
+                                                        smooth_obs=False, one_hot_obs=False,
+                                                        absorb=False, seed=seed)
+        return env, env_grid_spec, rollouts_envs
+
+    elif name == 'gridEnv4':
+        env, env_grid_spec, rollouts_envs = get_custom_grid_env(env_name=name, dim_obs=8,
+                                                        time_limit=50, tabular=False,
+                                                        smooth_obs=False, one_hot_obs=False,
+                                                        absorb=False, seed=seed)
+        return env, env_grid_spec, rollouts_envs
+
+    elif name == 'pendulum':
         # Load default env.
         default_params = PENDULUM_ENVS['default']
         train_env = tabular_env.InvertedPendulum(state_discretization=32,
@@ -381,7 +395,8 @@ def get_env(name, seed):
             r_env = wrap_time(r_env, time_limit=50)
             rollouts_envs.append(r_env)
 
-        return train_env, rollouts_envs
+        env_grid_spec = None
+        return train_env, env_grid_spec, rollouts_envs
 
     elif name == 'mountaincar':
         # Load default env.
@@ -402,7 +417,8 @@ def get_env(name, seed):
             r_env = wrap_time(r_env, time_limit=100)
             rollouts_envs.append(r_env)
 
-        return train_env, rollouts_envs
+        env_grid_spec = None
+        return train_env, env_grid_spec, rollouts_envs
 
     elif name == 'multiPathsEnv':
         # Load default env.
@@ -425,7 +441,8 @@ def get_env(name, seed):
                 r_env = time_limit_wrapper.TimeLimitWrapper(r_env, time_limit=10)            
             rollouts_envs.append(r_env)
 
-        return train_env, rollouts_envs
+        env_grid_spec = None
+        return train_env, env_grid_spec, rollouts_envs
 
     elif name == 'mdp1':
         env = tabular_env.MDP1()
@@ -434,29 +451,8 @@ def get_env(name, seed):
         r_env = tabular_env.MDP1()
         r_env = time_limit_wrapper.TimeLimitWrapper(r_env, time_limit=5)
 
-        return env, [r_env]
+        env_grid_spec = None
+        return env, env_grid_spec, [r_env]
 
     else:
         raise NotImplementedError('Unknown env id: %s' % name)
-
-    # if name == 'grid16randomobs':
-    #     env = random_grid_env(16, 16, dim_obs=16, time_limit=50, wall_ratio=0.2, smooth_obs=False, seed=0)
-    # elif name == 'grid16onehot':
-    #     env = random_grid_env(16, 16, time_limit=50, wall_ratio=0.2, one_hot_obs=True, seed=0)
-    # elif name == 'grid16sparse':
-    #     env = random_grid_env(16, 16, time_limit=50, wall_ratio=0.2, one_hot_obs=True, seed=0, distance_reward=False)
-    # elif name == 'grid64randomobs':
-    #     env = random_grid_env(64, 64, dim_obs=64, time_limit=100, wall_ratio=0.2, smooth_obs=False, seed=0)
-    # elif name == 'grid64onehot':
-    #     env = random_grid_env(64, 64, time_limit=100, wall_ratio=0.2, one_hot_obs=True, seed=0)
-    # elif name == 'cliffwalk':
-    #     with math_utils.np_seed(0):
-    #         env = tabular_env.CliffwalkEnv(25)
-    #         # Cliffwalk is unsolvable by QI with moderate entropy - up the reward to reduce the effects.
-    #         env = env_wrapper.AbsorbingStateWrapper(env, absorb_reward=10.0)
-    #         env = wrap_obs_time(env, dim_obs=16, time_limit=50)
-    # elif name == 'sparsegraph':
-    #     with math_utils.np_seed(0):
-    #         env = tabular_env.RandomTabularEnv(num_states=500, num_actions=3, transitions_per_action=1, self_loop=True)
-    #         env = env_wrapper.AbsorbingStateWrapper(env, absorb_reward=10.0)
-    #         env = wrap_obs_time(env, dim_obs=4, time_limit=10)
