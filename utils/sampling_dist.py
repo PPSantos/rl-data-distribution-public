@@ -46,7 +46,7 @@ def main(env_name, policy, num_episodes=10_000):
     os.makedirs(plots_folder_path, exist_ok=True)
 
     # Load train (and rollouts) environment.
-    env, env_grid_spec, rollouts_envs = env_suite.get_env(env_name, seed=time_delay)
+    env, env_grid_spec, rollouts_envs = env_suite.get_env(env_name)
 
     # Rollout policy.
     episode_rewards = []

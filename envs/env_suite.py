@@ -360,7 +360,7 @@ def wrap_time(env, time_limit=50):
 
 # Environments suite.
 ENV_KEYS = ['gridEnv1', 'gridEnv4', 'pendulum', 'mountaincar', 'multiPathsEnv', 'mdp1']
-def get_env(name, seed):
+def get_env(name, seed=None):
 
     if name == 'gridEnv1':
         env, env_grid_spec, rollouts_envs = get_custom_grid_env(env_name=name, dim_obs=8,
