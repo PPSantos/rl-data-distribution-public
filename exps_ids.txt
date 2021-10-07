@@ -66,10 +66,10 @@ OPTIMAL_SAMPLING_DIST_IDS = [
 
 ]
 OFFLINE_DQN_EXP_IDS = [
-
+'pendulum_offline_dqn_2021-10-07-09-55-12', 'pendulum_offline_dqn_2021-10-07-10-09-51', 'pendulum_offline_dqn_2021-10-07-10-24-12', 'pendulum_offline_dqn_2021-10-07-10-38-38', 'pendulum_offline_dqn_2021-10-07-10-53-21', 'pendulum_offline_dqn_2021-10-07-11-07-51', 'pendulum_offline_dqn_2021-10-07-11-22-26', 'pendulum_offline_dqn_2021-10-07-11-39-56', 'pendulum_offline_dqn_2021-10-07-11-56-36', 'pendulum_offline_dqn_2021-10-07-12-13-42', 'pendulum_offline_dqn_2021-10-07-12-28-57', 'pendulum_offline_dqn_2021-10-07-12-44-44', 'pendulum_offline_dqn_2021-10-07-13-01-25', 'pendulum_offline_dqn_2021-10-07-13-19-19', 'pendulum_offline_dqn_2021-10-07-13-35-27', 'pendulum_offline_dqn_2021-10-07-13-50-17', 'pendulum_offline_dqn_2021-10-07-14-04-50', 'pendulum_offline_dqn_2021-10-07-14-20-02', 'pendulum_offline_dqn_2021-10-07-14-36-46', 'pendulum_offline_dqn_2021-10-07-14-52-42', 'pendulum_offline_dqn_2021-10-07-15-09-27', 'pendulum_offline_dqn_2021-10-07-15-26-29', 'pendulum_offline_dqn_2021-10-07-15-43-12', 'pendulum_offline_dqn_2021-10-07-16-00-20', 'pendulum_offline_dqn_2021-10-07-16-16-37', 'pendulum_offline_dqn_2021-10-07-16-31-11', 'pendulum_offline_dqn_2021-10-07-16-48-12', 'pendulum_offline_dqn_2021-10-07-17-05-35', 'pendulum_offline_dqn_2021-10-07-17-22-12', 'pendulum_offline_dqn_2021-10-07-17-38-49'
 ]
 SAMPLING_DISTS_IDS = [
-
+'pendulum_sampling_dist_2021-10-07-09-54-52', 'pendulum_sampling_dist_2021-10-07-10-09-30', 'pendulum_sampling_dist_2021-10-07-10-23-51', 'pendulum_sampling_dist_2021-10-07-10-38-17', 'pendulum_sampling_dist_2021-10-07-10-53-00', 'pendulum_sampling_dist_2021-10-07-11-07-30', 'pendulum_sampling_dist_2021-10-07-11-22-04', 'pendulum_sampling_dist_2021-10-07-11-39-34', 'pendulum_sampling_dist_2021-10-07-11-56-14', 'pendulum_sampling_dist_2021-10-07-12-13-21', 'pendulum_sampling_dist_2021-10-07-12-28-36', 'pendulum_sampling_dist_2021-10-07-12-44-22', 'pendulum_sampling_dist_2021-10-07-13-01-03', 'pendulum_sampling_dist_2021-10-07-13-18-57', 'pendulum_sampling_dist_2021-10-07-13-35-06', 'pendulum_sampling_dist_2021-10-07-13-49-56', 'pendulum_sampling_dist_2021-10-07-14-04-29', 'pendulum_sampling_dist_2021-10-07-14-19-40', 'pendulum_sampling_dist_2021-10-07-14-36-25', 'pendulum_sampling_dist_2021-10-07-14-52-20', 'pendulum_sampling_dist_2021-10-07-15-09-04', 'pendulum_sampling_dist_2021-10-07-15-26-07', 'pendulum_sampling_dist_2021-10-07-15-42-50', 'pendulum_sampling_dist_2021-10-07-15-59-58', 'pendulum_sampling_dist_2021-10-07-16-16-16', 'pendulum_sampling_dist_2021-10-07-16-30-50', 'pendulum_sampling_dist_2021-10-07-16-47-50', 'pendulum_sampling_dist_2021-10-07-17-05-12', 'pendulum_sampling_dist_2021-10-07-17-21-51', 'pendulum_sampling_dist_2021-10-07-17-38-27'
 ]
 
 
@@ -78,7 +78,7 @@ SAMPLING_DISTS_IDS = [
     (???)
 """
 OPTIMAL_SAMPLING_DIST_IDS = [
-    
+
 ]
 OFFLINE_DQN_EXP_IDS = [
 
