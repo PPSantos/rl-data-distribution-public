@@ -93,6 +93,7 @@ if __name__ == "__main__":
 
             if (kl_dist < TARGET_INTERVAL[0]) or (kl_dist > TARGET_INTERVAL[1]):
                 print('REJECTED')
+                shutil.rmtree(pathlib.Path(sampling_dist_path).parent.absolute())
                 continue
 
         sampling_dist_ids.append(sampling_dist_id)

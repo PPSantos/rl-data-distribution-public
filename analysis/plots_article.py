@@ -43,7 +43,6 @@ MAXIMUM_REWARD = {
 }
 
 VAL_ITER_IDS = {
-    'mdp1': 'mdp1_val_iter_2021-08-27-17-49-23',
     'gridEnv1': 'gridEnv1_val_iter_2021-05-14-15-54-10',
     'gridEnv4': 'gridEnv4_val_iter_2021-06-16-10-08-44',
     'multiPathsEnv': 'multiPathsEnv_val_iter_2021-06-04-19-31-25',
