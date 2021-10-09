@@ -14,8 +14,9 @@ from utils.sampling_dist import main as sampling_dist
 from algos.utils.array_functions import build_eps_greedy_policy
 
 #################################################################
-ENV_NAME = 'gridEnv4'
-QVALS_EXP_ID = 'gridEnv4_offline_dqn_2021-10-03-00-02-12'
+ENV_NAME = 'multiPathsEnv'
+QVALS_EXP_ID = 'multiPathsEnv_offline_dqn_2021-10-03-11-15-09'
+EPSILON = 0.25
 #################################################################
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data'
@@ -37,7 +38,7 @@ def main():
     sampling_dist_ids = []
     for run_idx in range(final_qvals.shape[0]):
         run_qvals = final_qvals[run_idx,:,:] # [S,A]
-        policy = build_eps_greedy_policy(run_qvals, epsilon=0.0)
+        policy = build_eps_greedy_policy(run_qvals, epsilon=EPSILON)
 
         # Rollout policy and retrieve sampling dist.
         _, sampling_dist_id = sampling_dist(env_name=ENV_NAME, policy=policy)

@@ -7,10 +7,9 @@ import matplotlib
 import seaborn as sns
 plt.style.use('ggplot')
 
-matplotlib.rcParams['mathtext.fontset'] = 'stix'
-matplotlib.rcParams['font.family'] = 'STIXGeneral'
-matplotlib.pyplot.title(r'ABC123 vs $\mathrm{ABC123}^{123}$')
-matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['text.usetex'] =  True
+matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
+matplotlib.rcParams.update({'font.size': 12})
 
 
 FIGURE_X = 6.0
@@ -95,7 +94,7 @@ if __name__ == '__main__':
     # plt.savefig('{0}/grid.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0) """
 
     # code to generate 'correct_actions' plot (oracle version).
-    """ alphas = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5] # [1.25] # np.linspace(1.0, 1.0, 1001)
+    """ alphas = [1.25] # np.linspace(1.0, 1.0, 1001)
     x_dim = 101
     X = np.linspace(0.0,1.0,x_dim)
     Z = np.zeros((len(alphas), x_dim))        
@@ -133,7 +132,7 @@ if __name__ == '__main__':
 
     ax.set_xlabel('$\mu(s_1,a_1)$')
     ax.set_ylabel('\# correct actions')
-    plt.legend()
+    plt.legend(loc=3,ncol=2)
 
     ax.set_ylim(-0.1,2.1)
     ax.set_yticks([0.0, 1.0, 2.0])
@@ -146,10 +145,10 @@ if __name__ == '__main__':
     sec_ax.set_xlabel('$\mu(s_2,a_1)$')
 
     plt.savefig('{0}/2d_plot.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/2d_plot.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/2d_plot.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0) """
 
     # averaged (for different alphas) plot.
-    print(X)
+    """print(X)
     averaged = np.average(Z, axis=0)
     print(averaged)
     fig = plt.figure()
@@ -159,7 +158,7 @@ if __name__ == '__main__':
     plt.ylabel('Correct actions')
     plt.legend()
     plt.savefig('{0}/2d_averaged_plot.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    # plt.savefig('{0}/2d_averaged_plot.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0) """
+    # plt.savefig('{0}/2d_averaged_plot.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)"""
 
     # single fixed point calculation.
     """ alpha = 1.2
@@ -190,7 +189,7 @@ if __name__ == '__main__':
     print('correct_actions:', correct_actions) """
 
     """ # One-step TD version (fixed point calculation).
-    alphas = [1.25] # [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
+    alphas = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5] # [1.25]
     x_dim = 100
     Y = np.zeros((len(alphas), x_dim))        
     X = np.linspace(0.0, 1.0, x_dim)
@@ -266,7 +265,7 @@ if __name__ == '__main__':
 
     ax.set_xlabel('$\mu(s_1,a_1)$')
     ax.set_ylabel('\# correct actions')
-    plt.legend()
+    plt.legend(loc=3,ncol=2)
 
     ax.set_ylim(-0.1,2.1)
     ax.set_yticks([0.0, 1.0, 2.0])
