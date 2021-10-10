@@ -47,7 +47,7 @@ VAL_ITER_IDS = {
     'gridEnv4': 'gridEnv4_val_iter_2021-06-16-10-08-44',
     'multiPathsEnv': 'multiPathsEnv_val_iter_2021-06-04-19-31-25',
     'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
-    #'mountaincar': 'mountaincar_val_iter_2021-09-15-18-56-32',
+    'mountaincar': 'mountaincar_val_iter_2021-09-15-18-56-32',
 }
 
 EXP_SETUP_1_IDS = {
@@ -87,7 +87,15 @@ EXP_SETUP_1_IDS = {
         'pendulum_offline_dqn_2021-09-30-14-51-05.tar.gz',
         'pendulum_offline_dqn_2021-09-30-16-07-30.tar.gz',
     ],
-    # 'mountaincar': [],
+    'mountaincar': [
+        'mountaincar_offline_dqn_2021-09-30-17-23-26.tar.gz',
+        'mountaincar_offline_dqn_2021-09-30-19-13-16.tar.gz',
+        'mountaincar_offline_dqn_2021-09-30-21-02-34.tar.gz',
+        'mountaincar_offline_dqn_2021-09-30-22-51-20.tar.gz',
+        'mountaincar_offline_dqn_2021-10-01-00-40-35.tar.gz',
+        'mountaincar_offline_dqn_2021-10-01-02-35-59.tar.gz',
+        'mountaincar_offline_dqn_2021-10-01-04-31-09.tar.gz',
+    ],
 }
 #################################################################
 
