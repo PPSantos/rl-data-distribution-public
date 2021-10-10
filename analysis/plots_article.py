@@ -105,7 +105,6 @@ EXP_SETUP_2_IDS = {
         'gridEnv1_offline_dqn_2021-09-28-15-20-03.tar.gz',
         'gridEnv1_offline_dqn_2021-09-28-16-54-14.tar.gz',
         'gridEnv1_offline_dqn_2021-09-28-18-27-46.tar.gz',
-        'gridEnv1_offline_dqn_2021-09-28-20-01-40.tar.gz',
     ],
     'gridEnv4': [
         'gridEnv4_offline_dqn_2021-09-29-01-05-19.tar.gz',
