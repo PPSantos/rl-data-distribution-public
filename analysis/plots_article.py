@@ -126,8 +126,8 @@ EXP_SETUP_2_IDS = {
     ],
     'pendulum': [
         'pendulum_offline_dqn_2021-10-08-11-35-33.tar.gz',
-        'pendulum_offline_dqn_2021-10-08-12-21-14.tar.gz',
-        'pendulum_offline_dqn_2021-10-08-13-06-04.tar.gz',
+        'pendulum_offline_dqn_2021-10-10-20-52-08.tar.gz',
+        'pendulum_offline_dqn_2021-10-10-22-27-30.tar.gz',
         'pendulum_offline_dqn_2021-10-08-13-50-42.tar.gz',
         'pendulum_offline_dqn_2021-10-08-14-35-03.tar.gz',
         'pendulum_offline_dqn_2021-10-08-19-19-39.tar.gz',
