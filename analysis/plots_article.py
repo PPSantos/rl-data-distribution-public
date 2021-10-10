@@ -11,13 +11,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib
 plt.style.use('ggplot')
-matplotlib.rcParams['text.usetex'] =  True
-matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
-matplotlib.rcParams.update({'font.size': 13})
 
 from envs import env_suite
 
 #################################################################
+RENDER_LATEX = False
 ENVS_LABELS = {
     'gridEnv1': 'Grid 1',
     'gridEnv4': 'Grid 2',
@@ -98,6 +96,10 @@ EXP_SETUP_1_IDS = {
     ],
 }
 #################################################################
+if RENDER_LATEX:
+    matplotlib.rcParams['text.usetex'] =  True
+    matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
+    matplotlib.rcParams.update({'font.size': 13})
 
 FIGURE_X = 6.0
 FIGURE_Y = 4.0
@@ -207,8 +209,12 @@ def main():
         plt.fill_between(X, lower_ci_bounds, upper_ci_bounds,
                     color=p[0].get_color(), alpha=0.15)
 
-    plt.ylabel(r'$Q$-values error')
-    plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)]$')
+    if RENDER_LATEX:
+        plt.ylabel(r'$Q$-values error')
+        plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)]$')
+    else:
+        plt.ylabel('$Q$-values error')
+        plt.xlabel('$\mathbb{E}[\mathcal{H}(\mu)]$')
     plt.yscale('log')
     plt.legend()
     plt.savefig(f'{output_folder}/expSetup1_entropy_QvalsError.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
@@ -249,8 +255,12 @@ def main():
         plt.fill_between(X, lower_ci_bounds, upper_ci_bounds,
                     color=p[0].get_color(), alpha=0.15)
 
-    plt.ylabel(r'$Q$-values error')
-    plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)] / \mathcal{H}(\mathcal{U})$')
+    if RENDER_LATEX:
+        plt.ylabel(r'$Q$-values error')
+        plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)] / \mathcal{H}(\mathcal{U})$')
+    else:
+        plt.ylabel('$Q$-values error')
+        plt.xlabel('$\mathbb{E}[\mathcal{H}(\mu)] / \mathcal{H}(\mathcal{U})$')
     plt.yscale('log')
     plt.legend()
     plt.savefig(f'{output_folder}/expSetup1_normEntropy_QvalsError.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
@@ -304,7 +314,10 @@ def main():
                     color=p[0].get_color(), alpha=0.15)
 
     plt.ylabel('Reward')
-    plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)] / \mathcal{H}(\mathcal{U})$')
+    if RENDER_LATEX:
+        plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)] / \mathcal{H}(\mathcal{U})$')
+    else:
+        plt.xlabel('$\mathbb{E}[\mathcal{H}(\mu)] / \mathcal{H}(\mathcal{U})$')
     plt.yscale('linear')
     plt.legend()
     plt.savefig(f'{output_folder}/expSetup1_normEntropy_reward.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
@@ -359,7 +372,10 @@ def main():
                     color=p[0].get_color(), alpha=0.15)
 
     plt.ylabel('Normalized reward')
-    plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)] / \mathcal{H}(\mathcal{U})$')
+    if RENDER_LATEX:
+        plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)] / \mathcal{H}(\mathcal{U})$')
+    else:
+        plt.xlabel('$\mathbb{E}[\mathcal{H}(\mu)] / \mathcal{H}(\mathcal{U})$')
     plt.yscale('linear')
     plt.legend()
     plt.savefig(f'{output_folder}/expSetup1_normEntropy_normReward.png'.format(output_folder), bbox_inches='tight', pad_inches=0)

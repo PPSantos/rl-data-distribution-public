@@ -97,6 +97,8 @@ def main():
         plt.ylabel(metric)
         if metric == 'qvals_avg_error':
             plt.yscale('log')
+        else:
+            plt.yscale('linear')
         plt.savefig(f'{output_folder}/{metric}_kl_div.png'.format(), bbox_inches='tight', pad_inches=0)
         plt.savefig(f'{output_folder}/{metric}_kl_div.pdf'.format(), bbox_inches='tight', pad_inches=0)
 
@@ -111,6 +113,8 @@ def main():
         plt.ylabel(metric)
         if metric == 'qvals_avg_error':
             plt.yscale('log')
+        else:
+            plt.yscale('linear')
         plt.savefig(f'{output_folder}/{metric}_ratio_dist.png'.format(), bbox_inches='tight', pad_inches=0)
         plt.savefig(f'{output_folder}/{metric}_ratio_dist.pdf'.format(), bbox_inches='tight', pad_inches=0)
 
@@ -125,6 +129,8 @@ def main():
         plt.ylabel(metric)
         if metric == 'qvals_avg_error':
             plt.yscale('log')
+        else:
+            plt.yscale('linear')
         plt.savefig(f'{output_folder}/{metric}_wass_dist.png'.format(), bbox_inches='tight', pad_inches=0)
         plt.savefig(f'{output_folder}/{metric}_wass_dist.pdf'.format(), bbox_inches='tight', pad_inches=0)
 
