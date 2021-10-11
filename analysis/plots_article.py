@@ -15,7 +15,7 @@ plt.style.use('ggplot')
 from envs import env_suite
 
 #################################################################
-EXP_SETUP_TO_PLOT = 2 # [1, 2, 3, or 4]
+EXP_SETUP_TO_PLOT = 3 # [1, 2, 3, or 4]
 RENDER_LATEX = False
 ENVS_LABELS = {
     'gridEnv1': 'Grid 1',
@@ -142,6 +142,30 @@ EXP_SETUP_2_IDS = {
         'mountaincar_offline_dqn_2021-10-09-08-36-16.tar.gz',
         'mountaincar_offline_dqn_2021-10-09-09-55-54.tar.gz',
     ],
+}
+EXP_SETUP_3_IDS = {
+    'gridEnv1': [
+        'gridEnv1_offline_dqn_2021-10-01-09-04-33.tar.gz', # eps=0.0, cov=False
+        'gridEnv1_offline_dqn_2021-10-01-01-20-43.tar.gz', # eps=0.0, cov=True
+        #'gridEnv1_offline_dqn_2021-10-11-01-46-50.tar.gz', # eps=0.1, cov=False
+        #'gridEnv1_offline_dqn_2021-10-11-00-50-43.tar.gz', # eps=0.1, cov=True
+    ],
+    'gridEnv4': [
+        'gridEnv4_offline_dqn_2021-10-09-16-09-35.tar.gz', # eps=0.0, cov=False
+        'gridEnv4_offline_dqn_2021-10-01-15-44-34.tar.gz', # eps=0.0, cov=True
+        #'gridEnv4_offline_dqn_2021-10-11-03-40-59.tar.gz', # eps=0.1, cov=False # FIXME
+        #'gridEnv4_offline_dqn_2021-10-11-02-44-38.tar.gz', # eps=0.1, cov=True  # FIXME
+    ],
+    'multiPathsEnv': [
+        'multiPathsEnv_offline_dqn_2021-10-09-21-01-07.tar.gz', # eps=0.0, cov=False
+        'multiPathsEnv_offline_dqn_2021-10-09-19-56-04.tar.gz', # eps=0.0, cov=True
+    ],
+    'pendulum': [
+        'pendulum_offline_dqn_2021-10-10-03-18-38.tar.gz', # eps=0.0, cov=False
+        'pendulum_offline_dqn_2021-10-10-02-21-23.tar.gz', # eps=0.0, cov=True
+    ],
+    #'mountaincar': [
+    #],
 }
 #################################################################
 if RENDER_LATEX:
@@ -438,7 +462,85 @@ def main():
         plt.savefig(f'{output_folder}/expSetup{EXP_SETUP_TO_PLOT}_normEntropy_normReward.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
 
     elif EXP_SETUP_TO_PLOT == 3:
-        raise ValueError('Not implemented.')
+        """
+            Plots for experimental setup 3.
+        """
+        # Load data.
+        data = {}
+        for env_id, env_exp_ids in EXP_SETUP_3_IDS.items():
+
+            env_data = []
+            for exp_id in env_exp_ids:
+
+                print(f"Opening experiment {exp_id}")
+
+                exp_path = DATA_FOLDER_PATH + exp_id
+                exp_name = pathlib.Path(exp_path).stem
+                exp_name = '.'.join(exp_name.split('.')[:-1])
+
+                tar = tarfile.open(exp_path)
+                data_file = tar.extractfile("{0}/train_data.json".format(exp_name))
+
+                exp_data = json.load(data_file)
+                exp_data = json.loads(exp_data)
+
+                # Parse data.
+                parsed_data = {}
+                parsed_data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,E,S,A]
+                parsed_data['rollouts_rewards'] = np.array([e['rollouts_rewards']
+                                for e in exp_data]) # [R,(E),num_rollouts_types,num_rollouts]
+
+                env_data.append(parsed_data)
+
+            data[env_id] = env_data
+
+        # X: environment, Y: Q-values error.
+        covTrue_eps00 = {}
+        covFalse_eps00 = {}
+        for (env_id, env_data) in data.items():
+
+            exp_data = env_data[0] # eps=0, cov=False
+            errors = np.abs(val_iter_data[env_id]['Q_vals'] - exp_data['Q_vals']) # [R,E,S,A]
+            errors = np.mean(errors, axis=(2,3)) # [R,E]
+            errors = np.mean(errors[:,-10:], axis=1) # [R] (use last 10 episodes data)
+            point_est, (lower_ci, upper_ci) = mean_agg_func(errors)
+            covFalse_eps00[env_id] = (point_est, lower_ci, upper_ci)
+
+            exp_data = env_data[1] # eps=0, cov=True
+            errors = np.abs(val_iter_data[env_id]['Q_vals'] - exp_data['Q_vals']) # [R,E,S,A]
+            errors = np.mean(errors, axis=(2,3)) # [R,E]
+            errors = np.mean(errors[:,-10:], axis=1) # [R] (use last 10 episodes data)
+            point_est, (lower_ci, upper_ci) = mean_agg_func(errors)
+            covTrue_eps00[env_id] = (point_est, lower_ci, upper_ci)
+
+        fig = plt.figure()
+        fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+        X = np.arange(4)
+        lbls = list(ENVS_LABELS.values())[:4]
+
+        Y_true = [covTrue_eps00[env_id][0] for env_id in data.keys()]
+        Y_false = [covFalse_eps00[env_id][0] for env_id in data.keys()]
+        cis_true = [[covTrue_eps00[env_id][1],covTrue_eps00[env_id][2]] for env_id in data.keys()]
+        cis_false = [[covFalse_eps00[env_id][1],covFalse_eps00[env_id][2]] for env_id in data.keys()]
+        cis_true = np.array(cis_true).T
+        cis_false = np.array(cis_false).T
+
+        width = 0.35
+        rects1 = plt.bar(X - width/2, Y_false, width, yerr=cis_false, label='Cov=False')
+        rects2 = plt.bar(X + width/2, Y_true, width, yerr=cis_true, label='Cov=True')
+
+        plt.xticks(X, labels=lbls)
+        if RENDER_LATEX:
+            plt.ylabel(r'$Q$-values error')
+        else:
+            plt.ylabel('$Q$-values error')
+        plt.xlabel('Environment')
+        plt.yscale('log')
+        plt.legend()
+        plt.savefig(f'{output_folder}/expSetup{EXP_SETUP_TO_PLOT}_qvals_error.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+        plt.savefig(f'{output_folder}/expSetup{EXP_SETUP_TO_PLOT}_qvals_error.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+
 
     elif EXP_SETUP_TO_PLOT == 4:
         raise ValueError('Not implemented.')
