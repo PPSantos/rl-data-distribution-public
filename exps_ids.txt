@@ -29,7 +29,7 @@ SAMPLING_DISTS_IDS = [
 
 """
     gridEnv1.
-    (ILU-SERVER)
+    (ILU-SERVER & NEXUS-SERVER)
 """
 # gridEnv1.
 OPTIMAL_SAMPLING_DIST_IDS = [

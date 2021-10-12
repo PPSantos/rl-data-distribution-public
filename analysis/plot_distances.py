@@ -10,16 +10,26 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 plt.style.use('ggplot')
-#matplotlib.rcParams['text.usetex'] = True
-#matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
+matplotlib.rcParams['text.usetex'] =  True
+matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
 matplotlib.rcParams.update({'font.size': 13})
 
 #################################################################
-OPTIMAL_SAMPLING_DIST_IDS = ['gridEnv4_sampling_dist_2021-10-05-10-52-48', 'gridEnv4_sampling_dist_2021-10-05-10-52-50', 'gridEnv4_sampling_dist_2021-10-05-10-52-53', 'gridEnv4_sampling_dist_2021-10-05-10-52-56', 'gridEnv4_sampling_dist_2021-10-05-10-52-59', 'gridEnv4_sampling_dist_2021-10-05-10-53-01', 'gridEnv4_sampling_dist_2021-10-05-10-53-04', 'gridEnv4_sampling_dist_2021-10-05-10-53-07', 'gridEnv4_sampling_dist_2021-10-05-10-53-09', 'gridEnv4_sampling_dist_2021-10-05-10-53-12', 'gridEnv4_sampling_dist_2021-10-05-10-53-15', 'gridEnv4_sampling_dist_2021-10-05-10-53-18', 'gridEnv4_sampling_dist_2021-10-05-10-53-20', 'gridEnv4_sampling_dist_2021-10-05-10-53-23', 'gridEnv4_sampling_dist_2021-10-05-10-53-26', 'gridEnv4_sampling_dist_2021-10-05-10-53-28', 'gridEnv4_sampling_dist_2021-10-05-10-53-31', 'gridEnv4_sampling_dist_2021-10-05-10-53-34', 'gridEnv4_sampling_dist_2021-10-05-10-53-37', 'gridEnv4_sampling_dist_2021-10-05-10-53-39']
-
-SAMPLING_DISTS_IDS = ['gridEnv4_sampling_dist_2021-10-05-00-21-18', 'gridEnv4_sampling_dist_2021-10-05-00-32-27', 'gridEnv4_sampling_dist_2021-10-05-00-43-46', 'gridEnv4_sampling_dist_2021-10-05-00-55-01', 'gridEnv4_sampling_dist_2021-10-05-01-06-15', 'gridEnv4_sampling_dist_2021-10-05-01-17-29', 'gridEnv4_sampling_dist_2021-10-05-01-28-42', 'gridEnv4_sampling_dist_2021-10-05-01-40-01', 'gridEnv4_sampling_dist_2021-10-05-01-51-14', 'gridEnv4_sampling_dist_2021-10-05-02-02-29', 'gridEnv4_sampling_dist_2021-10-05-02-13-40', 'gridEnv4_sampling_dist_2021-10-05-02-24-54', 'gridEnv4_sampling_dist_2021-10-05-02-36-06', 'gridEnv4_sampling_dist_2021-10-05-02-47-14', 'gridEnv4_sampling_dist_2021-10-05-02-58-27', 'gridEnv4_sampling_dist_2021-10-05-03-09-38', 'gridEnv4_sampling_dist_2021-10-05-03-20-55', 'gridEnv4_sampling_dist_2021-10-05-03-32-11', 'gridEnv4_sampling_dist_2021-10-05-03-43-24', 'gridEnv4_sampling_dist_2021-10-05-03-54-36', 'gridEnv4_sampling_dist_2021-10-05-04-05-51', 'gridEnv4_sampling_dist_2021-10-05-04-17-02', 'gridEnv4_sampling_dist_2021-10-05-04-28-16', 'gridEnv4_sampling_dist_2021-10-05-04-39-24', 'gridEnv4_sampling_dist_2021-10-05-04-50-33', 'gridEnv4_sampling_dist_2021-10-05-05-01-47', 'gridEnv4_sampling_dist_2021-10-05-05-12-57', 'gridEnv4_sampling_dist_2021-10-05-05-24-08', 'gridEnv4_sampling_dist_2021-10-05-05-35-25', 'gridEnv4_sampling_dist_2021-10-05-05-46-40', 'gridEnv4_sampling_dist_2021-10-05-05-57-56', 'gridEnv4_sampling_dist_2021-10-05-06-09-11', 'gridEnv4_sampling_dist_2021-10-05-06-20-22', 'gridEnv4_sampling_dist_2021-10-05-06-31-32', 'gridEnv4_sampling_dist_2021-10-05-06-42-49', 'gridEnv4_sampling_dist_2021-10-05-06-54-02', 'gridEnv4_sampling_dist_2021-10-05-07-05-12', 'gridEnv4_sampling_dist_2021-10-05-07-16-20', 'gridEnv4_sampling_dist_2021-10-05-07-27-37', 'gridEnv4_sampling_dist_2021-10-05-07-38-52', 'gridEnv4_sampling_dist_2021-10-05-07-50-04', 'gridEnv4_sampling_dist_2021-10-05-08-01-16', 'gridEnv4_sampling_dist_2021-10-05-08-12-28', 'gridEnv4_sampling_dist_2021-10-05-08-23-46', 'gridEnv4_sampling_dist_2021-10-05-08-35-02', 'gridEnv4_sampling_dist_2021-10-05-08-46-15', 'gridEnv4_sampling_dist_2021-10-05-08-57-26', 'gridEnv4_sampling_dist_2021-10-05-09-08-42', 'gridEnv4_sampling_dist_2021-10-05-09-19-52', 'gridEnv4_sampling_dist_2021-10-05-09-32-07']
-
-OFFLINE_DQN_EXP_IDS = ['gridEnv4_offline_dqn_2021-10-05-00-21-27', 'gridEnv4_offline_dqn_2021-10-05-00-32-36', 'gridEnv4_offline_dqn_2021-10-05-00-43-54', 'gridEnv4_offline_dqn_2021-10-05-00-55-09', 'gridEnv4_offline_dqn_2021-10-05-01-06-24', 'gridEnv4_offline_dqn_2021-10-05-01-17-38', 'gridEnv4_offline_dqn_2021-10-05-01-28-51', 'gridEnv4_offline_dqn_2021-10-05-01-40-10', 'gridEnv4_offline_dqn_2021-10-05-01-51-22', 'gridEnv4_offline_dqn_2021-10-05-02-02-37', 'gridEnv4_offline_dqn_2021-10-05-02-13-49', 'gridEnv4_offline_dqn_2021-10-05-02-25-03', 'gridEnv4_offline_dqn_2021-10-05-02-36-15', 'gridEnv4_offline_dqn_2021-10-05-02-47-23', 'gridEnv4_offline_dqn_2021-10-05-02-58-36', 'gridEnv4_offline_dqn_2021-10-05-03-09-47', 'gridEnv4_offline_dqn_2021-10-05-03-21-04', 'gridEnv4_offline_dqn_2021-10-05-03-32-20', 'gridEnv4_offline_dqn_2021-10-05-03-43-33', 'gridEnv4_offline_dqn_2021-10-05-03-54-45', 'gridEnv4_offline_dqn_2021-10-05-04-05-59', 'gridEnv4_offline_dqn_2021-10-05-04-17-11', 'gridEnv4_offline_dqn_2021-10-05-04-28-24', 'gridEnv4_offline_dqn_2021-10-05-04-39-32', 'gridEnv4_offline_dqn_2021-10-05-04-50-41', 'gridEnv4_offline_dqn_2021-10-05-05-01-55', 'gridEnv4_offline_dqn_2021-10-05-05-13-06', 'gridEnv4_offline_dqn_2021-10-05-05-24-17', 'gridEnv4_offline_dqn_2021-10-05-05-35-34', 'gridEnv4_offline_dqn_2021-10-05-05-46-49', 'gridEnv4_offline_dqn_2021-10-05-05-58-04', 'gridEnv4_offline_dqn_2021-10-05-06-09-19', 'gridEnv4_offline_dqn_2021-10-05-06-20-31', 'gridEnv4_offline_dqn_2021-10-05-06-31-41', 'gridEnv4_offline_dqn_2021-10-05-06-42-57', 'gridEnv4_offline_dqn_2021-10-05-06-54-11', 'gridEnv4_offline_dqn_2021-10-05-07-05-21', 'gridEnv4_offline_dqn_2021-10-05-07-16-28', 'gridEnv4_offline_dqn_2021-10-05-07-27-46', 'gridEnv4_offline_dqn_2021-10-05-07-39-01', 'gridEnv4_offline_dqn_2021-10-05-07-50-12', 'gridEnv4_offline_dqn_2021-10-05-08-01-24', 'gridEnv4_offline_dqn_2021-10-05-08-12-36', 'gridEnv4_offline_dqn_2021-10-05-08-23-54', 'gridEnv4_offline_dqn_2021-10-05-08-35-10', 'gridEnv4_offline_dqn_2021-10-05-08-46-24', 'gridEnv4_offline_dqn_2021-10-05-08-57-34', 'gridEnv4_offline_dqn_2021-10-05-09-08-51', 'gridEnv4_offline_dqn_2021-10-05-09-20-01', 'gridEnv4_offline_dqn_2021-10-05-09-32-15']
+OPTIMAL_SAMPLING_DIST_IDS = [
+'pendulum_sampling_dist_2021-10-07-18-40-46', 'pendulum_sampling_dist_2021-10-07-18-40-51', 'pendulum_sampling_dist_2021-10-07-18-40-57', 'pendulum_sampling_dist_2021-10-07-18-41-03', 'pendulum_sampling_dist_2021-10-07-18-41-09', 'pendulum_sampling_dist_2021-10-07-18-41-14', 'pendulum_sampling_dist_2021-10-07-18-41-20', 'pendulum_sampling_dist_2021-10-07-18-41-26', 'pendulum_sampling_dist_2021-10-07-18-41-32', 'pendulum_sampling_dist_2021-10-07-18-41-37', 'pendulum_sampling_dist_2021-10-07-18-41-43', 'pendulum_sampling_dist_2021-10-07-18-41-49', 'pendulum_sampling_dist_2021-10-07-18-41-55', 'pendulum_sampling_dist_2021-10-07-18-42-00', 'pendulum_sampling_dist_2021-10-07-18-42-06', 'pendulum_sampling_dist_2021-10-07-18-42-12', 'pendulum_sampling_dist_2021-10-07-18-42-18', 'pendulum_sampling_dist_2021-10-07-18-42-23', 'pendulum_sampling_dist_2021-10-07-18-42-29', 'pendulum_sampling_dist_2021-10-07-18-42-35'
+]
+OFFLINE_DQN_EXP_IDS = [
+'pendulum_offline_dqn_2021-10-07-09-55-12', 'pendulum_offline_dqn_2021-10-07-10-09-51', 'pendulum_offline_dqn_2021-10-07-10-24-12', 'pendulum_offline_dqn_2021-10-07-10-38-38', 'pendulum_offline_dqn_2021-10-07-10-53-21', 'pendulum_offline_dqn_2021-10-07-11-07-51', 'pendulum_offline_dqn_2021-10-07-11-22-26', 'pendulum_offline_dqn_2021-10-07-11-39-56', 'pendulum_offline_dqn_2021-10-07-11-56-36', 'pendulum_offline_dqn_2021-10-07-12-13-42', 'pendulum_offline_dqn_2021-10-07-12-28-57', 'pendulum_offline_dqn_2021-10-07-12-44-44', 'pendulum_offline_dqn_2021-10-07-13-01-25', 'pendulum_offline_dqn_2021-10-07-13-19-19', 'pendulum_offline_dqn_2021-10-07-13-35-27', 'pendulum_offline_dqn_2021-10-07-13-50-17', 'pendulum_offline_dqn_2021-10-07-14-04-50', 'pendulum_offline_dqn_2021-10-07-14-20-02', 'pendulum_offline_dqn_2021-10-07-14-36-46', 'pendulum_offline_dqn_2021-10-07-14-52-42', 'pendulum_offline_dqn_2021-10-07-15-09-27', 'pendulum_offline_dqn_2021-10-07-15-26-29', 'pendulum_offline_dqn_2021-10-07-15-43-12', 'pendulum_offline_dqn_2021-10-07-16-00-20', 'pendulum_offline_dqn_2021-10-07-16-16-37', 'pendulum_offline_dqn_2021-10-07-16-31-11', 'pendulum_offline_dqn_2021-10-07-16-48-12', 'pendulum_offline_dqn_2021-10-07-17-05-35', 'pendulum_offline_dqn_2021-10-07-17-22-12', 'pendulum_offline_dqn_2021-10-07-17-38-49',
+'pendulum_offline_dqn_2021-10-07-18-57-22', 'pendulum_offline_dqn_2021-10-07-19-15-22', 'pendulum_offline_dqn_2021-10-07-19-32-08', 'pendulum_offline_dqn_2021-10-07-19-48-33', 'pendulum_offline_dqn_2021-10-07-20-05-14', 'pendulum_offline_dqn_2021-10-07-20-21-47', 'pendulum_offline_dqn_2021-10-07-20-36-46', 'pendulum_offline_dqn_2021-10-07-20-51-14', 'pendulum_offline_dqn_2021-10-07-21-05-49', 'pendulum_offline_dqn_2021-10-07-21-21-35', 'pendulum_offline_dqn_2021-10-07-21-39-16', 'pendulum_offline_dqn_2021-10-07-21-56-18', 'pendulum_offline_dqn_2021-10-07-22-13-17', 'pendulum_offline_dqn_2021-10-07-22-31-00', 'pendulum_offline_dqn_2021-10-07-22-45-49', 'pendulum_offline_dqn_2021-10-07-23-00-26', 'pendulum_offline_dqn_2021-10-07-23-15-25', 'pendulum_offline_dqn_2021-10-07-23-31-36', 'pendulum_offline_dqn_2021-10-07-23-46-32', 'pendulum_offline_dqn_2021-10-08-00-01-08', 'pendulum_offline_dqn_2021-10-08-00-15-44', 'pendulum_offline_dqn_2021-10-08-00-30-20', 'pendulum_offline_dqn_2021-10-08-00-46-15', 'pendulum_offline_dqn_2021-10-08-01-01-06', 'pendulum_offline_dqn_2021-10-08-01-16-22', 'pendulum_offline_dqn_2021-10-08-01-33-44', 'pendulum_offline_dqn_2021-10-08-01-49-16', 'pendulum_offline_dqn_2021-10-08-02-03-59', 'pendulum_offline_dqn_2021-10-08-02-18-30', 'pendulum_offline_dqn_2021-10-08-02-32-59',
+'pendulum_offline_dqn_2021-10-08-12-12-44', 'pendulum_offline_dqn_2021-10-08-12-40-29', 'pendulum_offline_dqn_2021-10-08-13-07-06', 'pendulum_offline_dqn_2021-10-08-13-41-19', 'pendulum_offline_dqn_2021-10-08-13-58-05', 'pendulum_offline_dqn_2021-10-08-14-33-25', 'pendulum_offline_dqn_2021-10-08-14-52-25', 'pendulum_offline_dqn_2021-10-08-15-16-57', 'pendulum_offline_dqn_2021-10-08-15-33-13', 'pendulum_offline_dqn_2021-10-08-15-50-59',
+'pendulum_offline_dqn_2021-10-10-11-18-55', 'pendulum_offline_dqn_2021-10-10-11-35-46', 'pendulum_offline_dqn_2021-10-10-11-51-51', 'pendulum_offline_dqn_2021-10-10-12-08-12', 'pendulum_offline_dqn_2021-10-10-12-23-28', 'pendulum_offline_dqn_2021-10-10-12-38-33', 'pendulum_offline_dqn_2021-10-10-12-53-30', 'pendulum_offline_dqn_2021-10-10-13-08-36', 'pendulum_offline_dqn_2021-10-10-13-23-23', 'pendulum_offline_dqn_2021-10-10-13-38-36',
+]
+SAMPLING_DISTS_IDS = [
+'pendulum_sampling_dist_2021-10-07-09-54-52', 'pendulum_sampling_dist_2021-10-07-10-09-30', 'pendulum_sampling_dist_2021-10-07-10-23-51', 'pendulum_sampling_dist_2021-10-07-10-38-17', 'pendulum_sampling_dist_2021-10-07-10-53-00', 'pendulum_sampling_dist_2021-10-07-11-07-30', 'pendulum_sampling_dist_2021-10-07-11-22-04', 'pendulum_sampling_dist_2021-10-07-11-39-34', 'pendulum_sampling_dist_2021-10-07-11-56-14', 'pendulum_sampling_dist_2021-10-07-12-13-21', 'pendulum_sampling_dist_2021-10-07-12-28-36', 'pendulum_sampling_dist_2021-10-07-12-44-22', 'pendulum_sampling_dist_2021-10-07-13-01-03', 'pendulum_sampling_dist_2021-10-07-13-18-57', 'pendulum_sampling_dist_2021-10-07-13-35-06', 'pendulum_sampling_dist_2021-10-07-13-49-56', 'pendulum_sampling_dist_2021-10-07-14-04-29', 'pendulum_sampling_dist_2021-10-07-14-19-40', 'pendulum_sampling_dist_2021-10-07-14-36-25', 'pendulum_sampling_dist_2021-10-07-14-52-20', 'pendulum_sampling_dist_2021-10-07-15-09-04', 'pendulum_sampling_dist_2021-10-07-15-26-07', 'pendulum_sampling_dist_2021-10-07-15-42-50', 'pendulum_sampling_dist_2021-10-07-15-59-58', 'pendulum_sampling_dist_2021-10-07-16-16-16', 'pendulum_sampling_dist_2021-10-07-16-30-50', 'pendulum_sampling_dist_2021-10-07-16-47-50', 'pendulum_sampling_dist_2021-10-07-17-05-12', 'pendulum_sampling_dist_2021-10-07-17-21-51', 'pendulum_sampling_dist_2021-10-07-17-38-27',
+'pendulum_sampling_dist_2021-10-07-18-57-01', 'pendulum_sampling_dist_2021-10-07-19-15-01', 'pendulum_sampling_dist_2021-10-07-19-31-46', 'pendulum_sampling_dist_2021-10-07-19-48-12', 'pendulum_sampling_dist_2021-10-07-20-04-53', 'pendulum_sampling_dist_2021-10-07-20-21-26', 'pendulum_sampling_dist_2021-10-07-20-36-25', 'pendulum_sampling_dist_2021-10-07-20-50-53', 'pendulum_sampling_dist_2021-10-07-21-05-28', 'pendulum_sampling_dist_2021-10-07-21-21-13', 'pendulum_sampling_dist_2021-10-07-21-38-54', 'pendulum_sampling_dist_2021-10-07-21-55-57', 'pendulum_sampling_dist_2021-10-07-22-12-56', 'pendulum_sampling_dist_2021-10-07-22-30-39', 'pendulum_sampling_dist_2021-10-07-22-45-28', 'pendulum_sampling_dist_2021-10-07-23-00-05', 'pendulum_sampling_dist_2021-10-07-23-15-05', 'pendulum_sampling_dist_2021-10-07-23-31-14', 'pendulum_sampling_dist_2021-10-07-23-46-11', 'pendulum_sampling_dist_2021-10-08-00-00-47', 'pendulum_sampling_dist_2021-10-08-00-15-23', 'pendulum_sampling_dist_2021-10-08-00-29-59', 'pendulum_sampling_dist_2021-10-08-00-45-54', 'pendulum_sampling_dist_2021-10-08-01-00-46', 'pendulum_sampling_dist_2021-10-08-01-16-01', 'pendulum_sampling_dist_2021-10-08-01-33-23', 'pendulum_sampling_dist_2021-10-08-01-48-55', 'pendulum_sampling_dist_2021-10-08-02-03-38', 'pendulum_sampling_dist_2021-10-08-02-18-09', 'pendulum_sampling_dist_2021-10-08-02-32-38',
+'pendulum_sampling_dist_2021-10-08-12-12-23', 'pendulum_sampling_dist_2021-10-08-12-40-08', 'pendulum_sampling_dist_2021-10-08-13-06-45', 'pendulum_sampling_dist_2021-10-08-13-40-57', 'pendulum_sampling_dist_2021-10-08-13-57-44', 'pendulum_sampling_dist_2021-10-08-14-33-03', 'pendulum_sampling_dist_2021-10-08-14-52-04', 'pendulum_sampling_dist_2021-10-08-15-16-36', 'pendulum_sampling_dist_2021-10-08-15-32-52', 'pendulum_sampling_dist_2021-10-08-15-50-38',
+'pendulum_sampling_dist_2021-10-10-11-18-34', 'pendulum_sampling_dist_2021-10-10-11-35-25', 'pendulum_sampling_dist_2021-10-10-11-51-30', 'pendulum_sampling_dist_2021-10-10-12-07-51', 'pendulum_sampling_dist_2021-10-10-12-23-07', 'pendulum_sampling_dist_2021-10-10-12-38-12', 'pendulum_sampling_dist_2021-10-10-12-53-09', 'pendulum_sampling_dist_2021-10-10-13-08-15', 'pendulum_sampling_dist_2021-10-10-13-23-01', 'pendulum_sampling_dist_2021-10-10-13-38-15',
+]
 #################################################################
 
 FIGURE_X = 6.0
@@ -90,11 +100,23 @@ def main():
         fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
         Y = [y for _, y in sorted(zip(kl_dists, data_to_plot))]
-        #plt.plot(sorted(kl_dists), Y)
-        plt.scatter(sorted(kl_dists), Y)
+        X = sorted(kl_dists)
+
+        #plt.plot(X, Y)
+        plt.scatter(X, Y)
+
+        # LOWESS smoothing.
+        from statsmodels.nonparametric.smoothers_lowess import lowess
+        sm_x, sm_y = lowess(Y, X,  frac=0.4, 
+                                it=5, return_sorted = True).T
+        plt.plot(sm_x, sm_y, label='LOWESS')
+
         plt.xlabel('KL div.')
         plt.yscale('log')
-        plt.ylabel(metric)
+        if metric == 'qvals_avg_error':
+            plt.ylabel(r'$Q$-values error')
+        else:
+            plt.ylabel('Reward')
         if metric == 'qvals_avg_error':
             plt.yscale('log')
         else:
@@ -103,13 +125,13 @@ def main():
         plt.savefig(f'{output_folder}/{metric}_kl_div.pdf'.format(), bbox_inches='tight', pad_inches=0)
 
         # Ratio dist. plot.
-        fig = plt.figure()
+        """ fig = plt.figure()
         fig.set_size_inches(FIGURE_X, FIGURE_Y)
         Y = [y for _, y in sorted(zip(ratio_dists, data_to_plot))]
         #plt.plot(sorted(ratio_dists), Y)
         plt.scatter(sorted(ratio_dists), Y)
         plt.yscale('log')
-        plt.xlabel('Ratio dist.')
+        #plt.xlabel('Ratio dist.')
         plt.ylabel(metric)
         if metric == 'qvals_avg_error':
             plt.yscale('log')
@@ -125,14 +147,14 @@ def main():
         #plt.plot(sorted(wass_dists), Y)
         plt.scatter(sorted(wass_dists), Y)
         plt.yscale('log')
-        plt.xlabel('Wass. dist.')
+        #plt.xlabel('Wass. dist.')
         plt.ylabel(metric)
         if metric == 'qvals_avg_error':
             plt.yscale('log')
         else:
             plt.yscale('linear')
         plt.savefig(f'{output_folder}/{metric}_wass_dist.png'.format(), bbox_inches='tight', pad_inches=0)
-        plt.savefig(f'{output_folder}/{metric}_wass_dist.pdf'.format(), bbox_inches='tight', pad_inches=0)
+        plt.savefig(f'{output_folder}/{metric}_wass_dist.pdf'.format(), bbox_inches='tight', pad_inches=0) """
 
 if __name__ == "__main__":
     main()
