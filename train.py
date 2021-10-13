@@ -31,13 +31,13 @@ VAL_ITER_DATA = {
 DEFAULT_TRAIN_ARGS = {
 
     # General arguments.
-    'num_runs': 5,
-    'num_processors': 5,
-    'algo': 'offline_dqn',
+    'num_runs': 1,
+    'num_processors': 1,
+    'algo': 'val_iter',
     'gamma': 0.9, # discount factor.
 
     # Environment arguments.
-    'env_name': 'gridEnv1',
+    'env_name': 'mountaincar',
 
     # Period at which the Q-values are stored.
     # (the period can either be number of steps

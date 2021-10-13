@@ -391,10 +391,10 @@ cdef class MountainCar(TabularEnv):
         self._gravity = gravity
         self._pos_disc = posdisc
         self._vel_disc = veldisc
-        self.max_vel = 0.07 # gym 0.07
+        self.max_vel = 0.07
         self.min_vel = -self.max_vel
-        self.max_pos = 0.6 # gym 0.6
-        self.min_pos = -1.2 # gym -1.2
+        self.max_pos = 0.6
+        self.min_pos = -1.2
         self.goal_pos = 0.5
 
         self._state_step = (self.max_pos-self.min_pos) / self._pos_disc
@@ -404,20 +404,19 @@ cdef class MountainCar(TabularEnv):
                                 for s in initial_states}
         super(MountainCar, self).__init__(self._pos_disc*self._vel_disc,
                                         action_discretization, initial_state_distr)
-        self.observation_space = gym.spaces.Box(low=np.array([self.min_pos,-self.max_vel]),
+        self.observation_space = gym.spaces.Box(low=np.array([self.min_pos,self.min_vel]),
                                 high=np.array([self.max_pos,self.max_vel]), dtype=np.float32)
 
     cdef map[int, double] transitions_cy(self, int state, int action):
         self._transition_map.clear()
         state_vec = self.from_state_id(state)
         position, velocity = state_vec.pos, state_vec.vel
-        for _ in range(3):
-            velocity += (action-1)*0.001 + cos(3*position)*(-self._gravity)
-            velocity = fmax(fmin(velocity, self.max_vel-1e-8), self.min_vel)
-            position += velocity
-            position = fmax(fmin(position, self.max_pos-1e-8), self.min_pos)
-            if (position==self.min_pos and velocity<0):
-                velocity = 0
+        velocity += (action-1)*0.001 + cos(3*position)*(-self._gravity)
+        velocity = fmax(fmin(velocity, self.max_vel), self.min_vel)
+        position += velocity
+        position = fmax(fmin(position, self.max_pos), self.min_pos)
+        if (position==self.min_pos and velocity<0):
+            velocity = 0
         next_state = self.to_state_id(MountainCarState(position, velocity))
         self._transition_map.insert(pair[int, double](next_state, 1.0))
         return self._transition_map
@@ -425,7 +424,7 @@ cdef class MountainCar(TabularEnv):
     cpdef double reward(self, int state, int action, int next_state):
         state_vec = self.from_state_id(state)
         if state_vec.pos >= self.goal_pos:
-            print('REACHED GOAL')
+            # print('REACHED GOAL')
             return 1.0
         return 0.0
     
