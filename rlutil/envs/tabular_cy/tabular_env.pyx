@@ -424,7 +424,7 @@ cdef class MountainCar(TabularEnv):
     cpdef double reward(self, int state, int action, int next_state):
         state_vec = self.from_state_id(state)
         if state_vec.pos >= self.goal_pos:
-            # print('REACHED GOAL')
+            print('REACHED GOAL')
             return 1.0
         return 0.0
     

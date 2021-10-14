@@ -15,7 +15,7 @@ from envs import env_suite
 from algos.value_iteration import ValueIteration
 from algos.dqn.dqn import DQN
 from algos.dqn.offline_dqn import OfflineDQN
-
+from algos.q_learning import QLearning
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data/'
 
@@ -33,7 +33,7 @@ DEFAULT_TRAIN_ARGS = {
     # General arguments.
     'num_runs': 1,
     'num_processors': 1,
-    'algo': 'val_iter',
+    'algo': 'q_learning',
     'gamma': 0.9, # discount factor.
 
     # Environment arguments.
@@ -98,6 +98,15 @@ DEFAULT_TRAIN_ARGS = {
         'dataset_force_full_coverage': True,
     },
 
+    # Q-learning arguments.
+    'q_learning_args': {
+        'alpha': 1.0,
+        'expl_eps_init': 0.05,
+        'expl_eps_final': 0.05,
+        'expl_eps_episodes': 40_000,
+        'num_episodes': 50_000, 
+    },
+
 }
 
 def create_exp_name(args):
@@ -125,6 +134,9 @@ def train_run(run_args):
     elif args['algo'] == 'offline_dqn':
         args['offline_dqn_args']['discount'] = args['gamma']
         agent = OfflineDQN(env, env_grid_spec, log_path, args['offline_dqn_args'])
+    elif args['algo'] == 'q_learning':
+        args['q_learning_args']['gamma'] = args['gamma']
+        agent = QLearning(env, **args['q_learning_args'])
     else:
         raise ValueError("Unknown algorithm.")
 
@@ -183,7 +195,7 @@ if __name__ == "__main__":
     # Train (uses DEFAULT_TRAIN_ARGS).
     exp_path, exp_id = train()
 
-    if DEFAULT_TRAIN_ARGS['algo'] not in ('val_iter',):
+    if DEFAULT_TRAIN_ARGS['algo'] not in ('val_iter', 'q_learning'):
 
         from analysis.plots import main as plots
         env_name = DEFAULT_TRAIN_ARGS['env_name']
@@ -191,6 +203,19 @@ if __name__ == "__main__":
 
         # Compute plots.
         plots(exp_id, val_iter_data)
+
+        # Compress and cleanup.
+        shutil.make_archive(exp_path,
+                        'gztar',
+                        os.path.dirname(exp_path),
+                        exp_id)
+        shutil.rmtree(exp_path)
+
+    if DEFAULT_TRAIN_ARGS['algo'] in ('q_learning',):
+        from analysis.plots_qlearning import main as plots
+
+        # Compute plots.
+        plots(exp_id)
 
         # Compress and cleanup.
         shutil.make_archive(exp_path,

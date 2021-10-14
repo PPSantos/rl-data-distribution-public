@@ -401,7 +401,7 @@ def get_env(name, seed=None):
     elif name == 'mountaincar':
         # Load default env.
         default_params = MOUNTAINCAR_ENVS['default']
-        train_env = tabular_env.MountainCar(posdisc=56, veldisc=32,
+        train_env = tabular_env.MountainCar(posdisc=100, veldisc=100,
                                             gravity=default_params['gravity'],
                                             initial_states=default_params['initial_states'])
         #train_env = env_wrapper.AbsorbingStateWrapper(train_env, absorb_reward=10.0)  
@@ -410,7 +410,7 @@ def get_env(name, seed=None):
         # Load rollouts envs.
         rollouts_envs = []
         for r_type, r_env_params in sorted(MOUNTAINCAR_ENVS.items()):
-            r_env = tabular_env.MountainCar(posdisc=56, veldisc=32,
+            r_env = tabular_env.MountainCar(posdisc=100, veldisc=100,
                                             gravity=r_env_params['gravity'],
                                             initial_states=r_env_params['initial_states'])
             #r_env = env_wrapper.AbsorbingStateWrapper(r_env, absorb_reward=10.0)  
