@@ -45,6 +45,9 @@ cdef class TabularEnvWrapper(tabular_env.TabularEnv):
     cpdef render(self):
         return self.wrapped_env.render()
 
+    cpdef reset(self):
+        return self.wrapped_env.reset()
+
 
 cdef class AbsorbingStateWrapper(TabularEnvWrapper):
     """A wrapper which moves an agent to an absorbing state after

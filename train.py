@@ -13,6 +13,7 @@ from envs import env_suite
 
 # Import algorithms.
 from algos.value_iteration import ValueIteration
+from algos.value_iteration_v2 import ValueIterationV2
 from algos.dqn.dqn import DQN
 from algos.dqn.offline_dqn import OfflineDQN
 from algos.q_learning import QLearning
@@ -25,16 +26,16 @@ VAL_ITER_DATA = {
     'gridEnv4': 'gridEnv4_val_iter_2021-06-16-10-08-44',
     'multiPathsEnv': 'multiPathsEnv_val_iter_2021-06-04-19-31-25',
     'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
-    'mountaincar': 'mountaincar_val_iter_2021-09-15-18-56-32',
+    'mountaincar': 'mountaincar_val_iter_v2_2021-10-17-19-38-30',
 }
 
 DEFAULT_TRAIN_ARGS = {
 
     # General arguments.
-    'num_runs': 1,
-    'num_processors': 1,
+    'num_runs': 5,
+    'num_processors': 5,
     'algo': 'q_learning',
-    'gamma': 0.9, # discount factor.
+    'gamma': 0.95, # discount factor.
 
     # Environment arguments.
     'env_name': 'mountaincar',
@@ -57,7 +58,7 @@ DEFAULT_TRAIN_ARGS = {
 
     # Value iteration arguments.
     'val_iter_args': {
-        'epsilon': 0.05
+        'epsilon': 0.5
     },
 
     # Standard DQN algorithm arguments.
@@ -100,11 +101,14 @@ DEFAULT_TRAIN_ARGS = {
 
     # Q-learning arguments.
     'q_learning_args': {
-        'alpha': 1.0,
-        'expl_eps_init': 0.05,
-        'expl_eps_final': 0.05,
-        'expl_eps_episodes': 40_000,
-        'num_episodes': 50_000, 
+        'alpha': 0.1,
+        'expl_eps_init': 1.0,
+        'expl_eps_final': 0.0,
+        'expl_eps_episodes': 19_000,
+        'num_episodes': 20_000,
+
+        'replay_buffer_size': 100_000,
+        'replay_buffer_batch_size': 100,
     },
 
 }
@@ -128,6 +132,9 @@ def train_run(run_args):
     if args['algo'] == 'val_iter':
         args['val_iter_args']['gamma'] = args['gamma']
         agent = ValueIteration(env, **args['val_iter_args'])
+    elif args['algo'] == 'val_iter_v2':
+        args['val_iter_args']['gamma'] = args['gamma']
+        agent = ValueIterationV2(env, **args['val_iter_args'])
     elif args['algo'] == 'dqn':
         args['dqn_args']['discount'] = args['gamma']
         agent = DQN(env, env_grid_spec, log_path, args['dqn_args'])
@@ -136,7 +143,7 @@ def train_run(run_args):
         agent = OfflineDQN(env, env_grid_spec, log_path, args['offline_dqn_args'])
     elif args['algo'] == 'q_learning':
         args['q_learning_args']['gamma'] = args['gamma']
-        agent = QLearning(env, **args['q_learning_args'])
+        agent = QLearning(env, args['q_learning_args'])
     else:
         raise ValueError("Unknown algorithm.")
 
@@ -195,7 +202,7 @@ if __name__ == "__main__":
     # Train (uses DEFAULT_TRAIN_ARGS).
     exp_path, exp_id = train()
 
-    if DEFAULT_TRAIN_ARGS['algo'] not in ('val_iter', 'q_learning'):
+    if DEFAULT_TRAIN_ARGS['algo'] not in ('val_iter', 'val_iter_v2'):
 
         from analysis.plots import main as plots
         env_name = DEFAULT_TRAIN_ARGS['env_name']
@@ -203,19 +210,6 @@ if __name__ == "__main__":
 
         # Compute plots.
         plots(exp_id, val_iter_data)
-
-        # Compress and cleanup.
-        shutil.make_archive(exp_path,
-                        'gztar',
-                        os.path.dirname(exp_path),
-                        exp_id)
-        shutil.rmtree(exp_path)
-
-    if DEFAULT_TRAIN_ARGS['algo'] in ('q_learning',):
-        from analysis.plots_qlearning import main as plots
-
-        # Compute plots.
-        plots(exp_id)
 
         # Compress and cleanup.
         shutil.make_archive(exp_path,

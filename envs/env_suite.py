@@ -8,6 +8,7 @@ from rlutil.envs.gridcraft import grid_spec_cy
 from rlutil.logging import log_utils
 from rlutil import math_utils
 from rlutil.envs.gridcraft.grid_spec_cy import TileType
+from envs import mountaincar
 
 
 # WARNING: Custom grid envs must be square.
@@ -212,30 +213,30 @@ PENDULUM_ENVS = {
 
 MOUNTAINCAR_ENVS = {
     'default': {
-        'gravity': 0.0025,
-        'initial_states': [-0.5],
+        # 'gravity': 0.0025,
+        # 'initial_states': [-0.5],
     },
-    'uniform_init_state_dist': {
-        'gravity': 0.0025,
-        'initial_states': [-1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4,
-                           -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4],
-    },
-    'gravity_0020': {
-        'gravity': 0.0020,
-        'initial_states': [-0.5],
-    },
-    'gravity_0023': {
-        'gravity': 0.0023,
-        'initial_states': [-0.5],
-    },
-    'gravity_0027': {
-        'gravity': 0.0027,
-        'initial_states': [-0.5],
-    },
-    'gravity_0030': {
-        'gravity': 0.0030,
-        'initial_states': [-0.5],
-    },
+    # 'uniform_init_state_dist': {
+    #     'gravity': 0.0025,
+    #     'initial_states': [-1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4,
+    #                        -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4],
+    # },
+    # 'gravity_0020': {
+    #     'gravity': 0.0020,
+    #     'initial_states': [-0.5],
+    # },
+    # 'gravity_0023': {
+    #     'gravity': 0.0023,
+    #     'initial_states': [-0.5],
+    # },
+    # 'gravity_0027': {
+    #     'gravity': 0.0027,
+    #     'initial_states': [-0.5],
+    # },
+    # 'gravity_0030': {
+    #     'gravity': 0.0030,
+    #     'initial_states': [-0.5],
+    # },
 }
 
 MULTIPATHS_ENVS = {
@@ -401,20 +402,12 @@ def get_env(name, seed=None):
     elif name == 'mountaincar':
         # Load default env.
         default_params = MOUNTAINCAR_ENVS['default']
-        train_env = tabular_env.MountainCar(posdisc=100, veldisc=100,
-                                            gravity=default_params['gravity'],
-                                            initial_states=default_params['initial_states'])
-        #train_env = env_wrapper.AbsorbingStateWrapper(train_env, absorb_reward=10.0)  
-        train_env = wrap_time(train_env, time_limit=100)
+        train_env = mountaincar.DiscreteMountainCarEnv(pos_disc=64, vel_disc=64, time_limit=200)
 
         # Load rollouts envs.
         rollouts_envs = []
         for r_type, r_env_params in sorted(MOUNTAINCAR_ENVS.items()):
-            r_env = tabular_env.MountainCar(posdisc=100, veldisc=100,
-                                            gravity=r_env_params['gravity'],
-                                            initial_states=r_env_params['initial_states'])
-            #r_env = env_wrapper.AbsorbingStateWrapper(r_env, absorb_reward=10.0)  
-            r_env = wrap_time(r_env, time_limit=100)
+            r_env = mountaincar.DiscreteMountainCarEnv(pos_disc=64, vel_disc=64, time_limit=200)
             rollouts_envs.append(r_env)
 
         env_grid_spec = None
