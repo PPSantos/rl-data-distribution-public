@@ -22,6 +22,16 @@ class QLearning(object):
     def train(self, q_vals_period, replay_buffer_counts_period,
                 num_rollouts, rollouts_period, rollouts_envs):
 
+        # Prefill replay buffer.
+        print('Pre-filling replay buffer...')
+        for state in range(self.env.num_states):
+            for action in range(self.env.num_actions):
+                self.env.reset()
+                self.env.set_state(state)
+                s_t1, r_t1, done, _ = self.env.step(action)
+                s_t1 = self.env.get_state()
+                self.replay_buffer.add(state, action, r_t1, s_t1, False)
+
         Q = np.zeros((self.env.num_states, self.env.num_actions))
 
         Q_vals = np.zeros((self.num_episodes//q_vals_period,
@@ -58,7 +68,7 @@ class QLearning(object):
                 s_t1 = self.env.get_state()
 
                 # Add to replay buffer.
-                self.replay_buffer.add(s_t, a_t, r_t1, s_t1, False)
+                # self.replay_buffer.add(s_t, a_t, r_t1, s_t1, False)
 
                 # Update.
                 if steps_counter > self.batch_size:

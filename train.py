@@ -102,13 +102,13 @@ DEFAULT_TRAIN_ARGS = {
     # Q-learning arguments.
     'q_learning_args': {
         'alpha': 0.1,
-        'expl_eps_init': 1.0,
+        'expl_eps_init': 0.0,
         'expl_eps_final': 0.0,
-        'expl_eps_episodes': 19_000,
+        'expl_eps_episodes': 20_000,
         'num_episodes': 20_000,
 
-        'replay_buffer_size': 100_000,
-        'replay_buffer_batch_size': 100,
+        'replay_buffer_size': 500_000,
+        'replay_buffer_batch_size': 128,
     },
 
 }
