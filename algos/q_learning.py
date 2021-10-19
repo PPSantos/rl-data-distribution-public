@@ -24,13 +24,14 @@ class QLearning(object):
 
         # Prefill replay buffer.
         print('Pre-filling replay buffer...')
-        for state in range(self.env.num_states):
-            for action in range(self.env.num_actions):
-                self.env.reset()
-                self.env.set_state(state)
-                s_t1, r_t1, done, _ = self.env.step(action)
-                s_t1 = self.env.get_state()
-                self.replay_buffer.add(state, action, r_t1, s_t1, False)
+        for _ in range(10):
+            for state in range(self.env.num_states):
+                for action in range(self.env.num_actions):
+                    self.env.reset()
+                    self.env.set_state(state)
+                    s_t1, r_t1, done, _ = self.env.step(action)
+                    s_t1 = self.env.get_state()
+                    self.replay_buffer.add(state, action, r_t1, s_t1, False)
 
         Q = np.zeros((self.env.num_states, self.env.num_actions))
 

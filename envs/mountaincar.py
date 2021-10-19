@@ -48,10 +48,11 @@ class MountainCarEnv(gym.Env):
         )
 
         position, velocity = self.state
-        velocity += (action - 1) * self.force + math.cos(3 * position) * (-self.gravity)
-        velocity = np.clip(velocity, self.min_speed, self.max_speed-1e-8)
-        position += velocity
-        position = np.clip(position, self.min_position, self.max_position-1e-8)
+        for _ in range(3):
+            velocity += (action - 1) * self.force + math.cos(3 * position) * (-self.gravity)
+            velocity = np.clip(velocity, self.min_speed, self.max_speed-1e-8)
+            position += velocity
+            position = np.clip(position, self.min_position, self.max_position-1e-8)
         if position == self.min_position and velocity < 0:
             velocity = 0
 
@@ -199,4 +200,6 @@ class DiscreteMountainCarEnv(MountainCarEnv):
         vel_idx = state // self.pos_disc
         pos = self.min_position + self.pos_step * pos_idx
         vel = self.min_speed + self.vel_step * vel_idx
+        pos += np.random.uniform(0.01, 0.99) * self.pos_step
+        vel += np.random.uniform(0.01, 0.99) * self.vel_step
         return np.array((pos,vel), dtype=np.float32)
