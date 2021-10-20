@@ -402,12 +402,12 @@ def get_env(name, seed=None):
     elif name == 'mountaincar':
         # Load default env.
         default_params = MOUNTAINCAR_ENVS['default']
-        train_env = mountaincar.DiscreteMountainCarEnv(pos_disc=200, vel_disc=200, time_limit=200)
+        train_env = mountaincar.DiscreteMountainCarEnv(pos_disc=100, vel_disc=100, time_limit=200)
 
         # Load rollouts envs.
         rollouts_envs = []
         for r_type, r_env_params in sorted(MOUNTAINCAR_ENVS.items()):
-            r_env = mountaincar.DiscreteMountainCarEnv(pos_disc=200, vel_disc=200, time_limit=200)
+            r_env = mountaincar.DiscreteMountainCarEnv(pos_disc=100, vel_disc=100, time_limit=200)
             rollouts_envs.append(r_env)
 
         env_grid_spec = None

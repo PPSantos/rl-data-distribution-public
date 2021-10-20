@@ -26,7 +26,7 @@ VAL_ITER_DATA = {
     'gridEnv4': 'gridEnv4_val_iter_2021-06-16-10-08-44',
     'multiPathsEnv': 'multiPathsEnv_val_iter_2021-06-04-19-31-25',
     'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
-    'mountaincar': 'mountaincar_val_iter_v2_2021-10-20-13-17-04',
+    'mountaincar': 'mountaincar_val_iter_v2_2021-10-20-16-17-47',
 }
 
 DEFAULT_TRAIN_ARGS = {
@@ -82,7 +82,7 @@ DEFAULT_TRAIN_ARGS = {
         'target_update_period': 1_000,
         'learning_rate': 1e-03,
         'num_learning_steps': 200_000,
-        'hidden_layers': [20,40,20],
+        'hidden_layers': [32,64,32],
         'dataset_size': 50_000,
 
         # Full/absolute path to json data file containing
