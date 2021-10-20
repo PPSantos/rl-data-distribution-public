@@ -27,7 +27,7 @@ print(PLOTS_FOLDER_PATH)
 args = {
     'num_states': 100,
     'dirichlet_alphas': [0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 10.0],
-    'num_dists': 100, # 50 for the coverage plots
+    'num_dists': 50, # 50 for the coverage plots, 100 for the distances plots.
     'dataset_sizes': [1_000, 5_000, 10_000, 20_000],
 }
 
@@ -71,7 +71,7 @@ def main():
 
     # Dataset coverage.
     # X: expected entropy; Y: dataset coverage.
-    """ covs = []
+    covs = []
     for d_size in args['dataset_sizes']:
         print('d_size=', d_size)
         
@@ -85,13 +85,11 @@ def main():
                 for _ in range(d_size):
                     sampled_state = np.random.choice(np.arange(args['num_states']), p=dist)
                     dataset_counts[sampled_state] += 1
-                covs_dists.append(np.count_nonzero(dataset_counts==0))
+                covs_dists.append(np.sum(dataset_counts>0))
 
             covs_dataset[alpha] = covs_dists
 
         covs.append(covs_dataset)
-
-    print(covs)
 
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
@@ -106,18 +104,18 @@ def main():
         plt.scatter(entropies, to_plot_data, color=p[0].get_color())
 
     plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)]$')
-    plt.ylabel('Percentage of unsampled points')
+    plt.ylabel('Coverage (\%)')
 
-    plt.legend(loc=1)
+    plt.legend(loc=4)
 
     plt.yscale("linear")
     plt.savefig('{0}/dataset_coverage.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/dataset_coverage.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.close() """
+    plt.close()
 
     # Distance to all other distributions.
     # X: expected entropy; Y: distance to all other distributions (chi-square div.).
-    def f_div(x, y):
+    """ def f_div(x, y):
         y = y + 1e-06
         # return np.dot(y, ((x/y)-1)**2 )
         return np.dot(y, (x/y)**2 - 1)
@@ -160,10 +158,10 @@ def main():
 
     plt.legend()
 
-    plt.yscale("linear")
+    plt.yscale("log")
     plt.savefig('{0}/distance_to_all_dists.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/distance_to_all_dists.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.close()
+    plt.close() """
 
     # Distance to all other distributions.
     # X: expected entropy; Y: distance to all other distributions (KL div.).
