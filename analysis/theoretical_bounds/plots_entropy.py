@@ -118,7 +118,9 @@ def main():
     # Distance to all other distributions.
     # X: expected entropy; Y: distance to all other distributions (chi-square div.).
     def f_div(x, y):
-        return np.dot(y, np.power(x/(y+1e-06), 2) - 1)
+        y = y + 1e-06
+        # return np.dot(y, ((x/y)-1)**2 )
+        return np.dot(y, (x/y)**2 - 1)
 
     all_dists = []
     for alpha in sorted(args['dirichlet_alphas']):
