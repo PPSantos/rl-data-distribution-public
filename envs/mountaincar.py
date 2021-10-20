@@ -56,18 +56,16 @@ class MountainCarEnv(gym.Env):
         if position == self.min_position and velocity < 0:
             velocity = 0
 
-        reward = -1.0
-
-        # if position >= self.goal_position:
-        #     reward = 0.0
-        #     #print('Reached goal')
-        # else:
-        #     reward = -1.0
+        if position >= self.goal_position:
+            reward = 0.0
+            #print('Reached goal')
+        else:
+            reward = -1.0
 
         self.state = (position, velocity)
         self.timer += 1
 
-        if self.timer >= self.time_limit or position >= self.goal_position:
+        if self.timer >= self.time_limit: # or position >= self.goal_position:
             done = True
         else:
             done = False
@@ -200,6 +198,6 @@ class DiscreteMountainCarEnv(MountainCarEnv):
         vel_idx = state // self.pos_disc
         pos = self.min_position + self.pos_step * pos_idx
         vel = self.min_speed + self.vel_step * vel_idx
-        pos += np.random.uniform(0.01, 0.99) * self.pos_step
-        vel += np.random.uniform(0.01, 0.99) * self.vel_step
+        pos += 0.5 * self.pos_step
+        vel += 0.5 * self.vel_step
         return np.array((pos,vel), dtype=np.float32)
