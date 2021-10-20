@@ -2,6 +2,7 @@
 .venv/
 data/
 analysis/plots
+analysis/theoretical_bounds/plots
 gen_errors/plots
 bounds_plots/plots
 bounds_plots/plots_2
