@@ -103,6 +103,22 @@ MAXIMUM_REWARD = {
     'mountaincar': 50.0, # TODO: check this.
 }
 
+def f_div(x, y):
+        y = y + 1e-06
+        # return np.dot(y, ((x/y)-1)**2 )
+        return np.dot(y, (x/y)**2 - 1)
+
+def smooth(x, y, xgrid):
+    samples = np.random.choice(len(x), len(x), replace=True) # resample half of the points.
+    y_s = y[samples]
+    x_s = x[samples]
+    y_sm = lowess(y_s, x_s, frac=0.5, it=5,
+                     return_sorted = False)
+    # regularly sample it onto the grid
+    y_grid = scipy.interpolate.interp1d(x_s, y_sm, 
+                                        fill_value='extrapolate')(xgrid)
+    return y_grid
+
 #################################################################
 
 FIGURE_X = 6.0
@@ -151,21 +167,26 @@ def main():
         print('len(offline_dqn_metrics)', len(offline_dqn_metrics))
 
         kl_dists = []
+        chi_dists = []
         for sampling_dist in sampling_dists:
             kl_dist = np.min([scipy.stats.entropy(optimal_dist,sampling_dist+1e-06)
                             for optimal_dist in optimal_dists])
             kl_dists.append(kl_dist)
+            chi_dist = np.min([f_div(optimal_dist,sampling_dist)
+                            for optimal_dist in optimal_dists])
+            chi_dists.append(chi_dist)
 
         data_to_plot[env_id] = {
             'optimal_dists': optimal_dists,
             'sampling_dists': sampling_dists,
             'offline_dqn_metrics': offline_dqn_metrics,
             'kl_dists': kl_dists,
+            'chi_dists': chi_dists,
         }
-
 
     # Q-values error plot.
     metric = 'qvals_avg_error'
+
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
@@ -177,25 +198,68 @@ def main():
         # KL-div. plot.
         Y = [y for _, y in sorted(zip(env_plot_data['kl_dists'], metric_d))]
         X = sorted(env_plot_data['kl_dists'])
+        X = np.array(X)
+        Y = np.array(Y)
+
+        # xgrid = np.linspace(X.min(), X.max())
+        # smooths = np.stack([smooth(X, Y, xgrid) for _ in range(100)]).T
+        # p = plt.plot(xgrid, smooths, alpha=0.25)
 
         # LOWESS smoothing.
-        sm_x, sm_y = lowess(Y, X, frac=0.5, 
-                                it=3, return_sorted = True).T
-        p = plt.plot(sm_x, sm_y, label=ENVS_LABELS[env_id])
+        #sm_x, sm_y = lowess(Y, X, frac=0.4, 
+        #                        it=3, return_sorted = True).T
+        # p = plt.plot(sm_x, sm_y, label=ENVS_LABELS[env_id])
 
-        #plt.plot(X, Y)
-        p = plt.scatter(X, Y, color=p[0].get_color(), alpha=0.25)
+        # Scatter.
+        plt.scatter(X, Y, alpha=0.7, label=ENVS_LABELS[env_id]) #, color=p[0].get_color())
 
-    plt.xlabel(r'$\min_{\pi^*}$KL$(\mu||d_{\pi^*}$)')
+    plt.xlabel(r'$\min_{\pi^*}$KL$(d_{\pi^*}||\mu$)')
     plt.ylabel(r'$Q$-values error')
     plt.yscale('log')
+    plt.xscale('linear')
     plt.legend(loc=2)
     plt.savefig(f'{output_folder}/{metric}_kl_div.png'.format(), bbox_inches='tight', pad_inches=0)
     plt.savefig(f'{output_folder}/{metric}_kl_div.pdf'.format(), bbox_inches='tight', pad_inches=0)
 
 
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    for env_id, env_plot_data in data_to_plot.items():
+        print('env_id=', env_id)
+
+        metric_d = [x[metric] for x in env_plot_data['offline_dqn_metrics']]
+
+        # KL-div. plot.
+        Y = [y for _, y in sorted(zip(env_plot_data['chi_dists'], metric_d))]
+        X = sorted(env_plot_data['chi_dists'])
+        X = np.array(X)
+        Y = np.array(Y)
+
+        # xgrid = np.linspace(X.min(), X.max())
+        # smooths = np.stack([smooth(X, Y, xgrid) for _ in range(100)]).T
+        # p = plt.plot(xgrid, smooths, alpha=0.25)
+
+        # LOWESS smoothing.
+        #sm_x, sm_y = lowess(Y, X, frac=0.4, 
+        #                        it=3, return_sorted = True).T
+        # p = plt.plot(sm_x, sm_y, label=ENVS_LABELS[env_id])
+
+        # Scatter.
+        plt.scatter(X, Y, alpha=0.7, label=ENVS_LABELS[env_id]) #, color=p[0].get_color())
+
+    plt.xlabel(r'$\min_{\pi^*}\chi^2(d_{\pi^*}||\mu$)')
+    plt.ylabel(r'$Q$-values error')
+    plt.yscale('log')
+    plt.xscale('log')
+    plt.legend(loc=2)
+    plt.savefig(f'{output_folder}/{metric}_chi_div.png'.format(), bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'{output_folder}/{metric}_chi_div.pdf'.format(), bbox_inches='tight', pad_inches=0)
+
+
     # Rewards plot.
     metric = 'rewards_default'
+
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
@@ -217,12 +281,43 @@ def main():
         #plt.plot(X, Y)
         plt.scatter(X, Y, alpha=0.7, label=ENVS_LABELS[env_id])#, color=p[0].get_color())
 
-    plt.xlabel(r'$\min_{\pi^*}$KL$(\mu||d_{\pi^*}$)')
+    plt.xlabel(r'$\min_{\pi^*}$KL$(d_{\pi^*}||\mu$)')
     plt.ylabel('Normalized reward')
     plt.yscale('linear')
+    plt.xscale('linear')
     plt.legend(loc=3)
     plt.savefig(f'{output_folder}/{metric}_kl_div.png'.format(), bbox_inches='tight', pad_inches=0)
     plt.savefig(f'{output_folder}/{metric}_kl_div.pdf'.format(), bbox_inches='tight', pad_inches=0)
+
+
+    fig = plt.figure()
+    fig.set_size_inches(FIGURE_X, FIGURE_Y)
+
+    for env_id, env_plot_data in data_to_plot.items():
+        print('env_id=', env_id)
+
+        metric_d = [x[metric] for x in env_plot_data['offline_dqn_metrics']]
+
+        # KL-div. plot.
+        Y = [y for _, y in sorted(zip(env_plot_data['chi_dists'], metric_d))]
+        X = sorted(env_plot_data['chi_dists'])
+
+        Y = np.array(Y) / MAXIMUM_REWARD[env_id]
+
+        # LOWESS smoothing.
+        #sm_x, sm_y = lowess(Y, X, frac=0.5, 
+        #                        it=5, return_sorted = True).T
+        #p = plt.plot(sm_x, sm_y, label=ENVS_LABELS[env_id], zorder=10)
+        #plt.plot(X, Y)
+        plt.scatter(X, Y, alpha=0.7, label=ENVS_LABELS[env_id])#, color=p[0].get_color())
+
+    plt.xlabel(r'$\min_{\pi^*}\chi^2(d_{\pi^*}||\mu$)')
+    plt.ylabel('Normalized reward')
+    plt.yscale('linear')
+    plt.xscale('log')
+    plt.legend(loc=3)
+    plt.savefig(f'{output_folder}/{metric}_chi_div.png'.format(), bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'{output_folder}/{metric}_chi_div.pdf'.format(), bbox_inches='tight', pad_inches=0)
 
 
 if __name__ == "__main__":
