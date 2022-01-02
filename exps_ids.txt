@@ -45,6 +45,21 @@ SAMPLING_DISTS_IDS = [
 ]
 
 """
+    gridEnv1 (smoothed observations).
+    (NEXUS-SERVER)
+"""
+OPTIMAL_SAMPLING_DIST_IDS = [
+'gridEnv1_sampling_dist_2021-10-06-10-48-59', 'gridEnv1_sampling_dist_2021-10-06-10-49-04', 'gridEnv1_sampling_dist_2021-10-06-10-49-08', 'gridEnv1_sampling_dist_2021-10-06-10-49-12', 'gridEnv1_sampling_dist_2021-10-06-10-49-16', 'gridEnv1_sampling_dist_2021-10-06-10-49-21', 'gridEnv1_sampling_dist_2021-10-06-10-49-25', 'gridEnv1_sampling_dist_2021-10-06-10-49-29', 'gridEnv1_sampling_dist_2021-10-06-10-49-33', 'gridEnv1_sampling_dist_2021-10-06-10-49-37', 'gridEnv1_sampling_dist_2021-10-06-10-49-42', 'gridEnv1_sampling_dist_2021-10-06-10-49-46', 'gridEnv1_sampling_dist_2021-10-06-10-49-50', 'gridEnv1_sampling_dist_2021-10-06-10-49-54', 'gridEnv1_sampling_dist_2021-10-06-10-49-58', 'gridEnv1_sampling_dist_2021-10-06-10-50-03', 'gridEnv1_sampling_dist_2021-10-06-10-50-07', 'gridEnv1_sampling_dist_2021-10-06-10-50-11', 'gridEnv1_sampling_dist_2021-10-06-10-50-15', 'gridEnv1_sampling_dist_2021-10-06-10-50-19',
+]
+OFFLINE_DQN_EXP_IDS = [
+'gridEnv1_offline_dqn_2021-11-24-15-18-22', 'gridEnv1_offline_dqn_2021-11-24-15-33-01', 'gridEnv1_offline_dqn_2021-11-24-15-47-54', 'gridEnv1_offline_dqn_2021-11-24-16-02-38', 'gridEnv1_offline_dqn_2021-11-24-16-17-08', 'gridEnv1_offline_dqn_2021-11-24-16-31-40', 'gridEnv1_offline_dqn_2021-11-24-16-46-24', 'gridEnv1_offline_dqn_2021-11-24-17-01-09', 'gridEnv1_offline_dqn_2021-11-24-17-16-03', 'gridEnv1_offline_dqn_2021-11-24-17-30-38', 'gridEnv1_offline_dqn_2021-11-24-17-45-18', 'gridEnv1_offline_dqn_2021-11-24-18-00-16', 'gridEnv1_offline_dqn_2021-11-24-18-14-50', 'gridEnv1_offline_dqn_2021-11-24-18-29-31', 'gridEnv1_offline_dqn_2021-11-24-18-44-13', 'gridEnv1_offline_dqn_2021-11-24-18-58-46', 'gridEnv1_offline_dqn_2021-11-24-19-13-22', 'gridEnv1_offline_dqn_2021-11-24-19-28-03', 'gridEnv1_offline_dqn_2021-11-24-19-42-42', 'gridEnv1_offline_dqn_2021-11-24-19-57-20',
+]
+SAMPLING_DISTS_IDS = [
+'gridEnv1_sampling_dist_2021-11-24-15-18-00', 'gridEnv1_sampling_dist_2021-11-24-15-32-39', 'gridEnv1_sampling_dist_2021-11-24-15-47-33', 'gridEnv1_sampling_dist_2021-11-24-16-02-16', 'gridEnv1_sampling_dist_2021-11-24-16-16-47', 'gridEnv1_sampling_dist_2021-11-24-16-31-18', 'gridEnv1_sampling_dist_2021-11-24-16-46-03', 'gridEnv1_sampling_dist_2021-11-24-17-00-48', 'gridEnv1_sampling_dist_2021-11-24-17-15-41', 'gridEnv1_sampling_dist_2021-11-24-17-30-17', 'gridEnv1_sampling_dist_2021-11-24-17-44-57', 'gridEnv1_sampling_dist_2021-11-24-17-59-54', 'gridEnv1_sampling_dist_2021-11-24-18-14-29', 'gridEnv1_sampling_dist_2021-11-24-18-29-09', 'gridEnv1_sampling_dist_2021-11-24-18-43-51', 'gridEnv1_sampling_dist_2021-11-24-18-58-24', 'gridEnv1_sampling_dist_2021-11-24-19-13-00', 'gridEnv1_sampling_dist_2021-11-24-19-27-41', 'gridEnv1_sampling_dist_2021-11-24-19-42-21', 'gridEnv1_sampling_dist_2021-11-24-19-56-59',
+]
+
+
+"""
     multiPathsEnv.
     (NEXUS-SERVER)
 """
