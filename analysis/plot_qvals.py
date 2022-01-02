@@ -137,7 +137,7 @@ def main(exp_id, val_iter_exp):
     # states_counts field.
     data['states_counts'] = np.array([e['states_counts'] for e in exp_data]) # [R,S]
 
-    is_grid_env = exp_args['env_args']['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys()
+    is_grid_env = exp_args['env_name'] in env_suite.CUSTOM_GRID_ENVS.keys()
     print('is_grid_env:', is_grid_env)
 
     if is_grid_env:

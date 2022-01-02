@@ -11,9 +11,6 @@ import matplotlib
 import seaborn as sns
 plt.style.use('ggplot')
 
-#matplotlib.rcParams['mathtext.fontset'] = 'stix'
-#matplotlib.rcParams['font.family'] = 'STIXGeneral'
-#matplotlib.pyplot.title(r'ABC123 vs $\mathrm{ABC123}^{123}$')
 matplotlib.rcParams['text.usetex'] = True
 matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
 matplotlib.rcParams.update({'font.size': 13})
@@ -27,7 +24,7 @@ SHOW_PLOTS = False
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/bounds_plots/plots/'
 
 args = {
-    'num_states': 5376,
+    'num_states': 10,
     'mdp_dirichlet_alphas': [0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 1000.0],
     'mu_dirichlet_alphas': np.linspace(0.01, 10.0, 1000),
     'num_mdps': 50,
@@ -43,9 +40,9 @@ if __name__ == '__main__':
 
     # Entropy plot.
     entropies = []
-    #sampled_entropies = []
-    #coverages_1 = []
-    #coverages_2 = []
+    sampled_entropies = []
+    coverages_1 = []
+    coverages_2 = []
     for alpha in args['mu_dirichlet_alphas']:
         expected_entropy = scipy.special.digamma(args['num_states']*alpha + 1) - scipy.special.digamma(alpha + 1)
         entropies.append(expected_entropy)
@@ -53,20 +50,20 @@ if __name__ == '__main__':
         #print('alpha', alpha)
         #print('expected_entropy', expected_entropy)
 
-        #samples = np.zeros(1_000)
-        #covs_1 = np.zeros(1_000)
-        #covs_2 = np.zeros(1_000)
-        #for s in range(1_000):
-        #    dist = np.random.dirichlet([alpha]*args['num_states'])
-        #    samples[s] = scipy.stats.entropy(dist)
-        #    covs_1[s] = np.sum(dist > 1e-02)
-        #    covs_2[s] = np.sum(dist > 1e-03)
+        samples = np.zeros(1_000)
+        covs_1 = np.zeros(1_000)
+        covs_2 = np.zeros(1_000)
+        for s in range(1_000):
+            dist = np.random.dirichlet([alpha]*args['num_states'])
+            samples[s] = scipy.stats.entropy(dist)
+            covs_1[s] = np.sum(dist > 1e-02)
+            covs_2[s] = np.sum(dist > 1e-03)
 
-        #sampled_entropies.append(np.mean(samples))
-        #coverages_1.append(np.mean(covs_1))
-        #coverages_2.append(np.mean(covs_2))
+        sampled_entropies.append(np.mean(samples))
+        coverages_1.append(np.mean(covs_1))
+        coverages_2.append(np.mean(covs_2))
 
-    # Calculate unifrom dist entropy.
+    # Calculate uniform dist entropy.
     unif_dist = np.ones(args['num_states']) / args['num_states']
     unif_dist_entropy = scipy.stats.entropy(unif_dist)
     print('unif dist entropy:', unif_dist_entropy)
@@ -82,8 +79,6 @@ if __name__ == '__main__':
     plt.legend()
     plt.savefig('{0}/entropy.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/entropy.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
-
-    exit()
 
     # Coverage plot.
     fig = plt.figure()
@@ -256,9 +251,9 @@ if __name__ == '__main__':
     p_12_5 = np.percentile(aux, 12.5, axis=0)
     p_87_5 = np.percentile(aux, 87.5, axis=0)
 
-    plt.fill_between(entropies, p_37_5, p_62_5, color=RED_COLOR, alpha=0.6, label='Pct25')
-    plt.fill_between(entropies, p_25, p_75, color=RED_COLOR, alpha=0.25, label='Pct50')
-    plt.fill_between(entropies, p_12_5, p_87_5, color=RED_COLOR, alpha=0.1, label='Pct75')
+    plt.fill_between(entropies, p_37_5, p_62_5, color=RED_COLOR, alpha=0.6, label='25th pct.')
+    plt.fill_between(entropies, p_25, p_75, color=RED_COLOR, alpha=0.25, label='50th pct.')
+    plt.fill_between(entropies, p_12_5, p_87_5, color=RED_COLOR, alpha=0.1, label='75th pct.')
 
     plt.scatter(entropies, p_50, color=GRAY_COLOR)
     p = plt.plot(entropies, p_50, label='Median', color=GRAY_COLOR)
@@ -266,7 +261,7 @@ if __name__ == '__main__':
     plt.xlabel(r'$\mathcal{H}(\mu)$')
     plt.ylabel(r'$C_1$')
 
-    plt.legend()
+    plt.legend(loc=3)
 
     plt.savefig('{0}/plot_perc_1.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/plot_perc_1.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)

@@ -19,33 +19,24 @@ plt.style.use('ggplot')
 matplotlib.rcParams['text.usetex'] = True
 matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
 matplotlib.rcParams.update({'font.size': 13})
+sns.set_style(style='white')
 
 FIGURE_X = 8.0
 FIGURE_Y = 6.0
 
-
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/analysis/plots/'
 
-sns.set_style(style='white')
 
-def policy(s):
-    if (s // 8) == 0:
-        return 4 # RIGHT
-    else:
-        return 1 # UP
+ARGS = {
 
-DEFAULT_TRAIN_ARGS = {
-    # WARNING: only works with tabular/grid envs.
-
-    'num_episodes': 5_000,
-    'epsilon': 0.3,
+    'dirichlet_alpha_coef': 5.0,
 
     # Env. arguments.
     'env_args': {
-        'env_name': 'gridEnv1',
+        'env_name': 'gridEnv4',
         'dim_obs': 8,
-        'time_limit': 50,
+        'time_limit': 25,
         'tabular': True, # do not change.
         'smooth_obs': False,
         'one_hot_obs': False,
@@ -55,12 +46,12 @@ DEFAULT_TRAIN_ARGS = {
 
 def create_exp_name(args):
     return args['env_args']['env_name'] + \
-        '_' + 'stationary_dist' + '_' + \
+        '_' + 'sampling_dist' + '_' + \
         str(datetime.today().strftime('%Y-%m-%d-%H-%M-%S'))
 
-def rollout():
+def main():
 
-    args = DEFAULT_TRAIN_ARGS
+    args = ARGS
 
     # Setup experiment data folder.
     exp_name = create_exp_name(args)
@@ -84,58 +75,17 @@ def rollout():
         # env, rollouts_envs = env_suite.get_env(env_name, seed=time_delay)
         # env_grid_spec = None
 
-    # Test policy.
-    # for s in range(env.num_states):
-    #     print('s', s, policy(s))
-
-    # Rollout policy.
-    episode_rewards = []
-    sa_counts = np.zeros((env.num_states,env.num_actions))
-
-    for episode in tqdm(range(args['num_episodes'])):
-
-        s_t = env.reset()
-        # print('ENV RESET.')
-
-        done = False
-        episode_cumulative_reward = 0
-        while not done:
-
-            # Pick action (epsilon-greedy policy).
-            if np.random.rand() <= args['epsilon']:
-                a_t = np.random.choice(env.num_actions)
-            else:
-                a_t = policy(s_t)
-
-            # Env step.
-            s_t1, r_t1, done, info = env.step(a_t)
-
-            # print('s_t', s_t)
-            # print('a_t', a_t)
-            # print('r_t1', r_t1)
-
-            # Log data.
-            episode_cumulative_reward += r_t1
-            sa_counts[s_t,a_t] += 1
-
-            # env.render()
-
-            s_t = s_t1
-
-        episode_rewards.append(episode_cumulative_reward)
+    # Create sampling dist.
+    sampling_dist_size = env.num_states * env.num_actions
+    sampling_dist = np.random.dirichlet([args['dirichlet_alpha_coef']]*sampling_dist_size)
+    print('(S,A) dist. entropy:', scipy.stats.entropy(sampling_dist))
 
     data = {}
-    data['episode_rewards'] = episode_rewards
-    data['sa_counts'] = sa_counts # [S,A]
-
-    sa_dist = sa_counts / np.sum(sa_counts) # [S,A]
-    sa_dist_flattened = sa_dist.flatten() # [S]
-    print(sa_dist_flattened)
-    print('(S,A) dist. entropy:', scipy.stats.entropy(sa_dist_flattened))
-    data['stationary_dist'] = sa_dist_flattened
+    data['sampling_dist'] = sampling_dist
 
     # 2D plot.
-    s_counts = np.sum(sa_counts, axis=1)
+    sampling_dist = sampling_dist.reshape(env.num_states, env.num_actions)
+    s_counts = np.sum(sampling_dist, axis=1)
     s_counts = np.reshape(s_counts, (8,-1))
     #s_counts[0,7] = np.nan
     #s_counts[7,0] = np.nan
@@ -183,4 +133,4 @@ def rollout():
 
 
 if __name__ == "__main__":
-    rollout()
+    main()

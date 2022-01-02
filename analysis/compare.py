@@ -25,15 +25,15 @@ from envs import env_suite
 #####################################################################
 ########################## SCRIPT ARGUMENTS #########################
 #####################################################################
-ENV_NAME = 'gridEnv1'
-VAL_ITER_DATA = 'gridEnv1_val_iter_2021-05-14-15-54-10'
+ENV_NAME = 'pendulum'
+VAL_ITER_DATA = 'pendulum_val_iter_2021-05-24-11-48-50'
 EXPS_DATA = [
-    {'id': 'gridEnv1_dqn_2021-09-08-11-20-42.tar.gz', 'label_1': '3.9', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 3.9$'},
-    {'id': 'gridEnv1_dqn_2021-09-08-13-14-15.tar.gz', 'label_1': '4.6', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 4.6$'},
-    {'id': 'gridEnv1_dqn_2021-09-08-15-19-03.tar.gz', 'label_1': '5.0', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 5.0$'},
-    {'id': 'gridEnv1_dqn_2021-09-08-17-28-48.tar.gz', 'label_1': '5.3', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 5.3$'},
-    {'id': 'gridEnv1_dqn_2021-09-08-19-39-03.tar.gz', 'label_1': '5.6', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 5.6$'},
-    {'id': 'gridEnv1_dqn_2021-09-08-21-52-27.tar.gz', 'label_1': '5.7', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 5.7$'},
+    {'id': 'pendulum_offline_dqn_2021-09-30-08-18-18.tar.gz', 'label_1': '6.6', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 6.6$'},
+    #{'id': 'pendulum_offline_dqn_2021-10-09-00-50-27.tar.gz', 'label_1': '7.3', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 7.3$'},
+    {'id': 'pendulum_offline_dqn_2021-09-30-10-51-08.tar.gz', 'label_1': '7.8', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 7.8$'},
+    {'id': 'pendulum_offline_dqn_2021-09-30-12-07-27.tar.gz', 'label_1': '8.1', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 8.1$'},
+    {'id': 'pendulum_offline_dqn_2021-09-30-13-23-51.tar.gz', 'label_1': '8.3', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 8.3$'},
+    {'id': 'pendulum_offline_dqn_2021-09-30-16-07-30.tar.gz', 'label_1': '8.4', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 8.4$'},
 ]
 EXPS_DATA_2 = None # Allows to concatenate additional experiments.
 STAT_TESTS = False # Whether to compute statistical tests.
@@ -198,8 +198,8 @@ def main():
                                                         parsed_data['rollouts_rewards']])
 
     # Load additional variables from last experiment file.
-    Q_vals_episodes = exp_data[0]['Q_vals_episodes'] # [(E)]
-    rollouts_episodes = exp_data[0]['rollouts_episodes'] # [(E)]
+    Q_vals_episodes = exp_data[0]['Q_vals_steps'] # [(E)]
+    rollouts_episodes = exp_data[0]['rollouts_steps'] # [(E)]
 
     aggregate_funcs = {'mean': mean, 'median': median, 'iqm': iqm}
 
@@ -238,8 +238,9 @@ def main():
             plt.fill_between(Q_vals_episodes, conf_intervals[:,0], conf_intervals[:,1],
                             color=p[0].get_color(), alpha=0.15)
 
-        plt.xlabel('Episode')
+        plt.xlabel('Learning step')
         plt.ylabel(r'$Q$-values error')
+        plt.yscale('log')
         plt.legend()
 
         plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_episodes_{func_lbl}.pdf',
@@ -284,13 +285,16 @@ def main():
 
         y_lim_lower = np.min(ci_lower_bounds) - \
                     (0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
-        y_lim_lower = max(y_lim_lower, 0.0)
+        y_lim_lower = max(y_lim_lower, 0.001)
         y_lim_upper = np.max(ci_upper_bounds) + \
                     (0.03*(np.max(ci_upper_bounds-np.min(ci_lower_bounds))))
         plt.ylim(y_lim_lower, y_lim_upper)
+        print('y_lim_lower', y_lim_lower)
+        print('y_lim_upper', y_lim_upper)
 
         plt.xticks(list(range(len(EXPS_DATA))), [exp['label_1'] for exp in EXPS_DATA])
         plt.ylabel(r'$Q$-values error')
+        plt.yscale('log')
         plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)]$')
 
         plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_final_{func_lbl}.pdf',
@@ -318,6 +322,7 @@ def main():
 
     plt.ylabel(r'$Q$-values error')
     plt.xlabel(r'$\mathbb{E}[\mathcal{H}(\mu)]$')
+    plt.yscale('log')
     plt.xticks(ticks=x_ticks_pos, labels=[e['label_1'] for e in EXPS_DATA])
 
     plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_final_distribution.pdf',
@@ -354,6 +359,7 @@ def main():
 
     plt.xlabel(r'$Q$-values error $(\tau)$')
     plt.ylabel(r'Fraction of runs with error $> \tau$')
+    plt.yscale('log')
     plt.legend()
 
     plt.savefig(f'{PLOTS_FOLDER_PATH}/qvals_final_performance_profile.pdf',
@@ -412,6 +418,8 @@ def main():
     else:
         raise ValueError(f'Env. {ENV_NAME} does not have rollout types defined.')
 
+    rollouts_types = ['default',]
+
     for t, rollout_type in enumerate(rollouts_types):
         print(f'Computing rollout {rollout_type} plots...')
 
@@ -445,7 +453,7 @@ def main():
                 plt.fill_between(rollouts_episodes, conf_intervals[:,0], conf_intervals[:,1],
                                 color=p[0].get_color(), alpha=0.15)
 
-            plt.xlabel('Episode')
+            plt.xlabel('Learning step')
             plt.ylabel('Reward')
             plt.legend()
 

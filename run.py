@@ -13,9 +13,41 @@ if __name__ == "__main__":
     # Load args.
     args = DEFAULT_TRAIN_ARGS
     algo_dict_key = args['algo'] + '_args'
-    env_name = args['env_args']['env_name']
-    val_iter_data = VAL_ITER_DATA[env_name]
-    print('val_iter_data', val_iter_data)
+
+    hidden_layers = {'gridEnv1': [20,40,20],
+                     'gridEnv4': [20,40,20],
+                     'multiPathsEnv': [20,40,20],
+                     'pendulum': [32,64,32],
+                     'mountaincar': [64,128,64]}
+
+    for env in ['gridEnv1', 'gridEnv4', 'multiPathsEnv',
+                'pendulum', 'mountaincar']:
+
+        print('env=', env)
+
+        # Setup train args.
+        args['env_name'] = env
+        args[algo_dict_key]['hidden_layers'] = hidden_layers[env]
+
+        for a in [0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]:
+
+            print('alpha=', a)
+            # Run.
+            args[algo_dict_key]['dataset_sampling_dist_alpha'] = a
+            exp_path, exp_id = train(args)
+            exp_ids.append(exp_id)
+            # Compute plots.
+            plots(exp_id, VAL_ITER_DATA[env])
+            # Compress and cleanup.
+            shutil.make_archive(exp_path,
+                                'gztar',
+                                os.path.dirname(exp_path),
+                                exp_id)
+            shutil.rmtree(exp_path)
+
+            print('Exp. ids:', exp_ids)
+
+    exit()
 
     """ # Run.
     exp_path, exp_id = train(args)
@@ -67,6 +99,8 @@ if __name__ == "__main__":
 
         print('Exp. ids:', exp_ids)
 
+    layers = [[25,50,25],[32,64,32],[64,128,64]]
+    for l in layers:
 
 
 
@@ -92,9 +126,9 @@ if __name__ == "__main__":
                             exp_id)
         shutil.rmtree(exp_path)
 
-        print('Exp. ids:', exp_ids)
+        print('Exp. ids:', exp_ids)"""
 
-    exit()"""
+    exit()
 
     #args[algo_dict_key]['hidden_layers'] = [20,40,20]
     #args[algo_dict_key]['e_net_hidden_layers'] = [20,40,20]
@@ -121,7 +155,7 @@ if __name__ == "__main__":
 
     # Vary alpha exp.
     # (only for dqn algorithm)
-    alphas = [0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
+    """ alphas = [0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
     for a in alphas:
 
         print('a=', a)
@@ -138,4 +172,4 @@ if __name__ == "__main__":
                             exp_id)
         shutil.rmtree(exp_path)
 
-        print('Exp. ids:', exp_ids)
+        print('Exp. ids:', exp_ids) """

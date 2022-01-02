@@ -14,9 +14,9 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 plt.style.use('ggplot')
-matplotlib.rcParams['mathtext.fontset'] = 'stix'
-matplotlib.rcParams['font.family'] = 'STIXGeneral'
-matplotlib.pyplot.title(r'ABC123 vs $\mathrm{ABC123}^{123}$')
+matplotlib.rcParams['text.usetex'] =  True
+matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
+matplotlib.rcParams.update({'font.size': 12})
 
 FIGURE_X = 6.0
 FIGURE_Y = 4.0
@@ -24,14 +24,23 @@ FIGURE_Y = 4.0
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/mdp_1/'
 
-VAL_ITER_DATA = 'mdp1_val_iter_2021-08-27-17-49-23'
+""" VAL_ITER_DATA = 'mdp1_val_iter_2021-08-27-17-49-23'
 DATA = [
     'mdp1_linear_approximator_2021-08-28-18-49-00',
     'mdp1_linear_approximator_2021-08-28-21-28-21',
     'mdp1_linear_approximator_2021-08-28-16-21-20',
 ]
 LABELS = [r'$\epsilon = 0.05$', r'$\epsilon = 1.0$', 'Uniform']
-KEYS = ['eps_05', 'eps_1', 'unif']
+KEYS = ['eps_05', 'eps_1', 'unif'] """
+
+VAL_ITER_DATA = 'mdp1_val_iter_2021-08-27-17-49-23'
+DATA = [
+    'mdp1_linear_approximator_2021-08-30-16-05-33',
+    'mdp1_linear_approximator_2021-08-30-16-31-27',
+    'mdp1_linear_approximator_2021-08-30-16-55-57',
+]
+LABELS = [r'Replay buffer size = $\infty$', 'Replay buffer size = 50 000', 'Replay buffer size = 10 000']
+KEYS = ['replay_infty', 'replay_50_000', 'replay_10_000']
 
 if __name__ == "__main__":
 
@@ -139,7 +148,7 @@ if __name__ == "__main__":
         plt.plot(Q_vals_episodes, 100*q_vals_averaged[:,1,1], label=r'$Q_w(s_2,a_2)$')
 
         plt.xlabel('Episode')
-        plt.ylabel('Q-value')
+        plt.ylabel(r'$Q$-value')
         #plt.ylim([-0.02, 0.32])
         plt.legend()
 
@@ -158,12 +167,12 @@ if __name__ == "__main__":
         plt.plot(Q_vals_episodes, errors, label=lbl)
 
     plt.xlabel('Episode')
-    plt.ylabel('Mean Q-values error')
+    plt.ylabel(r'Mean $Q$-values error')
     plt.ylim([-0.02, 0.32])
-    plt.legend()
+    plt.legend(loc=4)
 
-    plt.savefig('{0}/q_values_summed_error.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/q_values_summed_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/q_values_mean_error.pdf'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/q_values_mean_error.png'.format(PLOTS_FOLDER_PATH), bbox_inches='tight', pad_inches=0)
     plt.close()
 
     """
@@ -233,10 +242,10 @@ if __name__ == "__main__":
 
     plt.ylim([-0.1, 2.1])
     plt.yticks([0.0, 1.0, 2.0], ['0', '1', '2'])
-    plt.ylabel('# correct actions')
+    plt.ylabel('\# correct actions')
     plt.xlabel('Episode')
     plt.legend()
 
-    plt.savefig(f'{PLOTS_FOLDER_PATH}/correct_actions.png', bbox_inches='tight', pad_inches=0)
-    plt.savefig(f'{PLOTS_FOLDER_PATH}/correct_actions.pdf', bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'{PLOTS_FOLDER_PATH}/correct_actions_different_dists.png', bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'{PLOTS_FOLDER_PATH}/correct_actions_different_dists.pdf', bbox_inches='tight', pad_inches=0)
     plt.close()

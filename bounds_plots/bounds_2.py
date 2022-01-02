@@ -11,10 +11,9 @@ import matplotlib
 import seaborn as sns
 plt.style.use('ggplot')
 
-matplotlib.rcParams['mathtext.fontset'] = 'stix'
-matplotlib.rcParams['font.family'] = 'STIXGeneral'
-matplotlib.pyplot.title(r'ABC123 vs $\mathrm{ABC123}^{123}$')
 matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
+matplotlib.rcParams.update({'font.size': 14})
 
 
 FIGURE_X = 6.0
@@ -142,14 +141,16 @@ if __name__ == '__main__':
             P = Ps[np.random.choice(Ps.shape[0])] # [S,S]
             Ps_product = np.dot(init_dist,P) # [S]
 
-            C_value = np.max(Ps_product / (mu_dist + 1e-04))
+            #C_value = np.max(Ps_product / (mu_dist + 1e-04))
+            C_value = np.sqrt(np.dot(mu_dist, (Ps_product / (mu_dist + 1e-04))**2))
             for m in range(2,50): # number of MDP timesteps.
                 
                 # Randomly select P^pi matrix.
                 P = Ps[np.random.choice(Ps.shape[0])]
                 Ps_product = np.dot(Ps_product,P)
 
-                c_m = np.max(Ps_product / (mu_dist + 1e-04))
+                #c_m = np.max(Ps_product / (mu_dist + 1e-04))
+                c_m = np.sqrt(np.dot(mu_dist, (Ps_product / (mu_dist + 1e-04))**2))
 
                 C_value += m * c_m * args['gamma']**(m-1)
 
@@ -205,9 +206,9 @@ if __name__ == '__main__':
     p_12_5 = np.percentile(aux, 12.5, axis=1)
     p_87_5 = np.percentile(aux, 87.5, axis=1)
 
-    plt.fill_between(entropies, p_37_5, p_62_5, color=RED_COLOR, alpha=0.6, label='Pct25')
-    plt.fill_between(entropies, p_25, p_75, color=RED_COLOR, alpha=0.25, label='Pct50')
-    plt.fill_between(entropies, p_12_5, p_87_5, color=RED_COLOR, alpha=0.1, label='Pct75')
+    plt.fill_between(entropies, p_37_5, p_62_5, color=RED_COLOR, alpha=0.6, label='25th pct.')
+    plt.fill_between(entropies, p_25, p_75, color=RED_COLOR, alpha=0.25, label='50th pct.')
+    plt.fill_between(entropies, p_12_5, p_87_5, color=RED_COLOR, alpha=0.1, label='75th pct.')
 
     plt.scatter(entropies, p_50, color=GRAY_COLOR)
     p = plt.plot(entropies, p_50, label='Median', color=GRAY_COLOR)
@@ -215,7 +216,7 @@ if __name__ == '__main__':
     plt.xlabel(r'$\mathcal{H}(\mu)$')
     plt.ylabel(r'$C_2$')
 
-    plt.legend()
+    plt.legend(loc=3)
 
     plt.savefig('{0}/plot_perc_1.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
     plt.savefig('{0}/plot_perc_1.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
