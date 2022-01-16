@@ -60,7 +60,7 @@ DEFAULT_TRAIN_ARGS = {
 
         # Whether to force coverage over all (s,a) pairs, i.e.,
         # the sampling distribution always verifies p(s,a) > 0.
-        'force_full_coverage': True,
+        'force_full_coverage': False,
     },
 
     # Offline DQN algorithm arguments.

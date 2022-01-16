@@ -10,7 +10,7 @@ from train import train
 from train import DEFAULT_TRAIN_ARGS, VAL_ITER_DATA
 from analysis.plots import main as plots
 
-from utils.sampling_dist import main as sampling_dist
+from scripts.sampling_dist import main as sampling_dist
 from utils.array_functions import build_boltzmann_policy
 
 #################################################################

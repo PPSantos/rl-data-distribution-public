@@ -1,7 +1,7 @@
 """
     This script loads the final Q-values from a given experiment and
-    calculates the (s,a) distribution (sampling dist. induced by the
-    Q-values.
+    calculates the (s,a) distribution (sampling dist. induced by an
+    eps-greedy policy w.r.t. the Q-values.
 """
 import os
 import json

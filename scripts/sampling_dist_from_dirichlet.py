@@ -1,12 +1,15 @@
+"""
+    Script that generates a sampling distribution by sampling from a Dirichlet distribution.
+"""
 import os
 import json
 import numpy as np
 import pathlib
 import scipy.stats
 
+from envs import env_suite
 from utils.strings import create_exp_name
 from utils.json_utils import NumpyEncoder
-from envs import env_suite
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 
@@ -26,11 +29,11 @@ def main(args=None):
     exp_path = DATA_FOLDER_PATH + exp_name
     os.makedirs(exp_path, exist_ok=True)
     print('\nExperiment ID:', exp_name)
-    print('scripts/sampling_dist.py arguments:')
+    print('scripts/sampling_dist_from_dirichlet.py arguments:')
     print(args)
 
     # Load environment.
-    env, env_grid_spec = env_suite.get_env(args['env_name'], seed=0)
+    env, _ = env_suite.get_env(args['env_name'], seed=0)
 
     # Create sampling dist.
     sampling_dist_size = env.num_states * env.num_actions
@@ -45,6 +48,8 @@ def main(args=None):
     dumped = json.dumps(data, cls=NumpyEncoder)
     json.dump(dumped, f)
     f.close()
+
+    return exp_path + "/data.json", exp_name
 
 
 if __name__ == "__main__":
