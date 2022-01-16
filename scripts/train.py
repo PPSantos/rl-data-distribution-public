@@ -163,7 +163,14 @@ def train_run(run_args):
         sampling_dist = np.random.dirichlet(
                         [dataset_args['sampling_dist_alpha']]*sampling_dist_size)
     else:
-        raise ValueError('Custom sampling distribution not implement.')
+        # Load custom sampling distribution.
+        custom_sampling_dist_path = dataset_args['custom_sampling_dist']
+        print(f'Loading custom sampling dist from {custom_sampling_dist_path}.')
+        with open(custom_sampling_dist_path, 'r') as f:
+            sampling_dist_data = json.load(f)
+            sampling_dist_data = json.loads(sampling_dist_data)
+        f.close()
+        sampling_dist = sampling_dist_data['sampling_dist']
 
     dataset = create_dataset(env, env_grid_spec, sampling_dist,
                 dataset_size=dataset_args['dataset_size'],
