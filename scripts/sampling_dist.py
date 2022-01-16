@@ -6,7 +6,7 @@ import pathlib
 from datetime import datetime
 import scipy
 
-from rlutil.json_utils import NumpyEncoder
+from utils.json_utils import NumpyEncoder
 from envs import env_suite
 
 import matplotlib
