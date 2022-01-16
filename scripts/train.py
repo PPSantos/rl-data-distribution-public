@@ -106,21 +106,12 @@ def create_dataset(env, env_grid_spec, sampling_dist: np.ndarray,
         env.set_state(state)
         next_observation, reward, done, info = env.step(action)
 
-        next_state = env.get_state()
-
-        # Sample next action and next reward.
-        # Why is this needed?
-        next_action = np.random.choice(env.num_actions)
-        _, next_reward, _, _ = env.step(next_action)
-
         transition = Transition(observation_shape=observation.shape,
                                 action_size=env.num_actions,
                                 observation=observation,
                                 action=action,
                                 reward=reward,
                                 next_observation=next_observation,
-                                next_action=next_action,
-                                next_reward=next_reward,
                                 terminal=0.0)
 
         transitions.append(transition)
@@ -146,19 +137,12 @@ def create_dataset(env, env_grid_spec, sampling_dist: np.ndarray,
             env.set_state(state)
             next_observation, reward, done, info = env.step(action)
 
-            # Sample next action and next reward.
-            # Why is this needed?
-            next_action = np.random.choice(env.num_actions)
-            _, next_reward, _, _ = env.step(next_action)
-
             transition = Transition(observation_shape=observation.shape,
                                     action_size=env.num_actions,
                                     observation=observation,
                                     action=action,
                                     reward=reward,
                                     next_observation=next_observation,
-                                    next_action=next_action,
-                                    next_reward=next_reward,
                                     terminal=0.0)
 
             transitions.append(transition)

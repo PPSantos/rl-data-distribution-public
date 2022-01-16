@@ -13,4 +13,3 @@ tqdm
 statsmodels
 # scikit-posthocs
 arch==4.17
-d3rlpy==1.0.0
