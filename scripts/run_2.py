@@ -11,7 +11,7 @@ from train import DEFAULT_TRAIN_ARGS, VAL_ITER_DATA
 from analysis.plots import main as plots
 
 from utils.sampling_dist import main as sampling_dist
-from algos.utils.array_functions import build_boltzmann_policy
+from utils.array_functions import build_boltzmann_policy
 
 #################################################################
 ENV_NAME = 'gridEnv4'

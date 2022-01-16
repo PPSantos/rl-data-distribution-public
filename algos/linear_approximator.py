@@ -1,8 +1,7 @@
-import random
 import numpy as np
 from tqdm import tqdm
 
-from algos.utils.array_functions import choice_eps_greedy
+from utils.array_functions import choice_eps_greedy
 from algos.numpy_replay_buffer import NumpyReplayBuffer
 
 class LinearApproximator(object):

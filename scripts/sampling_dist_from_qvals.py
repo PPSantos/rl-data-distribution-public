@@ -11,7 +11,7 @@ import pathlib
 import numpy as np
 
 from utils.sampling_dist import main as sampling_dist
-from algos.utils.array_functions import build_eps_greedy_policy
+from utils.array_functions import build_eps_greedy_policy
 
 #################################################################
 ENV_NAME = 'multiPathsEnv'
