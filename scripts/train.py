@@ -88,18 +88,14 @@ def create_dataset(env, env_grid_spec, sampling_dist: np.ndarray,
     for _ in range(dataset_size):
 
         # Randomly sample (state, action) pair according to sampling dist.
-        if env_grid_spec:
-            tile_type = grid_spec.WALL
-            while tile_type == grid_spec.WALL:
-                sampled_idx = np.random.choice(np.arange(len(sampling_dist)), p=sampling_dist)
-                state, action = sa_combinations[sampled_idx]
-                xy = env_grid_spec.idx_to_xy(state)
-                tile_type = env_grid_spec.get_value(xy, xy=True)
-        else:
+        tile_type = grid_spec.WALL
+        while tile_type == grid_spec.WALL:
             sampled_idx = np.random.choice(np.arange(len(sampling_dist)), p=sampling_dist)
             state, action = sa_combinations[sampled_idx]
+            xy = env_grid_spec.idx_to_xy(state)
+            tile_type = env_grid_spec.get_value(xy, xy=True)
 
-        sa_counts[state,action] += 1
+        sa_counts[state, action] += 1
         observation = env.get_observation(state)
 
         # Sample next state, observation and reward.
@@ -123,13 +119,12 @@ def create_dataset(env, env_grid_spec, sampling_dist: np.ndarray,
         zero_positions = np.where(sa_counts == 0)
         print('Number of missing (s,a) pairs:', np.sum((sa_counts == 0)))
         for (state, action) in zip(*zero_positions):
-            
+
             # Skip walls.
-            if env_grid_spec:
-                xy = env_grid_spec.idx_to_xy(state)
-                tile_type = env_grid_spec.get_value(xy, xy=True)
-                if tile_type == grid_spec.WALL:
-                    continue
+            xy = env_grid_spec.idx_to_xy(state)
+            tile_type = env_grid_spec.get_value(xy, xy=True)
+            if tile_type == grid_spec.WALL:
+                continue
 
             observation = env.get_observation(state)
 
