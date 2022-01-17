@@ -1,3 +1,11 @@
+"""
+    Experimental setup 3: Vary the (statistical) distance between the sampling distribution
+    and the closest distribution induced by one of the optimal policies of the MDP.
+
+    This is achieved by first loading the optimal Q-values and then generating sampling
+    distributions using a Boltzmann policy with a temperature coefficient varying in the
+    interval [-10 (anti-optimal), 10 (optimal)].
+"""
 import os
 import json
 import shutil
@@ -14,9 +22,9 @@ from scripts.sampling_dist import main as sampling_dist
 from utils.array_functions import build_boltzmann_policy
 
 #################################################################
-ENV_NAME = 'gridEnv4'
+ENV_NAME = 'gridEnv1'
 NUM_SAMPLING_DISTS = 25
-OPTIMAL_QVALS_EXP_ID = 'gridEnv4_offline_dqn_2021-10-03-00-02-12'
+OPTIMAL_QVALS_EXP_ID = 'gridEnv1_offline_dqn_2022-01-16-13-09-39'
 HIDDEN_LAYERS = {'gridEnv1': [20,40,20],
                  'gridEnv4': [20,40,20],
                  'multiPathsEnv': [20,40,20],
@@ -29,7 +37,7 @@ OPTIMAL_SAMPLING_DIST_IDS = None
 TARGET_INTERVAL = [2,10]
 #################################################################
 
-DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/data'
+DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data'
 
 
 if __name__ == "__main__":

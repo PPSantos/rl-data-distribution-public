@@ -183,7 +183,7 @@ def train_run(run_args):
                     hidden_units=args['offline_dqn_args']['hidden_layers'],
                     activation='relu')
         args['offline_dqn_args']['gamma'] = args['gamma']
-        algo = DQN(**args['offline_dqn_args'],
+        algo = DQN(**args['offline_dqn_args'], use_gpu=False,
                 encoder_factory=encoder_factory)
     else:
         raise ValueError('Unknown algorithm.')

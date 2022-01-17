@@ -1,5 +1,5 @@
 """
-    Script that generates a sampling distribution by sampling from a Dirichlet distribution.
+    Helper script that generates a sampling distribution by sampling from a Dirichlet distribution.
 """
 import os
 import json

@@ -6,7 +6,7 @@ import json
 import numpy as np
 import pathlib
 from tqdm import tqdm
-import scipy
+import scipy.stats
 
 from envs import env_suite
 from utils.strings import create_exp_name
@@ -15,7 +15,7 @@ from utils.json_utils import NumpyEncoder
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 
 
-def main(env_name, policy, num_episodes=10_000):
+def main(env_name, policy, num_episodes=1_000):
 
     # Setup experiment data folder.
     exp_name = create_exp_name({'env_name': env_name, 'algo': 'sampling_dist'})
