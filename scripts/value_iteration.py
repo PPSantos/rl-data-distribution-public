@@ -10,7 +10,7 @@ from algos.value_iteration import ValueIteration
 DEFAULT_ARGS = {
     'env_name': 'gridEnv1',
     'gamma': 0.9, # discount factor.
-    'epsilon': 0.01, # error threshold.
+    'epsilon': 0.001, # error threshold.
 }
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'

@@ -23,7 +23,7 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data
 
 VAL_ITER_DATA = {
     # 'mdp1': 'mdp1_val_iter_2021-08-27-17-49-23',
-    'gridEnv1': 'gridEnv1_val_iter_2022-01-15-21-58-32',
+    'gridEnv1': 'gridEnv1_val_iter_2022-01-17-15-07-56',
     # 'gridEnv4': 'gridEnv4_val_iter_2021-06-16-10-08-44',
     # 'multiPathsEnv': 'multiPathsEnv_val_iter_2021-06-04-19-31-25',
     # 'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
@@ -42,7 +42,7 @@ DEFAULT_TRAIN_ARGS = {
 
     # Period at which checkpoints are saved.
     # (in number of epochs)
-    'save_interval': 10,
+    'save_interval': 20,
     'num_rollouts': 5, # number of rollouts to execute per checkpoint.
 
     'dataset_args': {
