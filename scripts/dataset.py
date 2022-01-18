@@ -99,6 +99,7 @@ def _dataset_from_sampling_dist(env, env_grid_spec, sampling_dist: np.ndarray,
 
     dataset_info = {}
     dataset_info['dataset_dist'] = dataset_dist
+    dataset_info['dataset_sa_counts'] = sa_counts
     dataset_info['dataset_entropy'] = scipy.stats.entropy(dataset_dist)
 
     return transitions, dataset_info
