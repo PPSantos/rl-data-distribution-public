@@ -48,14 +48,14 @@ MULTIPATHS_ENVS = {
 
 # Environments suite.
 ENV_KEYS = ['gridEnv1', 'gridEnv2'] # 'pendulum', 'mountaincar', 'multiPathsEnv', 'mdp1']
-def get_env(name, seed=None):
+def get_env(name):
 
     if name in ('gridEnv1', 'gridEnv2'):
         env_params = GRID_ENVS[name]
         grid_spec = env_params['grid_spec']
         env = grid_env.GridEnvRandomObservation(grid_spec=grid_spec,
                 max_timesteps=env_params['max_timesteps'],
-                obs_dim=env_params['obs_dim'], seed=seed)
+                obs_dim=env_params['obs_dim'])
         return env, grid_spec
 
     elif name == 'pendulum':

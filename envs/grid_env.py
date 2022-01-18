@@ -68,15 +68,14 @@ class RewardFunction(object):
 class GridEnv(gym.Env):
     def __init__(self,
                  grid_spec,
-                 max_timesteps=50,
-                 seed=None):
+                 max_timesteps=50):
 
         self.gs = grid_spec
         self.max_timesteps = max_timesteps
         self.num_states = len(grid_spec)
         self.num_actions = 5
 
-        np.random.seed(seed)
+        np.random.seed(33)
 
         # print('self.num_states', self.num_states)
         # print('self.num_actions', self.num_actions)

@@ -26,7 +26,7 @@ def main(env_name, policy, num_episodes=1_000):
     print('env_name:', env_name, ', num_episodes:', num_episodes)
 
     # Load environment.
-    env, _ = env_suite.get_env(env_name, seed=0)
+    env, _ = env_suite.get_env(env_name)
 
     # Rollout policy.
     episode_rewards = []
@@ -64,8 +64,10 @@ def main(env_name, policy, num_episodes=1_000):
 
     sampling_dist = sa_counts / np.sum(sa_counts) # [S,A]
     sampling_dist_flattened = sampling_dist.flatten() # [S*A]
-    print('(S,A) dist. entropy:', scipy.stats.entropy(sampling_dist_flattened))
+    sampling_dist_entropy = scipy.stats.entropy(sampling_dist_flattened)
+    print('(S,A) dist. entropy:', sampling_dist_entropy)
     data['sampling_dist'] = sampling_dist_flattened
+    data['sampling_dist_entropy'] = sampling_dist_entropy
 
     # Store data.
     f = open(exp_path + "/data.json", "w")

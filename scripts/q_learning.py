@@ -49,7 +49,7 @@ def main(args=None):
     f.close()
 
     # Load environment.
-    env, _ = env_suite.get_env(args['env_name'], seed=0)
+    env, _ = env_suite.get_env(args['env_name'])
 
     # Compute value iteration.
     algo = QLearning(env=env, qlearning_args=args)
