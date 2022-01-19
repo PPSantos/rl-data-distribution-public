@@ -1,3 +1,5 @@
+import numpy as np
+
 from scripts.run import RUN_ARGS
 from scripts.run import main as run
 
@@ -76,3 +78,38 @@ if __name__ == "__main__":
             exp_ids.append(exp_id)
 
             print('Exp. ids:', exp_ids) """
+
+    # Boltzmann dataset: vary temperature parameter.
+    run_args = RUN_ARGS
+
+    exp_ids = []
+    for env in ENVS:
+
+        # Setup train args.
+        run_args['env_name'] = env
+        print('env=', env)
+
+        run_args['dataset_args']['force_full_coverage'] = False
+        temps = np.linspace(-10.0, 10-0, 21)
+        for t in temps:
+
+            print('Temperature=', t)
+            run_args['dataset_args']['boltzmann_dataset_args']['temperature'] = t
+
+            # Run.
+            exp_id = run(run_args)
+            exp_ids.append(exp_id)
+
+            print('Exp. ids:', exp_ids)
+
+        run_args['dataset_args']['force_full_coverage'] = True
+        for t in temps:
+
+            print('Temperature=', t)
+            run_args['dataset_args']['boltzmann_dataset_args']['temperature'] = t
+
+            # Run.
+            exp_id = run(run_args)
+            exp_ids.append(exp_id)
+
+            print('Exp. ids:', exp_ids)
