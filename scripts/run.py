@@ -60,7 +60,7 @@ RUN_ARGS = {
     'train_args':  {
         'num_runs': 4,
         'num_processors': 2,
-        'algo': 'offline_dqn',
+        'algo': 'offline_cql',
         'gamma': 0.9, # discount factor.
         'num_epochs': 200, # number of epochs to train.
 
@@ -76,6 +76,13 @@ RUN_ARGS = {
             'learning_rate': 1e-03,
             'hidden_layers': [20,40,20],
         },
+
+        'offline_cql_args': {
+            'batch_size': 100,
+            'target_update_interval': 1_000,
+            'learning_rate': 1e-03,
+            'hidden_layers': [20,40,20],
+        }
 
     },
 }

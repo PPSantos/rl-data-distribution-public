@@ -12,7 +12,7 @@ from envs import env_suite, grid_spec
 from utils.json_utils import NumpyEncoder
 
 # Import algorithms.
-from d3rlpy.algos import DQN
+from d3rlpy.algos import DQN, DiscreteCQL
 from d3rlpy.metrics.scorer import evaluate_on_environment
 from d3rlpy.models.encoders import VectorEncoderFactory
 from d3rlpy.dataset import Transition
@@ -65,6 +65,13 @@ def train_run(run_args):
                     activation='relu')
         args['offline_dqn_args']['gamma'] = args['gamma']
         algo = DQN(**args['offline_dqn_args'], use_gpu=False,
+                encoder_factory=encoder_factory)
+    elif args['algo'] == 'offline_cql':
+        encoder_factory = VectorEncoderFactory(
+                    hidden_units=args['offline_cql_args']['hidden_layers'],
+                    activation='relu')
+        args['offline_cql_args']['gamma'] = args['gamma']
+        algo = DiscreteCQL(**args['offline_cql_args'], use_gpu=False,
                 encoder_factory=encoder_factory)
     else:
         raise ValueError('Unknown algorithm.')
