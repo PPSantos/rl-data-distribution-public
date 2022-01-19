@@ -1,10 +1,14 @@
 import json
-import random
+import pathlib
 import numpy as np
 import scipy.stats
 
 from utils.json_utils import NumpyEncoder
 from envs import env_suite, grid_spec
+from utils.array_functions import build_eps_greedy_policy
+
+
+DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 
 DEFAULT_DATASET_ARGS = {
 
@@ -14,7 +18,7 @@ DEFAULT_DATASET_ARGS = {
     # Dataset type.
     # If type=dirichlet: the dataset is sampled from a distribution that
     # is itself sampled from a prior Dirichlet distribution parameterized by alpha.
-    'dataset_type': 'dirichlet',
+    'dataset_type': 'eps-greedy',
 
     # Number of dataset transitions.
     'dataset_size': 50_000,
@@ -27,13 +31,62 @@ DEFAULT_DATASET_ARGS = {
     'dirichlet_dataset_args': {
         'dirichlet_alpha_coef': 5.0,
     },
+
+    # type=eps-greedy args.
+    'eps_greedy_dataset_args': {
+        'epsilon': 0.0,
+    },
 }
 
+def _calculate_dataset_dist_from_counts(env, env_grid_spec, sa_counts):
+
+    # Flag walls with nan values.
+    for state in range(env.num_states):
+        for action in range(env.num_actions):
+            xy = env_grid_spec.idx_to_xy(state)
+            tile_type = env_grid_spec.get_value(xy, xy=True)
+            if tile_type == grid_spec.WALL:
+                sa_counts[state,action] = np.nan
+
+    sa_counts = sa_counts.flatten() # [S*A]
+    sa_counts = sa_counts[np.logical_not(np.isnan(sa_counts))] # remove nans
+    dataset_dist = sa_counts / np.sum(sa_counts) # [S*A]
+
+    return dataset_dist
+
+def _get_missing_transitions(env, env_grid_spec, sa_counts):
+
+    env.reset()
+
+    zero_positions = np.where(sa_counts == 0)
+    print('Number of missing (s,a) pairs:', np.sum((sa_counts == 0)))
+
+    missing_transitions = []
+
+    for (state, action) in zip(*zero_positions):
+
+        # Skip walls.
+        xy = env_grid_spec.idx_to_xy(state)
+        tile_type = env_grid_spec.get_value(xy, xy=True)
+        if tile_type == grid_spec.WALL:
+            continue
+
+        observation = env.get_observation(state)
+
+        # Sample next state, observation and reward.
+        env.set_state(state)
+        next_observation, reward, _, _ = env.step(action)
+
+        missing_transitions.append((observation, action, reward, next_observation))
+
+        env.reset()
+
+    print(missing_transitions)
+
+    return missing_transitions
 
 def _dataset_from_sampling_dist(env, env_grid_spec, sampling_dist: np.ndarray,
                 dataset_size: int, force_full_coverage: bool):
-
-    print('Creating dataset.')
 
     transitions = []
 
@@ -65,41 +118,76 @@ def _dataset_from_sampling_dist(env, env_grid_spec, sampling_dist: np.ndarray,
 
     if force_full_coverage:
         # Correct dataset such that we have coverage over all (state, action) pairs.
-        zero_positions = np.where(sa_counts == 0)
-        print('Number of missing (s,a) pairs:', np.sum((sa_counts == 0)))
-        for (state, action) in zip(*zero_positions):
+        missing_transitions = _get_missing_transitions(env, env_grid_spec,
+                                                        sa_counts=sa_counts)
+        transitions = transitions + missing_transitions
 
-            # Skip walls.
-            xy = env_grid_spec.idx_to_xy(state)
-            tile_type = env_grid_spec.get_value(xy, xy=True)
-            if tile_type == grid_spec.WALL:
-                continue
-
-            observation = env.get_observation(state)
-
-            # Sample next state, observation and reward.
-            env.set_state(state)
-            next_observation, reward, done, info = env.step(action)
-
-            transitions.append((observation, action, reward, next_observation))
-
-            env.reset()
-
-    # Flag walls with nan values.
-    for state in range(env.num_states):
-        for action in range(env.num_actions):
-            xy = env_grid_spec.idx_to_xy(state)
-            tile_type = env_grid_spec.get_value(xy, xy=True)
-            if tile_type == grid_spec.WALL:
-                sa_counts[state,action] = np.nan
-
-    sa_counts = sa_counts.flatten() # [S*A]
-    sa_counts = sa_counts[np.logical_not(np.isnan(sa_counts))] # remove nans
-    dataset_dist = sa_counts / np.sum(sa_counts) # [S*A]
+    dataset_dist = _calculate_dataset_dist_from_counts(
+                            env, env_grid_spec, sa_counts)
 
     dataset_info = {}
     dataset_info['dataset_dist'] = dataset_dist
     dataset_info['dataset_sa_counts'] = sa_counts
+    dataset_info['dataset_entropy'] = scipy.stats.entropy(dataset_dist)
+
+    return transitions, dataset_info
+
+def _dataset_from_eps_greedy_policy(env, env_grid_spec, policy,
+                            dataset_size: int, force_full_coverage: bool):
+
+    transitions = []
+
+    # Rollout policy.
+    episode_rewards = []
+    num_samples = 0
+
+    # Matrix to store (s,a) counts.
+    sa_counts = np.zeros((env.num_states, env.num_actions))
+
+    while num_samples < dataset_size:
+
+        observation = env.reset()
+        state = env.get_state()
+
+        done = False
+        episode_cumulative_reward = 0
+        while not done:
+
+            # Pick action.
+            action = policy(state)
+
+            # Env step.
+            next_observation, reward, done, _ = env.step(action)
+            next_state = env.get_state()
+
+            # Log data.
+            episode_cumulative_reward += reward
+            sa_counts[state, action] += 1
+
+            transitions.append((observation, action,
+                                reward, next_observation))
+
+            state = next_state
+            observation = next_observation
+            num_samples += 1
+
+        episode_rewards.append(episode_cumulative_reward)
+    
+    if force_full_coverage:
+        # Correct dataset such that we have coverage over all (state, action) pairs.
+        missing_transitions = _get_missing_transitions(env, env_grid_spec,
+                                                        sa_counts=sa_counts)
+        transitions = transitions + missing_transitions
+
+    dataset_dist = _calculate_dataset_dist_from_counts(
+                        env, env_grid_spec, sa_counts)
+
+    print('Average policy reward:', np.mean(episode_rewards))
+
+    dataset_info = {}
+    dataset_info['episode_rewards'] = episode_rewards
+    dataset_info['sa_counts'] = sa_counts # [S,A]
+    dataset_info['dataset_dist'] = dataset_dist
     dataset_info['dataset_entropy'] = scipy.stats.entropy(dataset_dist)
 
     return transitions, dataset_info
@@ -117,6 +205,7 @@ def main(args=None):
     env, env_grid_spec = env_suite.get_env(args['env_name'])
 
     # Create dataset for (offline) training.
+    print('Creating dataset.')
     if args['dataset_type'] == 'dirichlet':
 
         sampling_dist_size = env.num_states * env.num_actions
@@ -124,11 +213,31 @@ def main(args=None):
         sampling_dist = np.random.dirichlet([alpha]*sampling_dist_size)
 
         dataset, dataset_info = _dataset_from_sampling_dist(env, env_grid_spec,
-                                        sampling_dist,
-                                        dataset_size=args['dataset_size'],
-                                        force_full_coverage=args['force_full_coverage'])
+                                    sampling_dist=sampling_dist,
+                                    dataset_size=args['dataset_size'],
+                                    force_full_coverage=args['force_full_coverage'])
+
+    elif args['dataset_type'] == 'eps-greedy':
+
+        val_iter_path = DATA_FOLDER_PATH + args['val_iter_path']
+        print(f"Opening experiment {args['val_iter_path']}")
+        with open(val_iter_path + "/train_data.json", 'r') as f:
+            val_iter_data = json.load(f)
+            val_iter_data = json.loads(val_iter_data)
+            val_iter_data = val_iter_data
+        f.close()
+        optimal_q_vals = np.array(val_iter_data['Q_vals']) # [S,A]
+
+        policy = build_eps_greedy_policy(optimal_q_vals,
+                epsilon=args['eps_greedy_dataset_args']['epsilon'])
+
+        dataset, dataset_info = _dataset_from_eps_greedy_policy(env, env_grid_spec,
+                                    policy=policy,
+                                    dataset_size=args['dataset_size'],
+                                    force_full_coverage=args['force_full_coverage'])
+
     else:
-        raise ValueError('Unkown dataset type.')
+        raise ValueError('Unknown dataset type.')
 
     # Store dataset.
     dataset_path = args['exp_path'] + "/dataset.json"
@@ -143,7 +252,5 @@ def main(args=None):
     dumped = json.dumps(dataset_info, cls=NumpyEncoder)
     json.dump(dumped, f)
     f.close()
-
-
 
     return dataset_path, dataset_info

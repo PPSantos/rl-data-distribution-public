@@ -4,9 +4,6 @@ import shutil
 import pathlib
 
 
-from utils.strings import create_exp_name
-from utils.json_utils import NumpyEncoder
-
 # Import scripts to create sampling distributions.
 from scripts.sampling_dist_from_dirichlet import main as dirichlet_sampling_dist
 
@@ -19,6 +16,8 @@ from scripts.train import train
 # Import plots script.
 from analysis.plots import main as plots
 
+from utils.strings import create_exp_name
+
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 
@@ -26,7 +25,7 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data
 VAL_ITER_DATA = {
     # 'mdp1': 'mdp1_val_iter_2021-08-27-17-49-23',
     'gridEnv1': 'gridEnv1_val_iter_2022-01-17-15-07-56',
-    # 'gridEnv4': 'gridEnv4_val_iter_2021-06-16-10-08-44',
+    'gridEnv2': 'gridEnv2_val_iter_2022-01-19-11-44-01',
     # 'multiPathsEnv': 'multiPathsEnv_val_iter_2021-06-04-19-31-25',
     # 'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
     # 'mountaincar': 'mountaincar_val_iter_v2_2021-10-20-16-17-47',
@@ -36,7 +35,7 @@ RUN_ARGS = {
     'env_name': 'gridEnv1',
 
     'dataset_args': {
-        'dataset_type': 'dirichlet',
+        'dataset_type': 'eps-greedy',
 
         # Number of dataset transitions.
         'dataset_size': 50_000,
@@ -47,6 +46,10 @@ RUN_ARGS = {
 
         'dirichlet_dataset_args': {
             'dirichlet_alpha_coef': 100.0,
+        },
+
+        'eps_greedy_dataset_args': {
+            'epsilon': 0.0,
         },
     },
 
@@ -93,6 +96,7 @@ def main(run_args):
     # Generate dataset.
     run_args['dataset_args']['env_name'] = run_args['env_name']
     run_args['dataset_args']['exp_path'] = exp_path
+    run_args['dataset_args']['val_iter_path'] = VAL_ITER_DATA[run_args['env_name']]
     dataset_path, dataset_info = create_dataset(run_args['dataset_args'])
     print('dataset info:', dataset_info)
 
