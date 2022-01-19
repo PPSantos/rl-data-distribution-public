@@ -5,7 +5,7 @@ import scipy.stats
 
 from utils.json_utils import NumpyEncoder
 from envs import env_suite, grid_spec
-from utils.array_functions import build_eps_greedy_policy
+from utils.array_functions import build_eps_greedy_policy, build_boltzmann_policy
 
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
@@ -15,10 +15,8 @@ DEFAULT_DATASET_ARGS = {
     # Environment name.
     'env_name': 'gridEnv1',
 
-    # Dataset type.
-    # If type=dirichlet: the dataset is sampled from a distribution that
-    # is itself sampled from a prior Dirichlet distribution parameterized by alpha.
-    'dataset_type': 'eps-greedy',
+    # Dataset type (dirichlet, eps-greedy, or boltzmann).
+    'dataset_type': 'boltzmann',
 
     # Number of dataset transitions.
     'dataset_size': 50_000,
@@ -35,6 +33,11 @@ DEFAULT_DATASET_ARGS = {
     # type=eps-greedy args.
     'eps_greedy_dataset_args': {
         'epsilon': 0.0,
+    },
+
+    # type=boltzmann args.
+    'boltzmann_dataset_args': {
+        'temperature': 0.0,
     },
 }
 
@@ -132,7 +135,7 @@ def _dataset_from_sampling_dist(env, env_grid_spec, sampling_dist: np.ndarray,
 
     return transitions, dataset_info
 
-def _dataset_from_eps_greedy_policy(env, env_grid_spec, policy,
+def _dataset_from_policy(env, env_grid_spec, policy,
                             dataset_size: int, force_full_coverage: bool):
 
     transitions = []
@@ -231,7 +234,26 @@ def main(args=None):
         policy = build_eps_greedy_policy(optimal_q_vals,
                 epsilon=args['eps_greedy_dataset_args']['epsilon'])
 
-        dataset, dataset_info = _dataset_from_eps_greedy_policy(env, env_grid_spec,
+        dataset, dataset_info = _dataset_from_policy(env, env_grid_spec,
+                                    policy=policy,
+                                    dataset_size=args['dataset_size'],
+                                    force_full_coverage=args['force_full_coverage'])
+
+    elif args['dataset_type'] == 'boltzmann':
+
+        val_iter_path = DATA_FOLDER_PATH + args['val_iter_path']
+        print(f"Opening experiment {args['val_iter_path']}")
+        with open(val_iter_path + "/train_data.json", 'r') as f:
+            val_iter_data = json.load(f)
+            val_iter_data = json.loads(val_iter_data)
+            val_iter_data = val_iter_data
+        f.close()
+        optimal_q_vals = np.array(val_iter_data['Q_vals']) # [S,A]
+
+        policy = build_boltzmann_policy(optimal_q_vals,
+                temperature=args['boltzmann_dataset_args']['temperature'])
+
+        dataset, dataset_info = _dataset_from_policy(env, env_grid_spec,
                                     policy=policy,
                                     dataset_size=args['dataset_size'],
                                     force_full_coverage=args['force_full_coverage'])

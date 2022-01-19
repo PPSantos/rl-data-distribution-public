@@ -35,7 +35,7 @@ RUN_ARGS = {
     'env_name': 'gridEnv1',
 
     'dataset_args': {
-        'dataset_type': 'eps-greedy',
+        'dataset_type': 'boltzmann',
 
         # Number of dataset transitions.
         'dataset_size': 50_000,
@@ -50,6 +50,10 @@ RUN_ARGS = {
 
         'eps_greedy_dataset_args': {
             'epsilon': 0.0,
+        },
+
+        'boltzmann_dataset_args': {
+            'temperature': 0.0,
         },
     },
 

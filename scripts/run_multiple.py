@@ -8,7 +8,7 @@ ENVS = ['gridEnv1',]
 
 if __name__ == "__main__":
 
-    # Vary alpha dirichlet parameter.
+    # Dirichlet dataset: vary alpha dirichlet parameter.
     """ run_args = RUN_ARGS
 
     exp_ids = []
@@ -43,8 +43,8 @@ if __name__ == "__main__":
 
             print('Exp. ids:', exp_ids) """
 
-    # Vary epsilon parameter.
-    run_args = RUN_ARGS
+    # Epsilon-greedy dataset: vary epsilon parameter.
+    """ run_args = RUN_ARGS
 
     exp_ids = []
     for env in ENVS:
@@ -75,5 +75,4 @@ if __name__ == "__main__":
             exp_id = run(run_args)
             exp_ids.append(exp_id)
 
-            print('Exp. ids:', exp_ids)
-
+            print('Exp. ids:', exp_ids) """
