@@ -66,7 +66,7 @@ RUN_ARGS = {
 
         # Period at which checkpoints are saved.
         # (in number of epochs)
-        'save_interval': 20,
+        'save_interval': 10,
         'num_rollouts': 5, # number of rollouts to execute per checkpoint.
 
         # Offline DQN algorithm arguments.

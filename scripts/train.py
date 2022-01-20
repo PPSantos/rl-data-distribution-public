@@ -21,7 +21,8 @@ from d3rlpy.dataset import Transition
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 
 
-def _read_dataset(env, dataset_path):
+def _read_dataset(env, dataset_path: str):
+
     with open(dataset_path, 'r') as f:
         dataset = json.load(f)
         dataset = json.loads(dataset)

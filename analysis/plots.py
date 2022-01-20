@@ -133,8 +133,6 @@ def main(exp_id, val_iter_exp):
     f.close()
     val_iter_data['Q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
 
-    print(val_iter_data)
-
     # Open data.
     print(f"Opening experiment {exp_id}")
     exp_path = DATA_FOLDER_PATH + exp_id
@@ -147,15 +145,13 @@ def main(exp_id, val_iter_exp):
     data = {}
 
     # steps field.
-    data['steps'] = exp_data[0]['steps'] # [(S)]
+    data['steps'] = exp_data[0]['steps'] # [(Steps)]
 
     # Q_vals field.
-    data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,(S),S,A]
+    data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,(Steps),S,A]
 
     # rollouts_rewards field.
-    data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(S)]
-
-    print(data['Q_vals'][0,-1])
+    data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(Steps)]
 
     # Scalar metrics dict.
     scalar_metrics = {}
@@ -166,8 +162,8 @@ def main(exp_id, val_iter_exp):
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
-    for (i, run_rollouts) in enumerate(data['rollouts_rewards']): # run_rollouts = [(S)]
-        X = data['steps'] # [(S)]
+    for (i, run_rollouts) in enumerate(data['rollouts_rewards']): # run_rollouts = [(Steps)]
+        X = data['steps'] # [(Steps)]
         Y = run_rollouts
 
         plt.plot(X, Y, label=f'Run {i}')
@@ -182,7 +178,7 @@ def main(exp_id, val_iter_exp):
     """
         Scalar evaluation rewards metrics.
     """
-    scalar_metrics[f'rollouts_rewards_final'] = np.mean(data['rollouts_rewards'][-10:,:])
+    scalar_metrics[f'rollouts_rewards_final'] = np.mean(data['rollouts_rewards'][:,-1])
 
     """
         `maximizing_action_s_*` plots.
@@ -199,10 +195,10 @@ def main(exp_id, val_iter_exp):
             fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
             i = 0
-            for (ax, run_data) in zip(axs.flat, data['Q_vals']): # run_data = [E,S,A]
+            for (ax, run_data) in zip(axs.flat, data['Q_vals']): # run_data = [(Steps),S,A]
 
-                state_data = run_data[:,state,:] # [E,A]
-                Y = np.argmax(state_data, axis=1) # [E]
+                state_data = run_data[:,state,:] # [(Steps),A]
+                Y = np.argmax(state_data, axis=1) # [(Steps)]
                 X = data['steps']
 
                 ax.plot(X, Y)
@@ -226,9 +222,9 @@ def main(exp_id, val_iter_exp):
     fig = plt.figure()
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
     
-    for (i, run_Q_vals) in enumerate(data['Q_vals']):
-        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
-        Y = np.sum(errors, axis=(1,2)) # [E]
+    for (i, run_Q_vals) in enumerate(data['Q_vals']): # run_Q_vals = [(Steps),S,A]
+        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
+        Y = np.sum(errors, axis=(1,2)) # [(Steps)]
         X = data['steps']
 
         plt.plot(X, Y, label=f'Run {i}')
@@ -244,13 +240,13 @@ def main(exp_id, val_iter_exp):
     """
         Scalar q-values metrics.
     """
-    errors = np.abs(val_iter_data['Q_vals'] - data['Q_vals']) # [R,E,S,A]
-    errors = np.sum(errors, axis=(2,3)) # [R,E]
-    scalar_metrics['qvals_summed_error'] = np.mean(errors[:,-10:])
+    errors = np.abs(val_iter_data['Q_vals'] - data['Q_vals']) # [R,(Steps),S,A]
+    errors = np.sum(errors, axis=(2,3)) # [R,(Steps)]
+    scalar_metrics['qvals_summed_error'] = np.mean(errors[:,-1])
 
-    errors = np.abs(val_iter_data['Q_vals'] - data['Q_vals']) # [R,E,S,A]
-    errors = np.mean(errors, axis=(2,3)) # [R,E]
-    scalar_metrics['qvals_avg_error'] = np.mean(errors[:,-10:])
+    errors = np.abs(val_iter_data['Q_vals'] - data['Q_vals']) # [R,(Steps),S,A]
+    errors = np.mean(errors, axis=(2,3)) # [R,(Steps)]
+    scalar_metrics['qvals_avg_error'] = np.mean(errors[:,-1])
 
     """
         `q_values_mean_error` plot.
@@ -263,15 +259,15 @@ def main(exp_id, val_iter_exp):
     fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
     i = 0
-    for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [E,S,A]
+    for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [(Steps),S,A]
 
-        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
-        Y = np.mean(errors, axis=(1,2)) # [E]
+        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
+        Y = np.mean(errors, axis=(1,2)) # [(Steps)]
         X = data['steps']
         # Y_std = np.std(errors, axis=(1,2))
 
         # CI calculation.
-        # errors_flatten = errors.reshape(len(Y), -1) # [E,S*A]
+        # errors_flatten = errors.reshape(len(Y), -1) # [(Steps),S*A]
         # X_CI = np.arange(0, len(Y), 100)
         # CI_bootstrap = [calculate_CI_bootstrap(Y[x], errors_flatten[x,:]) for x in X_CI]
         # CI_bootstrap = np.array(CI_bootstrap).T
@@ -283,12 +279,12 @@ def main(exp_id, val_iter_exp):
         # ax.fill_between(X, Y-Y_std, Y+Y_std, color=p[0].get_color(), alpha=0.15)
 
         # Max Q-values.
-        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
-        maximizing_actions = np.argmax(run_Q_vals, axis=2) # [E,S]
+        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
+        maximizing_actions = np.argmax(run_Q_vals, axis=2) # [(Steps),S]
         x, y = np.indices(maximizing_actions.shape)
-        errors = errors[x,y,maximizing_actions] # [E,S]
+        errors = errors[x,y,maximizing_actions] # [(Steps),S]
 
-        Y = np.mean(errors, axis=1) # [E]
+        Y = np.mean(errors, axis=1) # [(Steps)]
         X = data['steps']
         # CI calculation.
         # X_CI = np.arange(0, len(Y), 100)
@@ -323,19 +319,16 @@ def main(exp_id, val_iter_exp):
     fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
     i = 0
-    for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [E,S,A]
+    for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [(Steps),S,A]
 
-        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
-        errors = errors.reshape(errors.shape[0], -1) # [E,S*A]
+        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
+        errors = errors.reshape(errors.shape[0], -1) # [(Steps),S*A]
 
-        X = np.arange(0, data['steps'][-1], 500)
-        idxs = np.searchsorted(data['steps'], X)
-        abs_diff_list = errors[idxs,:].tolist() # Sub-sample.
-        abs_diff_mean = np.mean(errors[idxs,:], axis=1) # Sub-sample.
-
-        violin = ax.violinplot(abs_diff_list, positions=X,
+        X = data['steps']
+        violin = ax.violinplot(errors.tolist(), positions=X,
                                 showextrema=True, widths=350)
 
+        abs_diff_mean = np.mean(errors, axis=1)
         ax.scatter(X, abs_diff_mean, s=12)
 
         #ax.set_ylim(y_axis_range)
@@ -361,21 +354,18 @@ def main(exp_id, val_iter_exp):
     fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
     i = 0
-    for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [E,S,A]
+    for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [(Steps),S,A]
 
-        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [E,S,A]
-        maximizing_actions = np.argmax(run_Q_vals, axis=2) # [E,S]
+        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
+        maximizing_actions = np.argmax(run_Q_vals, axis=2) # [(Steps),S]
         x, y = np.indices(maximizing_actions.shape)
-        errors = errors[x,y,maximizing_actions] # [E,S]
+        errors = errors[x,y,maximizing_actions] # [(Steps),S]
 
-        X = np.arange(0, data['steps'][-1], 500)
-        idxs = np.searchsorted(data['steps'], X)
-        abs_diff_list = errors[idxs,:].tolist() # Sub-sample.
-        abs_diff_mean = np.mean(errors[idxs,:], axis=1) # Sub-sample.
-
-        violin = ax.violinplot(abs_diff_list, positions=X,
+        X = data['steps']
+        violin = ax.violinplot(errors.tolist(), positions=X,
                                 showextrema=True, widths=350)
 
+        abs_diff_mean = np.mean(errors, axis=1)
         ax.scatter(X, abs_diff_mean, s=12)
 
         #ax.set_ylim(y_axis_range)
@@ -406,7 +396,7 @@ def main(exp_id, val_iter_exp):
             fig.set_size_inches(FIGURE_X*num_cols, FIGURE_Y*num_rows)
 
             i = 0
-            for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [E,S,A]
+            for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [(Steps),S,A]
 
                 for action in range(run_Q_vals.shape[-1]):
                     
