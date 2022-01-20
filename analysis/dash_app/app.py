@@ -2,6 +2,7 @@ import os
 import json
 import pathlib
 import tarfile
+import collections
 
 import dash
 from dash import dcc
@@ -14,15 +15,15 @@ import numpy as np
 import pandas as pd
 
 # Path to folder containing data files.
-DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
-PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/analysis/plots/'
+DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.parent.absolute()) + '/data/'
+PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.parent.absolute()) + '/analysis/plots/'
 
-ENVS = ['GridEnv1', 'GridEnv2', 'MultiPath']
-ALGORITHMS = ['DQN', 'CQL']
+ENVS = ['GridEnv1'] #, 'GridEnv2', 'MultiPath']
+ALGORITHMS = ['DQN'] #, 'CQL']
 DATASET_TYPES = ['Dirichlet', 'Eps-greedy', 'Boltzmann']
 
 EXP_IDS = {
-    'gridEnv1': {
+    'GridEnv1': {
         'DQN': {
             'Dirichlet': [
                 'gridEnv1_offline_dqn_2022-01-18-22-07-14', 'gridEnv1_offline_dqn_2022-01-18-22-15-26', 'gridEnv1_offline_dqn_2022-01-18-22-23-08', 'gridEnv1_offline_dqn_2022-01-18-22-31-01', 'gridEnv1_offline_dqn_2022-01-18-22-38-56', 'gridEnv1_offline_dqn_2022-01-18-22-46-39', 'gridEnv1_offline_dqn_2022-01-18-22-54-30',
@@ -36,45 +37,55 @@ EXP_IDS = {
             ],
         },
 
-        'CQL': {},
+        #'CQL': {},
 
     },
-    'gridEnv2': {},
-    'MultiPath': {},
+    # 'GridEnv2': {},
+    # 'MultiPath': {},
 }
 
 def load_data(exp_ids):
+    print('Pre-loading data.')
 
-    algo_metrics_dict = {}
-    dataset_metrics_dict = {}
+    nested_dict = lambda: collections.defaultdict(nested_dict)
+    metrics_dict = nested_dict()
+    dataset_metrics_dict = nested_dict()
     for env_id, env_data in exp_ids.items():
+        print('env_id=', env_id)
         for algo_id, algo_data in env_data.items():
+            print('algo_id=', algo_id)
             for dataset_type_id, dataset_type_data in algo_data.items():
+                print('dataset_type_id=', dataset_type_id)
 
-                algo_metrics_list = []
+                metrics_list = []
                 dataset_metrics_list = []
                 for exp_id in dataset_type_data:
+
+                    # Load algorithm metrics.
                     exp_metrics_path = PLOTS_FOLDER_PATH + exp_id + '/scalar_metrics.json'
                     with open(exp_metrics_path, 'r') as f:
                         d = json.load(f)
                     f.close()
-                    algo_metrics_list.append(d)
+                    metrics_list.append(d)
 
+                    # Load dataset metrics.
                     exp_folder_path = DATA_FOLDER_PATH + exp_id + '.tar.gz'
-
                     tar = tarfile.open(exp_folder_path)
                     data_file = tar.extractfile("{0}/dataset_info.json".format(exp_id))
-
                     dataset_info = json.load(data_file)
                     dataset_info = json.loads(dataset_info)
-
                     dataset_metrics_list.append(dataset_info)
 
-                algo_metrics_dict[env_id][algo_id][dataset_type_id] = algo_metrics_list
+                metrics_dict[env_id][algo_id][dataset_type_id] = metrics_list
                 dataset_metrics_dict[env_id][algo_id][dataset_type_id] = dataset_metrics_list
 
-    return algo_metrics_dict, dataset_metrics_dict
+    print('Finished pre-loading data.')
+
+    return metrics_dict, dataset_metrics_dict
+
 ALGO_METRICS, DATASET_METRICS = load_data(EXP_IDS)
+
+print(ALGO_METRICS['GridEnv1']['DQN']['Dirichlet'])
 
 app = dash.Dash(__name__,
                 meta_tags=[
@@ -153,7 +164,7 @@ runs_picker_layout_json = html.Div(
                                     dcc.Dropdown(
                                         id='algorithm-picker',
                                         options=[{'label': algo, 'value': algo} for algo in ALGORITHMS],
-                                        value='DQN',
+                                        value=['DQN'],
                                         multi=True,
                                         style={'color': '#3b505e'},
                                         className="dropdown-box-third",
@@ -167,7 +178,7 @@ runs_picker_layout_json = html.Div(
                                     dcc.Dropdown(
                                         id='dataset-picker',
                                         options=[{'label': d, 'value': d} for d in DATASET_TYPES],
-                                        value='dirichlet',
+                                        value=['Dirichlet'],
                                         multi=True,
                                         style={'color': '#3b505e'},
                                         className="dropdown-box-third",
@@ -202,7 +213,7 @@ def callback_rl_actions(env, algorithms, dataset_types):
     print('dataset_types', dataset_types)
 
     layout = go.Layout(
-        title='Entropy',
+        #title='Entropy',
         margin=go.layout.Margin(l=50, r=50, b=50, t=30),
         xaxis={"title": 'Entropy'},
         yaxis={"title": 'Q-values error'},
@@ -210,50 +221,30 @@ def callback_rl_actions(env, algorithms, dataset_types):
         legend=dict(y=-0.2)
     )
 
-    env_exp_ids = EXP_IDS[env]
-
     traces = []
 
-    for algo in algorithms:
+    for (c_idx, algo) in enumerate(sorted(algorithms)):
+
+        algo_data_X = []
+        algo_data_Y = []
 
         for dataset_type in dataset_types:
+            algo_data_Y.extend([y['qvals_avg_error'] for y in ALGO_METRICS[env][algo][dataset_type]])
+            algo_data_X.extend([x['dataset_entropy'] for x in DATASET_METRICS[env][algo][dataset_type]])
 
-            data = []
-            for exp_id in env_exp_ids[algo][dataset_type]:
-                pass
-
-            traces.append(go.Scatter(
-                x=X,
-                y=Y,
-                #mode="lines",
-                name=os.path.basename(file_name),
-                showlegend=True,
-            ))
-
-    traces = []
-    for file_name in sorted(runs):
-
-        d = data[file_name]
-
-        if d:
-            
-            Y = d['rl_actions']
-            X = np.linspace(1, len(Y), len(Y))
-
-            Y = np.array(Y)
-            Y = Y.flatten()
-
-            traces.append(go.Scatter(
-                x=X,
-                y=Y,
-                #mode="lines",
-                name=os.path.basename(file_name),
-                showlegend=True,
-            ))
+        traces.append(go.Scatter(
+            x=algo_data_X,
+            y=algo_data_Y,
+            showlegend=True,
+            marker_color=COLORS[c_idx],
+            mode='markers',
+            name=algo
+        ))
 
     figure = go.Figure(data=traces, layout=layout)
+    figure.update_layout(yaxis_type="log")
 
-    return dcc.Graph(figure=figure, id='rl_actions-graph')
+    return dcc.Graph(figure=figure, id='entropy-graph')
 
 """
 def update_graph(
