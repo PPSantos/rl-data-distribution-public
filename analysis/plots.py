@@ -2,9 +2,8 @@ import os
 import sys
 import math
 import json
-import random
+import tarfile
 import numpy as np
-import pandas as pd
 import pathlib
 import argparse
 
@@ -14,9 +13,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 plt.style.use('ggplot')
 
-import statsmodels.api as sm
-
-from envs import env_suite
 
 FIGURE_X = 6.0
 FIGURE_Y = 4.0
@@ -135,11 +131,21 @@ def main(exp_id, val_iter_exp):
 
     # Open data.
     print(f"Opening experiment {exp_id}")
-    exp_path = DATA_FOLDER_PATH + exp_id
-    with open(exp_path + "/train_data.json", 'r') as f:
-        exp_data = json.load(f)
+    if exp_id[-7:] == '.tar.gz':
+        exp_folder_path = DATA_FOLDER_PATH + exp_id
+
+        tar = tarfile.open(exp_folder_path)
+        data_file = tar.extractfile("{0}/train_data.json".format(exp_id))
+
+        exp_data = json.load(data_file)
         exp_data = json.loads(exp_data)
-    f.close()
+
+    else:
+        exp_path = DATA_FOLDER_PATH + exp_id
+        with open(exp_path + "/train_data.json", 'r') as f:
+            exp_data = json.load(f)
+            exp_data = json.loads(exp_data)
+        f.close()
 
     # Parse data.
     data = {}
