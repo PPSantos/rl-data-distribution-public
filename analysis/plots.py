@@ -110,14 +110,7 @@ def main(exp_id, val_iter_exp):
     os.makedirs(q_vals_folder_path, exist_ok=True)
 
     # Get args file (assumes all experiments share the same arguments).
-    exp_args = get_args_json_file(DATA_FOLDER_PATH + exp_id)
-    print('Exp. args:')
-    print(exp_args)
 
-    # Store a copy of the args.json file inside plots folder.
-    with open(output_folder + "args.json", 'w') as f:
-        json.dump(exp_args, f)
-        f.close()
 
     # Load optimal policy/Q-values.
     val_iter_path = DATA_FOLDER_PATH + val_iter_exp
@@ -140,12 +133,25 @@ def main(exp_id, val_iter_exp):
         exp_data = json.load(data_file)
         exp_data = json.loads(exp_data)
 
+        args_file = tar.extractfile("{0}/args.json".format(exp_id))
+        exp_args = json.load(args_file)
+        exp_args = json.loads(exp_args)
+
     else:
         exp_path = DATA_FOLDER_PATH + exp_id
         with open(exp_path + "/train_data.json", 'r') as f:
             exp_data = json.load(f)
             exp_data = json.loads(exp_data)
         f.close()
+
+        exp_args = get_args_json_file(DATA_FOLDER_PATH + exp_id)
+    
+    # Store a copy of the args.json file inside plots folder.
+    with open(output_folder + "args.json", 'w') as f:
+        json.dump(exp_args, f)
+        f.close()
+    print('Exp. args:')
+    print(exp_args)
 
     # Parse data.
     data = {}
@@ -189,7 +195,7 @@ def main(exp_id, val_iter_exp):
     """
         `maximizing_action_s_*` plots.
     """
-    """ if exp_args['env_name'] not in ('pendulum', 'mountaincar'):
+    """ if exp_args['env_name'] in ('gridEnv1', 'gridEnv2'):
         print('Computing `maximizing_action_s_*` plots.')
 
         for state in range(data['Q_vals'].shape[2]):
@@ -391,7 +397,7 @@ def main(exp_id, val_iter_exp):
         `Q_values_s*-*-*` plots.
     """
     print('Computing `Q_values_s*-*-*` plots.')
-    if exp_args['env_name'] not in ('pendulum', 'mountaincar'):
+    if exp_args['env_name'] in ('gridEnv1', 'gridEnv2'):
         for state_to_plot in range(data['Q_vals'].shape[2]):
 
             # Plot.
