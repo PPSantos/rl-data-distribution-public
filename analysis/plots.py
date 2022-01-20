@@ -138,7 +138,6 @@ def main(exp_id, val_iter_exp):
 
         args_file = tar.extractfile("{0}/args.json".format(exp_id))
         exp_args = json.load(args_file)
-        exp_args = json.loads(exp_args)
 
     else:
         exp_path = DATA_FOLDER_PATH + exp_id
