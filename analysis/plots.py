@@ -398,7 +398,7 @@ def main(exp_id, val_iter_exp):
     """
         `Q_values_s*-*-*` plots.
     """
-    print('Computing `Q_values_s*-*-*` plots.')
+    """print('Computing `Q_values_s*-*-*` plots.')
     if exp_args['env_name'] in ('gridEnv1', 'gridEnv2'):
         for state_to_plot in range(data['Q_vals'].shape[2]):
 
@@ -435,7 +435,7 @@ def main(exp_id, val_iter_exp):
 
             plt.savefig(f'{q_vals_folder_path}/Q_values_s{state_to_plot}.png', bbox_inches='tight', pad_inches=0)
 
-            plt.close()
+            plt.close()"""
 
     # Store scalars dict.
     with open(output_folder + "scalar_metrics.json", 'w') as f:
