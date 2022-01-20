@@ -103,6 +103,11 @@ def main(exp_id, val_iter_exp):
     print('Exp. id: {0}'.format(exp_id))
     print('Val. iter. exp. id: {0}\n'.format(val_iter_exp))
 
+    is_tar_file = False
+    if exp_id[-7:] == '.tar.gz':
+        is_tar_file = True
+        exp_id = exp_id[:-7]
+
     # Prepare plots output folder.
     output_folder = PLOTS_FOLDER_PATH + exp_id + '/'
     os.makedirs(output_folder, exist_ok=True)
@@ -124,10 +129,8 @@ def main(exp_id, val_iter_exp):
 
     # Open data.
     print(f"Opening experiment {exp_id}")
-    if exp_id[-7:] == '.tar.gz':
-        exp_folder_path = DATA_FOLDER_PATH + exp_id
-
-        tar = tarfile.open(exp_folder_path)
+    if is_tar_file:
+        tar = tarfile.open(DATA_FOLDER_PATH + exp_id + '.tar.gz')
         data_file = tar.extractfile("{0}/train_data.json".format(exp_id))
 
         exp_data = json.load(data_file)
