@@ -84,8 +84,8 @@ def load_data(exp_ids):
     return metrics_dict, dataset_metrics_dict
 
 ALGO_METRICS, DATASET_METRICS = load_data(EXP_IDS)
-
-print(ALGO_METRICS['GridEnv1']['DQN']['Dirichlet'])
+#print(ALGO_METRICS['GridEnv1']['DQN']['Dirichlet'])
+#print(DATASET_METRICS['GridEnv1']['DQN']['Dirichlet'])
 
 app = dash.Dash(__name__,
                 meta_tags=[
@@ -190,7 +190,32 @@ runs_picker_layout_json = html.Div(
 page_layout.append(runs_picker_layout_json)
 
 # Plots.
-page_layout.append(html.Div(className="container", children=[div_graph('entropy')]))
+graph_section = html.Div(
+                    className="row",
+                    children=[
+                        html.Div(
+                            className="eight columns",
+                            children=[div_graph('entropy')]
+                        ),
+                        html.Div(
+                            className="four columns",
+                            children=[
+                                    html.P("Y-axis:"),
+                                    dcc.Dropdown(
+                                        id='entropy-y-axis-picker',
+                                        options=[{'label': 'Q-values error', 'value': 'qvals_avg_error'},
+                                                {'label':'Rollouts rewards', 'value': 'rollouts_rewards_final'}],
+                                        value='qvals_avg_error',
+                                        multi=False,
+                                        style={'color': '#3b505e'},
+                                        className="dropdown-box-third",
+                                    ),
+                                    html.P("Point info:"),
+                            ]
+                        ),
+                    ],
+                )
+page_layout.append(html.Div(className="container", children=[graph_section]))
 
 
 app.layout = html.Div(
@@ -204,19 +229,20 @@ app.layout = html.Div(
         Input("env-picker", "value"),
         Input("algorithm-picker", "value"),
         Input("dataset-picker", "value"),
+        Input("entropy-y-axis-picker", "value"),
     ],
 )
-def callback_entropy_plot(env, algorithms, dataset_types):
+def callback_entropy_plot(env, algorithms, dataset_types, y_axis):
 
-    print('env', env)
-    print('algorithms', algorithms)
-    print('dataset_types', dataset_types)
+    if y_axis == "qvals_avg_error":
+        y_axis_lbl = "Q-values error"
+    else:
+        y_axis_lbl = "Reward"
 
     layout = go.Layout(
-        #title='Entropy',
         margin=go.layout.Margin(l=50, r=50, b=50, t=30),
         xaxis={"title": 'Entropy'},
-        yaxis={"title": 'Q-values error'},
+        yaxis={"title": y_axis_lbl},
         legend_orientation="h",
         legend=dict(y=-0.2)
     )
@@ -230,9 +256,11 @@ def callback_entropy_plot(env, algorithms, dataset_types):
         hover_text = []
 
         for dataset_type in dataset_types:
-            algo_data_Y.extend([y['qvals_avg_error'] for y in ALGO_METRICS[env][algo][dataset_type]])
+
+            algo_data_Y.extend([y[y_axis] for y in ALGO_METRICS[env][algo][dataset_type]])
             algo_data_X.extend([x['dataset_entropy'] for x in DATASET_METRICS[env][algo][dataset_type]])
-            h_texts = [f"Entropy: {x['dataset_entropy']:.2f}<br>Q-value error: {y['qvals_avg_error']:.2f}"
+            h_texts = [f"Entropy: {x['dataset_entropy']:.2f}<br>Q-value error: {y['qvals_avg_error']:.2f} \
+                                                    <br>Mean rollouts reward: {y['rollouts_rewards_final']:.2f}"
                                         for x, y in zip(DATASET_METRICS[env][algo][dataset_type],
                                         ALGO_METRICS[env][algo][dataset_type])]
             hover_text.extend(h_texts)
@@ -249,7 +277,8 @@ def callback_entropy_plot(env, algorithms, dataset_types):
         ))
 
     figure = go.Figure(data=traces, layout=layout)
-    figure.update_layout(yaxis_type="log")
+    if y_axis == "qvals_avg_error":
+        figure.update_layout(yaxis_type="log")
 
     return dcc.Graph(figure=figure, id='entropy-graph')
 
