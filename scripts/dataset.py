@@ -55,16 +55,14 @@ def _calculate_dataset_dist_from_counts(env, env_grid_spec, sa_counts):
     sa_counts = sa_counts[np.logical_not(np.isnan(sa_counts))] # remove nans
     dataset_dist = sa_counts / np.sum(sa_counts) # [S*A]
 
-    return dataset_dist
+    return dataset_dist, sa_counts
 
-def _get_missing_transitions(env, env_grid_spec, sa_counts):
+def _add_missing_transitions(env, env_grid_spec, transitions, sa_counts):
 
     env.reset()
 
     zero_positions = np.where(sa_counts == 0)
     print('Number of missing (s,a) pairs:', np.sum((sa_counts == 0)))
-
-    missing_transitions = []
 
     for (state, action) in zip(*zero_positions):
 
@@ -80,13 +78,11 @@ def _get_missing_transitions(env, env_grid_spec, sa_counts):
         env.set_state(state)
         next_observation, reward, _, _ = env.step(action)
 
-        missing_transitions.append((observation, action, reward, next_observation))
+        transitions.append((observation, action, reward, next_observation))
+
+        sa_counts[state,action] += 1
 
         env.reset()
-
-    print(missing_transitions)
-
-    return missing_transitions
 
 def _dataset_from_sampling_dist(env, env_grid_spec, sampling_dist: np.ndarray,
                 dataset_size: int, force_full_coverage: bool):
@@ -121,11 +117,10 @@ def _dataset_from_sampling_dist(env, env_grid_spec, sampling_dist: np.ndarray,
 
     if force_full_coverage:
         # Correct dataset such that we have coverage over all (state, action) pairs.
-        missing_transitions = _get_missing_transitions(env, env_grid_spec,
-                                                        sa_counts=sa_counts)
-        transitions = transitions + missing_transitions
+        _add_missing_transitions(env, env_grid_spec,
+                transitions=transitions, sa_counts=sa_counts)
 
-    dataset_dist = _calculate_dataset_dist_from_counts(
+    dataset_dist, sa_counts = _calculate_dataset_dist_from_counts(
                             env, env_grid_spec, sa_counts)
 
     dataset_info = {}
@@ -165,7 +160,7 @@ def _dataset_from_policy(env, env_grid_spec, policy,
 
             # Log data.
             episode_cumulative_reward += reward
-            sa_counts[state, action] += 1
+            sa_counts[state,action] += 1
 
             transitions.append((observation, action,
                                 reward, next_observation))
@@ -178,18 +173,17 @@ def _dataset_from_policy(env, env_grid_spec, policy,
     
     if force_full_coverage:
         # Correct dataset such that we have coverage over all (state, action) pairs.
-        missing_transitions = _get_missing_transitions(env, env_grid_spec,
-                                                        sa_counts=sa_counts)
-        transitions = transitions + missing_transitions
+        _add_missing_transitions(env, env_grid_spec,
+                transitions=transitions, sa_counts=sa_counts)
 
-    dataset_dist = _calculate_dataset_dist_from_counts(
+    dataset_dist, sa_counts = _calculate_dataset_dist_from_counts(
                         env, env_grid_spec, sa_counts)
 
-    print('Average policy reward:', np.mean(episode_rewards))
+    # print('Average policy reward:', np.mean(episode_rewards))
 
     dataset_info = {}
     dataset_info['episode_rewards'] = episode_rewards
-    dataset_info['dataset_sa_counts'] = sa_counts # [S,A]
+    dataset_info['dataset_sa_counts'] = sa_counts
     dataset_info['dataset_dist'] = dataset_dist
     dataset_info['dataset_entropy'] = scipy.stats.entropy(dataset_dist)
 
