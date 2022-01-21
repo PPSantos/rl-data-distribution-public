@@ -189,7 +189,7 @@ def _dataset_from_policy(env, env_grid_spec, policy,
 
     dataset_info = {}
     dataset_info['episode_rewards'] = episode_rewards
-    dataset_info['sa_counts'] = sa_counts # [S,A]
+    dataset_info['dataset_sa_counts'] = sa_counts # [S,A]
     dataset_info['dataset_dist'] = dataset_dist
     dataset_info['dataset_entropy'] = scipy.stats.entropy(dataset_dist)
 
