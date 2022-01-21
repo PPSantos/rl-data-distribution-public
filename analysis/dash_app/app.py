@@ -19,7 +19,7 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.parent.absolute()) +
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.parent.absolute()) + '/analysis/plots/'
 
 ENVS = ['GridEnv1'] #, 'GridEnv2', 'MultiPath']
-ALGORITHMS = ['DQN'] #, 'CQL']
+ALGORITHMS = ['DQN', 'CQL']
 DATASET_TYPES = ['Dirichlet', 'Eps-greedy', 'Boltzmann']
 
 EXP_IDS = {
@@ -37,7 +37,17 @@ EXP_IDS = {
             ],
         },
 
-        #'CQL': {},
+        'CQL': {
+            'Dirichlet': [
+                'gridEnv1_offline_cql_2022-01-20-14-25-26', 'gridEnv1_offline_cql_2022-01-20-14-36-46', 'gridEnv1_offline_cql_2022-01-20-14-46-45', 'gridEnv1_offline_cql_2022-01-20-14-56-38', 'gridEnv1_offline_cql_2022-01-20-15-06-26', 'gridEnv1_offline_cql_2022-01-20-15-16-04', 'gridEnv1_offline_cql_2022-01-20-15-25-52', 'gridEnv1_offline_cql_2022-01-20-15-35-44', 'gridEnv1_offline_cql_2022-01-20-15-45-38', 'gridEnv1_offline_cql_2022-01-20-15-55-21', 'gridEnv1_offline_cql_2022-01-20-16-04-59', 'gridEnv1_offline_cql_2022-01-20-16-14-38', 'gridEnv1_offline_cql_2022-01-20-16-24-20', 'gridEnv1_offline_cql_2022-01-20-16-34-06'
+            ],
+            'Eps-greedy': [
+                'gridEnv1_offline_cql_2022-01-20-14-25-26', # FIXME
+            ],
+            'Boltzmann': [
+                'gridEnv1_offline_cql_2022-01-20-01-05-19', 'gridEnv1_offline_cql_2022-01-20-01-16-29', 'gridEnv1_offline_cql_2022-01-20-01-27-04', 'gridEnv1_offline_cql_2022-01-20-01-37-35', 'gridEnv1_offline_cql_2022-01-20-01-48-07', 'gridEnv1_offline_cql_2022-01-20-01-58-47', 'gridEnv1_offline_cql_2022-01-20-02-09-24', 'gridEnv1_offline_cql_2022-01-20-02-19-53', 'gridEnv1_offline_cql_2022-01-20-02-30-42', 'gridEnv1_offline_cql_2022-01-20-02-41-09', 'gridEnv1_offline_cql_2022-01-20-02-51-43', 'gridEnv1_offline_cql_2022-01-20-03-02-16', 'gridEnv1_offline_cql_2022-01-20-03-12-53', 'gridEnv1_offline_cql_2022-01-20-03-23-23', 'gridEnv1_offline_cql_2022-01-20-03-33-58', 'gridEnv1_offline_cql_2022-01-20-03-44-31', 'gridEnv1_offline_cql_2022-01-20-03-55-04', 'gridEnv1_offline_cql_2022-01-20-04-05-37', 'gridEnv1_offline_cql_2022-01-20-04-16-14', 'gridEnv1_offline_cql_2022-01-20-04-26-44', 'gridEnv1_offline_cql_2022-01-20-04-37-14', 'gridEnv1_offline_cql_2022-01-20-04-47-41', 'gridEnv1_offline_cql_2022-01-20-04-58-12', 'gridEnv1_offline_cql_2022-01-20-05-08-45', 'gridEnv1_offline_cql_2022-01-20-05-19-18', 'gridEnv1_offline_cql_2022-01-20-05-29-53', 'gridEnv1_offline_cql_2022-01-20-05-40-30', 'gridEnv1_offline_cql_2022-01-20-05-51-06', 'gridEnv1_offline_cql_2022-01-20-06-01-39', 'gridEnv1_offline_cql_2022-01-20-06-12-08', 'gridEnv1_offline_cql_2022-01-20-06-22-47', 'gridEnv1_offline_cql_2022-01-20-06-33-23', 'gridEnv1_offline_cql_2022-01-20-06-43-54', 'gridEnv1_offline_cql_2022-01-20-06-54-26', 'gridEnv1_offline_cql_2022-01-20-07-04-58', 'gridEnv1_offline_cql_2022-01-20-07-15-29', 'gridEnv1_offline_cql_2022-01-20-07-25-58', 'gridEnv1_offline_cql_2022-01-20-07-36-33', 'gridEnv1_offline_cql_2022-01-20-07-47-15', 'gridEnv1_offline_cql_2022-01-20-07-57-48', 'gridEnv1_offline_cql_2022-01-20-08-08-44', 'gridEnv1_offline_cql_2022-01-20-08-19-14'
+            ],
+        },
 
     },
     # 'GridEnv2': {},

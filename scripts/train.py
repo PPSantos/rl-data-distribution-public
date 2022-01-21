@@ -7,6 +7,7 @@ import pathlib
 from typing import List
 import multiprocessing as mp
 
+import torch
 
 from envs import env_suite, grid_spec
 from utils.json_utils import NumpyEncoder
@@ -28,7 +29,7 @@ def _read_dataset(env, dataset_path: str):
         dataset = json.loads(dataset)
     f.close()
 
-    transitions : List[Transition]= []
+    transitions : List[Transition] = []
 
     for transition in dataset:
         observation = np.array(transition[0])
@@ -52,6 +53,10 @@ def train_run(run_args):
     time_delay, args = run_args
 
     time.sleep(time_delay)
+
+    # Set number of threads.
+    if run_args['num_threads_per_proc']:
+        torch.set_num_threads(run_args['num_threads_per_proc'])
 
     # Load environment.
     env, env_grid_spec = env_suite.get_env(args['env_name'])

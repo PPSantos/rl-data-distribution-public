@@ -60,7 +60,8 @@ RUN_ARGS = {
     'train_args':  {
         'num_runs': 4,
         'num_processors': 2,
-        'algo': 'offline_cql',
+        'num_threads_per_proc': 4, # if None then uses default settings.
+        'algo': 'offline_dqn',
         'gamma': 0.9, # discount factor.
         'num_epochs': 200, # number of epochs to train.
 
