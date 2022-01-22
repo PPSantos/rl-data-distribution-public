@@ -1,17 +1,23 @@
+import pathlib
+
 import dash
 from dash import dcc
 from dash import html
-import dash_daq as daq
+# import dash_daq as daq
 from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 
 import numpy as np
 import pandas as pd
 
+# from analysis.plots_appendix import PLOTS_FOLDER_PATH
+
 # Absolute path to folder containing experiments data.
 CSV_PATH = '/home/pedrosantos/git/rl-data-distribution/data/parsed_data.csv'
 
-ENVS = ['GridEnv1'] #, 'GridEnv2', 'MultiPath']
+PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.parent.absolute()) + '/analysis/plots/'
+
+ENVS = ['GridEnv1', 'GridEnv2'] # 'MultiPath']
 ALGORITHMS = ['DQN', 'CQL']
 DATASET_TYPES = ['Dirichlet', 'Eps-greedy', 'Boltzmann']
 
@@ -124,14 +130,24 @@ graph_section = html.Div(
                     children=[
                         html.Div(
                             className="eight columns",
-                            children=[dcc.Graph(figure=None, id='entropy-graph')]
+                            children=[dcc.Graph(figure=None, id='graph1')]
                         ),
                         html.Div(
                             className="four columns",
                             children=[
+                                    html.P("X-axis:"),
+                                    dcc.Dropdown(
+                                        id='graph1-x-axis-picker',
+                                        options=[{'label': 'Dataset entropy', 'value': 'dataset_entropy'},
+                                                {'label':'Dataset coverage', 'value': 'dataset_coverage'}],
+                                        value='dataset_entropy',
+                                        multi=False,
+                                        style={'color': '#3b505e'},
+                                        className="dropdown-box-third",
+                                    ),
                                     html.P("Y-axis:"),
                                     dcc.Dropdown(
-                                        id='entropy-y-axis-picker',
+                                        id='graph1-y-axis-picker',
                                         options=[{'label': 'Q-values error', 'value': 'qvals_avg_error'},
                                                 {'label':'Rollouts rewards', 'value': 'rollouts_rewards_final'}],
                                         value='qvals_avg_error',
@@ -140,7 +156,7 @@ graph_section = html.Div(
                                         className="dropdown-box-third",
                                     ),
                                     html.P("Point info:"),
-                                    html.Div(id='entropy-plot-point-info')
+                                    html.Div(id='graph1-point-info')
                             ]
                         ),
                     ],
@@ -154,26 +170,34 @@ app.layout = html.Div(
 )
 
 @app.callback(
-    Output("entropy-graph", "figure"),
+    Output("graph1", "figure"),
     [
         Input("env-picker", "value"),
         Input("algorithm-picker", "value"),
         Input("dataset-picker", "value"),
-        Input("entropy-y-axis-picker", "value"),
+        Input("graph1-x-axis-picker", "value"),
+        Input("graph1-y-axis-picker", "value"),
     ],
 )
-def callback_entropy_plot(env, algorithms, dataset_types, y_axis):
+def callback_graph1(env, algorithms, dataset_types, x_axis, y_axis):
 
-    x_axis = "dataset_entropy" 
+    if x_axis == "dataset_entropy":
+        x_axis_lbl = "Dataset entropy"
+    elif x_axis == "dataset_coverage":
+        x_axis_lbl = "Dataset coverage"
+    else:
+        raise ValueError("Unknown X-axis type.")
 
     if y_axis == "qvals_avg_error":
         y_axis_lbl = "Q-values error"
-    else:
+    elif y_axis == "rollouts_rewards_final":
         y_axis_lbl = "Reward"
+    else:
+        raise ValueError("Unknown Y-axis type.")
 
     layout = go.Layout(
         margin=go.layout.Margin(l=50, r=50, b=50, t=30),
-        xaxis={"title": 'Entropy'},
+        xaxis={"title": x_axis_lbl},
         yaxis={"title": y_axis_lbl},
         legend_orientation="h",
         legend=dict(y=-0.2)
@@ -213,11 +237,10 @@ def callback_entropy_plot(env, algorithms, dataset_types, y_axis):
 
     return figure
 
-
 @app.callback(
-        Output('entropy-plot-point-info', 'children'),
-        [Input('entropy-graph', 'clickData')])
-def plot_basin(selection):
+        Output('graph1-point-info', 'children'),
+        [Input('graph1', 'clickData')])
+def callback_graph1_point(selection):
     print(selection)
     if selection is not None:
         # x_data = np.linspace(0,500,500)
