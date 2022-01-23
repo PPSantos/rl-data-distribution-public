@@ -58,6 +58,10 @@ def train_run(run_args):
     if args['num_threads_per_proc']:
         torch.set_num_threads(args['num_threads_per_proc'])
 
+    # Set seeds.
+    torch.manual_seed(time_delay)
+    np.random.seed(time_delay)
+
     # Load environment.
     env, env_grid_spec = env_suite.get_env(args['env_name'])
 
