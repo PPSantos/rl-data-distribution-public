@@ -17,9 +17,9 @@ CSV_PATH = '/home/pedrosantos/git/rl-data-distribution/data/parsed_data.csv'
 
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.parent.absolute()) + '/analysis/plots/'
 
-ENVS = ['GridEnv1', 'GridEnv2'] # 'MultiPath']
-ALGORITHMS = ['DQN', 'CQL']
-DATASET_TYPES = ['Dirichlet', 'Eps-greedy', 'Boltzmann']
+ENVS = ['gridEnv1', 'gridEnv2'] # 'MultiPath']
+ALGORITHMS = ['offline_dqn', 'offline_cql']
+DATASET_TYPES = ['dirichlet', 'eps-greedy', 'boltzmann']
 
 DATA = pd.read_csv(CSV_PATH)
 
@@ -42,7 +42,7 @@ app = dash.Dash(__name__,
 app.title = 'RL data distribution'
 server = app.server
 
-ALGO_COLORS= {'DQN': '#d62728', 'CQL': '#1f77b4'}
+ALGO_COLORS= {'offline_dqn': '#d62728', 'offline_cql': '#1f77b4'}
 # COLORS = ['#ff7f0e', '#2ca02c', '#9467bd']
 
 
@@ -85,7 +85,7 @@ runs_picker_layout_json = html.Div(
                                     dcc.Dropdown(
                                         id='env-picker',
                                         options=[{'label': env, 'value': env} for env in ENVS],
-                                        value='GridEnv1',
+                                        value='gridEnv1',
                                         multi=False,
                                         style={'color': '#3b505e'},
                                         className="dropdown-box-third",
@@ -99,7 +99,7 @@ runs_picker_layout_json = html.Div(
                                     dcc.Dropdown(
                                         id='algorithm-picker',
                                         options=[{'label': algo, 'value': algo} for algo in ALGORITHMS],
-                                        value=['DQN'],
+                                        value=['offline_dqn'],
                                         multi=True,
                                         style={'color': '#3b505e'},
                                         className="dropdown-box-third",
@@ -113,7 +113,7 @@ runs_picker_layout_json = html.Div(
                                     dcc.Dropdown(
                                         id='dataset-picker',
                                         options=[{'label': d, 'value': d} for d in DATASET_TYPES],
-                                        value=['Dirichlet'],
+                                        value=['eps-greedy', 'boltzmann'],
                                         multi=True,
                                         style={'color': '#3b505e'},
                                         className="dropdown-box-third",
@@ -155,8 +155,8 @@ graph_section = html.Div(
                                         style={'color': '#3b505e'},
                                         className="dropdown-box-third",
                                     ),
-                                    html.P("Point info:"),
-                                    html.Div(id='graph1-point-info')
+                                    # html.P("Point info:"),
+                                    # html.Div(id='graph1-point-info')
                             ]
                         ),
                     ],
@@ -237,7 +237,7 @@ def callback_graph1(env, algorithms, dataset_types, x_axis, y_axis):
 
     return figure
 
-@app.callback(
+""" @app.callback(
         Output('graph1-point-info', 'children'),
         [Input('graph1', 'clickData')])
 def callback_graph1_point(selection):
@@ -266,7 +266,7 @@ def callback_graph1_point(selection):
         #             )
         
         # return {'data': data, 'layout': layout}
-        return []
+        return [] """
 
 if __name__ == "__main__":
     app.run_server(debug=True)
