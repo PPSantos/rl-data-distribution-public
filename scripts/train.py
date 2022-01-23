@@ -125,10 +125,16 @@ def train_run(run_args):
         # Store Q-values.
         estimated_Q_vals = np.zeros((env.num_states, env.num_actions))
         for state in range(env.num_states):
-            xy = env_grid_spec.idx_to_xy(state)
-            tile_type = env_grid_spec.get_value(xy, xy=True)
-            if tile_type == grid_spec.WALL:
-                estimated_Q_vals[state,:] = 0.0
+            if env_grid_spec:
+                xy = env_grid_spec.idx_to_xy(state)
+                tile_type = env_grid_spec.get_value(xy, xy=True)
+                if tile_type == grid_spec.WALL:
+                    estimated_Q_vals[state,:] = 0.0
+                else:
+                    obs = env.get_observation(state)
+                    for a in range(env.num_actions):
+                        estimated_Q_vals[state,a] = \
+                            algo.predict_value([obs], [a])[0]
             else:
                 obs = env.get_observation(state)
                 for a in range(env.num_actions):
