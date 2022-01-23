@@ -1,27 +1,33 @@
+import os
 import pathlib
+
+from PIL import Image
 
 import dash
 from dash import dcc
 from dash import html
-# import dash_daq as daq
 from dash.dependencies import Input, Output
+from dash.exceptions import PreventUpdate
 import plotly.graph_objs as go
+import plotly.express as px
 
 import numpy as np
 import pandas as pd
 
-# from analysis.plots_appendix import PLOTS_FOLDER_PATH
-
+###########################################################################
 # Absolute path to folder containing experiments data.
 CSV_PATH = '/home/pedrosantos/git/rl-data-distribution/data/parsed_data.csv'
-
-PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.parent.absolute()) + '/analysis/plots/'
+DATA = pd.read_csv(CSV_PATH)
+###########################################################################
+# Path to folder containing data files.
+PLOTS_FOLDER_PATH_1 = str(pathlib.Path(__file__).parent.parent.parent.absolute()) + '/analysis/plots/'
+# Path to folder containing data files (second folder).
+PLOTS_FOLDER_PATH_2 = str(pathlib.Path(__file__).parent.parent.parent.absolute()) + '/analysis/plots/ilu_server/'
 
 ENVS = ['gridEnv1', 'gridEnv2'] # 'MultiPath']
 ALGORITHMS = ['offline_dqn', 'offline_cql']
 DATASET_TYPES = ['dirichlet', 'eps-greedy', 'boltzmann']
-
-DATA = pd.read_csv(CSV_PATH)
+ALGO_COLORS= {'offline_dqn': '#d62728', 'offline_cql': '#1f77b4'} # COLORS = ['#ff7f0e', '#2ca02c', '#9467bd']
 
 app = dash.Dash(__name__,
                 meta_tags=[
@@ -38,22 +44,10 @@ app = dash.Dash(__name__,
                     'content': 'width=device-width, initial-scale=1.0'
                     }]
                 )
-
 app.title = 'RL data distribution'
 server = app.server
 
-ALGO_COLORS= {'offline_dqn': '#d62728', 'offline_cql': '#1f77b4'}
-# COLORS = ['#ff7f0e', '#2ca02c', '#9467bd']
-
-
-def div_graph(name):
-    components = []
-    components.append(html.Div(id="div-{0}-graph".format(name), className="twelve columns"))
-    return html.Div(
-        className="row",
-        children=components,
-    )
-
+# Build page layout.
 page_layout = []
 
 # Top row.
@@ -70,7 +64,8 @@ top_row_layout = html.Div(
         )
 page_layout.append(top_row_layout)
 
-runs_picker_layout_json = html.Div(
+# Runs picker.
+runs_picker = html.Div(
             className="container",
             style={"padding": "35px 25px"},
             children=[
@@ -122,10 +117,10 @@ runs_picker_layout_json = html.Div(
                         ),
                     ]),
             ])
-page_layout.append(runs_picker_layout_json)
+page_layout.append(runs_picker)
 
-# Plots.
-graph_section = html.Div(
+# Graph1 section.
+graph1_section = html.Div(
                     className="row",
                     children=[
                         html.Div(
@@ -155,19 +150,38 @@ graph_section = html.Div(
                                         style={'color': '#3b505e'},
                                         className="dropdown-box-third",
                                     ),
-                                    # html.P("Point info:"),
-                                    # html.Div(id='graph1-point-info')
                             ]
                         ),
                     ],
                 )
-page_layout.append(html.Div(className="container", children=[graph_section]))
-
+point_info =  html.Div(className='row',
+                    children=[
+                        html.Div(id="graph1-point-info-text")
+                    ])
+images_section = html.Div(
+                    className="row",
+                    children=[
+                        html.Div(
+                            className="six columns",
+                            children=[
+                                    html.Div(id='graph1-img-1'),
+                            ]
+                        ),
+                        html.Div(
+                            className="six columns",
+                            children=[
+                                    html.Div(id='graph1-img-2'),
+                            ]
+                        ),
+                    ],
+                )
+page_layout.append(html.Div(className="container", children=[graph1_section, point_info, images_section]))
 
 app.layout = html.Div(
     style={"height": "100%"},
     children=page_layout,
 )
+
 
 @app.callback(
     Output("graph1", "figure"),
@@ -210,6 +224,7 @@ def callback_graph1(env, algorithms, dataset_types, x_axis, y_axis):
         algo_data_X = []
         algo_data_Y = []
         hover_text = []
+        exp_ids = []
 
         for dataset_type in dataset_types:
 
@@ -219,10 +234,12 @@ def callback_graph1(env, algorithms, dataset_types, x_axis, y_axis):
             algo_data_Y.extend(filtered_df[y_axis])
             algo_data_X.extend(filtered_df[x_axis])
             hover_text.extend(filtered_df['info_text'])
+            exp_ids.extend(filtered_df['id'])
 
         traces.append(go.Scatter(
             x=algo_data_X,
             y=algo_data_Y,
+            customdata=exp_ids,
             showlegend=True,
             marker_color=ALGO_COLORS[algo],
             mode='markers',
@@ -237,36 +254,49 @@ def callback_graph1(env, algorithms, dataset_types, x_axis, y_axis):
 
     return figure
 
-""" @app.callback(
-        Output('graph1-point-info', 'children'),
+@app.callback(
+        [
+        Output('graph1-img-1', 'children'),
+        Output('graph1-img-2', 'children'),
+        Output('graph1-point-info-text', 'children')
+        ],
         [Input('graph1', 'clickData')])
-def callback_graph1_point(selection):
-    print(selection)
-    if selection is not None:
-        # x_data = np.linspace(0,500,500)
-        # y_data = np.random.rand(500)
-        
-        # # depending on the station text use different color for line
-        # if selection['points'][0]['text'] == 'red':
-        #     color='#ff0000'
-        # else:
-        #     color='#0000ff'
-        # data = [go.Scatter(
-        #             x=x_data,
-        #             y=y_data,
-        #             line={'color': color},
-        #             opacity=0.8,
-        #             name="Graph"
-        #         )]
-        # layout = go.Layout(
-        #             xaxis={'type': 'linear', 'title': "Timestep"},
-        #             yaxis={'type': 'linear', 'title': "Value"},
-        #             margin={'l': 60, 'b': 40, 'r': 10, 't': 10},
-        #             hovermode="False"
-        #             )
-        
-        # return {'data': data, 'layout': layout}
-        return [] """
+def callback_graph1_point_images(selected_point):
+
+    if not selected_point:
+        raise PreventUpdate
+
+    exp_id_to_plot = selected_point['points'][0]['customdata']
+
+    # Load image.
+    try:
+        # Check if file exists and setup paths.
+        if os.path.isfile(PLOTS_FOLDER_PATH_1 + exp_id_to_plot + '/scalar_metrics.json'):
+            plots_folder_path = PLOTS_FOLDER_PATH_1
+        elif os.path.isfile(PLOTS_FOLDER_PATH_2 + exp_id_to_plot + '/scalar_metrics.json'):
+            plots_folder_path = PLOTS_FOLDER_PATH_2
+        else:
+            raise FileNotFoundError(f"Unable to find experiment {exp_id_to_plot} data.")
+
+        img_1 = np.array(Image.open(plots_folder_path + exp_id_to_plot + '/q_values_summed_error.png'))
+        img_2 = np.array(Image.open(plots_folder_path + exp_id_to_plot + '/rollouts_rewards.png'))
+
+    except:
+        raise PreventUpdate
+
+    fig_1 = px.imshow(img_1)
+    fig_1.update_layout(coloraxis_showscale=False)
+    fig_1.update_xaxes(showticklabels=False)
+    fig_1.update_yaxes(showticklabels=False)
+
+    fig_2 = px.imshow(img_2)
+    fig_2.update_layout(coloraxis_showscale=False)
+    fig_2.update_xaxes(showticklabels=False)
+    fig_2.update_yaxes(showticklabels=False)
+
+    text_render = 'Point Info:\n' + selected_point['points'][0]['hovertext'].replace("<br>", "; ")
+
+    return dcc.Graph(figure=fig_1), dcc.Graph(figure=fig_2), text_render
 
 if __name__ == "__main__":
     app.run_server(debug=True)
