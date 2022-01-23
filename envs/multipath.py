@@ -35,7 +35,7 @@ class MultiPathEnv(gym.Env):
     def set_state(self, s):
         self.__state = s
 
-    def get_transitions(self, s, a):
+    def _get_transitions(self, s, a):
 
         if s == 0: # Start state.
             probs = [self._init_action_random_p]*5
@@ -55,6 +55,10 @@ class MultiPathEnv(gym.Env):
             else:
                 return [26], [1.0] # Move to dead state.
 
+    def get_transitions(self, s, a):
+        next_states, probs = self._get_transitions(s, a)
+        return {next_state: prob for next_state, prob in zip(next_states, probs)}
+
     def get_reward(self, state):
         if state in [5,10,15,20,25]:
             return 1.0
@@ -62,7 +66,7 @@ class MultiPathEnv(gym.Env):
             return 0.0
 
     def step_stateless(self, s, a, verbose=False):
-        next_states, probs = self.get_transitions(s, a)
+        next_states, probs = self._get_transitions(s, a)
         next_s = np.random.choice(next_states, p=probs)
         r = self.get_reward(s)
 

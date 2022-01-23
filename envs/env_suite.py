@@ -1,7 +1,7 @@
 import numpy as np
 
 from envs import grid_env, grid_spec
-from envs import mountaincar
+from envs import mountaincar, multipath
 
 GRID_ENVS = {
     'gridEnv1': {
@@ -47,7 +47,7 @@ MULTIPATHS_ENVS = {
 }
 
 # Environments suite.
-ENV_KEYS = ['gridEnv1', 'gridEnv2'] # 'pendulum', 'mountaincar', 'multiPathsEnv', 'mdp1']
+ENV_KEYS = ['gridEnv1', 'gridEnv2', 'multiPathEnv'] # 'pendulum', 'mountaincar', 'mdp1']
 def get_env(name):
 
     if name in ('gridEnv1', 'gridEnv2'):
@@ -57,6 +57,10 @@ def get_env(name):
                 max_timesteps=env_params['max_timesteps'],
                 obs_dim=env_params['obs_dim'])
         return env, grid_spec
+
+    elif name == 'multiPathEnv':
+        env = multipath.MultiPathRandomObservation()
+        return env, None
 
     elif name == 'pendulum':
         raise ValueError('Env. not implemented.')
@@ -91,31 +95,6 @@ def get_env(name):
         rollouts_envs = []
         for r_type, r_env_params in sorted(MOUNTAINCAR_ENVS.items()):
             r_env = mountaincar.DiscreteMountainCarEnv(pos_disc=100, vel_disc=100, time_limit=200)
-            rollouts_envs.append(r_env)
-
-        env_grid_spec = None
-        return train_env, env_grid_spec, rollouts_envs
-
-    elif name == 'multiPathsEnv':
-        raise ValueError('Env. not implemented.')
-        # Load default env.
-        default_params = MULTIPATHS_ENVS['default']
-        with math_utils.np_seed(seed):
-            train_env = tabular_env.MultiPathsEnv(init_action_random_p=default_params['init_action_random_p'],
-                                            initial_states=default_params['initial_states'])
-            train_env = random_obs_wrapper.MultiPathsEnvObsWrapper(train_env, dim_obs=4)
-            #train_env = random_obs_wrapper.MultiPathsEnvObsWrapper1Hot(train_env)
-            train_env = time_limit_wrapper.TimeLimitWrapper(train_env, time_limit=10)
-
-        # Load rollouts envs.
-        rollouts_envs = []
-        for r_type, r_env_params in sorted(MULTIPATHS_ENVS.items()):
-            with math_utils.np_seed(seed):
-                r_env = tabular_env.MultiPathsEnv(init_action_random_p=r_env_params['init_action_random_p'],
-                                            initial_states=r_env_params['initial_states'])
-                r_env = random_obs_wrapper.MultiPathsEnvObsWrapper(r_env, dim_obs=4)
-                #r_env = random_obs_wrapper.MultiPathsEnvObsWrapper1Hot(r_env)
-                r_env = time_limit_wrapper.TimeLimitWrapper(r_env, time_limit=10)            
             rollouts_envs.append(r_env)
 
         env_grid_spec = None

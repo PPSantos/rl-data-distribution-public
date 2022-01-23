@@ -43,13 +43,14 @@ DEFAULT_DATASET_ARGS = {
 
 def _calculate_dataset_dist_from_counts(env, env_grid_spec, sa_counts):
 
-    # Flag walls with nan values.
-    for state in range(env.num_states):
-        for action in range(env.num_actions):
-            xy = env_grid_spec.idx_to_xy(state)
-            tile_type = env_grid_spec.get_value(xy, xy=True)
-            if tile_type == grid_spec.WALL:
-                sa_counts[state,action] = np.nan
+    if env_grid_spec:
+        # Flag walls with nan values.
+        for state in range(env.num_states):
+            for action in range(env.num_actions):
+                xy = env_grid_spec.idx_to_xy(state)
+                tile_type = env_grid_spec.get_value(xy, xy=True)
+                if tile_type == grid_spec.WALL:
+                    sa_counts[state,action] = np.nan
 
     sa_counts = sa_counts.flatten() # [S*A]
     sa_counts = sa_counts[np.logical_not(np.isnan(sa_counts))] # remove nans
@@ -67,10 +68,11 @@ def _add_missing_transitions(env, env_grid_spec, transitions, sa_counts):
     for (state, action) in zip(*zero_positions):
 
         # Skip walls.
-        xy = env_grid_spec.idx_to_xy(state)
-        tile_type = env_grid_spec.get_value(xy, xy=True)
-        if tile_type == grid_spec.WALL:
-            continue
+        if env_grid_spec:
+            xy = env_grid_spec.idx_to_xy(state)
+            tile_type = env_grid_spec.get_value(xy, xy=True)
+            if tile_type == grid_spec.WALL:
+                continue
 
         observation = env.get_observation(state)
 
@@ -97,12 +99,16 @@ def _dataset_from_sampling_dist(env, env_grid_spec, sampling_dist: np.ndarray,
     for _ in range(dataset_size):
 
         # Randomly sample (state, action) pair according to sampling dist.
-        tile_type = grid_spec.WALL
-        while tile_type == grid_spec.WALL:
+        if env_grid_spec:
+            tile_type = grid_spec.WALL
+            while tile_type == grid_spec.WALL:
+                sampled_idx = np.random.choice(np.arange(len(sampling_dist)), p=sampling_dist)
+                state, action = sa_combinations[sampled_idx]
+                xy = env_grid_spec.idx_to_xy(state)
+                tile_type = env_grid_spec.get_value(xy, xy=True)
+        else:
             sampled_idx = np.random.choice(np.arange(len(sampling_dist)), p=sampling_dist)
             state, action = sa_combinations[sampled_idx]
-            xy = env_grid_spec.idx_to_xy(state)
-            tile_type = env_grid_spec.get_value(xy, xy=True)
 
         sa_counts[state, action] += 1
         observation = env.get_observation(state)
