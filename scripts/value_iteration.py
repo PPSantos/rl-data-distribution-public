@@ -8,7 +8,7 @@ from utils.json_utils import NumpyEncoder
 from algos.value_iteration import ValueIteration
 
 DEFAULT_ARGS = {
-    'env_name': 'multiPathEnv',
+    'env_name': 'gridEnv2',
     'gamma': 0.9, # discount factor.
     'epsilon': 0.001, # error threshold.
 }

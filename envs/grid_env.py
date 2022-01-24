@@ -107,7 +107,7 @@ class GridEnv(gym.Env):
 
     def get_transitions(self, s, a):
         tile_type = self.gs[self.gs.idx_to_xy(s)]
-        if tile_type == LAVA:
+        if tile_type == LAVA or tile_type == WALL:
             return {s: 1.0}
 
         aprobs = self.model.get_aprobs(s, a)

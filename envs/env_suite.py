@@ -23,28 +23,6 @@ GRID_ENVS = {
     },
 }
 
-MULTIPATHS_ENVS = {
-    'default': {
-        'initial_states': [0],
-        'init_action_random_p': 0.01,
-    },
-    'uniform_init_state_dist': {
-        'initial_states': [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25],
-        'init_action_random_p': 0.01,
-    },
-    'action_random_p_0.05': {
-        'initial_states': [0],
-        'init_action_random_p': 0.05,
-    },
-    'action_random_p_0.1': {
-        'initial_states': [0],
-        'init_action_random_p': 0.1,
-    },
-    'action_random_p_0.2': {
-        'initial_states': [0],
-        'init_action_random_p': 0.2,
-    },
-}
 
 # Environments suite.
 ENV_KEYS = ['gridEnv1', 'gridEnv2', 'multiPathEnv'] # 'pendulum', 'mountaincar', 'mdp1']
