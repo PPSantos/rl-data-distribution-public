@@ -4,7 +4,7 @@ import numpy as np
 from envs import grid_spec
 
 class MultiPathEnv(gym.Env):
-    def __init__(self, max_timesteps=50):
+    def __init__(self, max_timesteps=20):
 
         self.max_timesteps = max_timesteps
         self.num_states = 5*5+2
