@@ -18,11 +18,11 @@ import pandas as pd
 # Absolute path to folder containing experiments data.
 CSV_PATH = '/home/pedrosantos/git/rl-data-distribution/data/parsed_data.csv'
 DATA = pd.read_csv(CSV_PATH)
+# Absolute path to folder containing plots files.
+PLOTS_FOLDER_PATH_1 = '/home/pedrosantos/git/rl-data-distribution/analysis/plots/'
+# Absolute path to folder containing plots files (second folder).
+PLOTS_FOLDER_PATH_2 = '/home/pedrosantos/git/rl-data-distribution/analysis/plots/ilu_server/'
 ###########################################################################
-# Path to folder containing data files.
-PLOTS_FOLDER_PATH_1 = str(pathlib.Path(__file__).parent.parent.parent.absolute()) + '/analysis/plots/'
-# Path to folder containing data files (second folder).
-PLOTS_FOLDER_PATH_2 = str(pathlib.Path(__file__).parent.parent.parent.absolute()) + '/analysis/plots/ilu_server/'
 
 ENVS = ['gridEnv1', 'gridEnv2'] # 'MultiPath']
 ALGORITHMS = ['offline_dqn', 'offline_cql']
