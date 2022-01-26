@@ -8,7 +8,7 @@ from utils.strings import create_exp_name
 from algos.q_learning import QLearning
 
 DEFAULT_ARGS = {
-    'env_name': 'gridEnv1',
+    'env_name': 'mountaincar',
     'gamma': 0.9, # discount factor.
     'alpha': 0.1, # learning rate.
 
@@ -22,7 +22,7 @@ DEFAULT_ARGS = {
     'replay_buffer_size': 50_000,
     'replay_buffer_batch_size': 128,
 
-    'learning_steps': 20_000, # train_offline number of learning steps
+    'learning_steps': 100_000, # train_offline number of learning steps
 }
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'

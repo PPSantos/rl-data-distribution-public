@@ -1,7 +1,11 @@
 import numpy as np
 
-from envs import grid_env, grid_spec
-from envs import mountaincar, multipath
+from gym.envs.classic_control import MountainCarEnv
+from gym.wrappers.time_limit import TimeLimit
+
+from envs import grid_env, grid_spec, multipath
+from envs import env_discretizer
+
 
 GRID_ENVS = {
     'gridEnv1': {
@@ -25,7 +29,7 @@ GRID_ENVS = {
 
 
 # Environments suite.
-ENV_KEYS = ['gridEnv1', 'gridEnv2', 'multiPathEnv'] # 'pendulum', 'mountaincar', 'mdp1']
+ENV_KEYS = ['gridEnv1', 'gridEnv2', 'multiPathEnv', 'mountaincar']
 def get_env(name):
 
     if name in ('gridEnv1', 'gridEnv2'):
@@ -40,54 +44,10 @@ def get_env(name):
         env = multipath.MultiPathRandomObservation()
         return env, None
 
-    elif name == 'pendulum':
-        raise ValueError('Env. not implemented.')
-        # Load default env.
-        default_params = PENDULUM_ENVS['default']
-        train_env = tabular_env.InvertedPendulum(state_discretization=32,
-                                                 action_discretization=5,
-                                                 gravity=default_params['gravity'],
-                                                 initial_states=default_params['initial_states'])
-        train_env = wrap_time(train_env, time_limit=50)
-
-        # Load rollouts envs.
-        rollouts_envs = []
-        for r_type, r_env_params in sorted(PENDULUM_ENVS.items()):
-            r_env = tabular_env.InvertedPendulum(state_discretization=32,
-                                                 action_discretization=5,
-                                                 gravity=r_env_params['gravity'],
-                                                 initial_states=r_env_params['initial_states'])
-            r_env = wrap_time(r_env, time_limit=50)
-            rollouts_envs.append(r_env)
-
-        env_grid_spec = None
-        return train_env, env_grid_spec, rollouts_envs
-
     elif name == 'mountaincar':
-        raise ValueError('Env. not implemented.')
-        # Load default env.
-        default_params = MOUNTAINCAR_ENVS['default']
-        train_env = mountaincar.DiscreteMountainCarEnv(pos_disc=100, vel_disc=100, time_limit=200)
-
-        # Load rollouts envs.
-        rollouts_envs = []
-        for r_type, r_env_params in sorted(MOUNTAINCAR_ENVS.items()):
-            r_env = mountaincar.DiscreteMountainCarEnv(pos_disc=100, vel_disc=100, time_limit=200)
-            rollouts_envs.append(r_env)
-
-        env_grid_spec = None
-        return train_env, env_grid_spec, rollouts_envs
-
-    elif name == 'mdp1':
-        raise ValueError('Env. not implemented.')
-        env = tabular_env.MDP1()
-        env = time_limit_wrapper.TimeLimitWrapper(env, time_limit=5)
-
-        r_env = tabular_env.MDP1()
-        r_env = time_limit_wrapper.TimeLimitWrapper(r_env, time_limit=5)
-
-        env_grid_spec = None
-        return env, env_grid_spec, [r_env]
+        env = env_discretizer.get_env(MountainCarEnv)(dim_bins=50)
+        env = TimeLimit(env, max_episode_steps=200)
+        return env, None
 
     else:
         raise NotImplementedError('Unknown env id: %s' % name)

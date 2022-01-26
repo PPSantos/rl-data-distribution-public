@@ -4,9 +4,6 @@ import shutil
 import pathlib
 
 
-# Import scripts to create sampling distributions.
-from scripts.sampling_dist_from_dirichlet import main as dirichlet_sampling_dist
-
 # Import script to generate dataset from sampling dist.
 from scripts.dataset import main as create_dataset
 
@@ -27,12 +24,12 @@ VAL_ITER_DATA = {
     'gridEnv1': 'gridEnv1_val_iter_2022-01-17-15-07-56',
     'gridEnv2': 'gridEnv2_val_iter_2022-01-23-19-56-06',
     'multiPathEnv': 'multiPathEnv_val_iter_2022-01-23-18-46-25',
+    'mountaincar': 'mountaincar_q_learning_2022-01-26-10-19-43',
     # 'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
-    # 'mountaincar': 'mountaincar_val_iter_v2_2021-10-20-16-17-47',
 }
 
 RUN_ARGS = {
-    'env_name': 'multiPathEnv',
+    'env_name': 'mountaincar',
 
     'dataset_args': {
         'dataset_type': 'dirichlet',

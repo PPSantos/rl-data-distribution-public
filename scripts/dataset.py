@@ -96,6 +96,8 @@ def _dataset_from_sampling_dist(env, env_grid_spec, sampling_dist: np.ndarray,
     sa_combinations = mesh.T.reshape(-1, 2)
     sa_counts = np.zeros((env.num_states, env.num_actions))
 
+    env.reset()
+
     for _ in range(dataset_size):
 
         # Randomly sample (state, action) pair according to sampling dist.
@@ -166,7 +168,7 @@ def _dataset_from_policy(env, env_grid_spec, policy,
 
             # Log data.
             episode_cumulative_reward += reward
-            sa_counts[state,action] += 1
+            sa_counts[state, action] += 1
 
             transitions.append((observation, action,
                                 reward, next_observation))

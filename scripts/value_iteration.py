@@ -23,6 +23,9 @@ def main(args=None):
         args = DEFAULT_ARGS
     args['algo'] = 'val_iter'
 
+    if args['env_name'] not in ('gridEnv1', 'gridEnv2', 'multiPathEnv'):
+        raise ValueError("Env. must be either 'gridEnv1', 'gridEnv2', or 'multiPathEnv'.")
+
     # Setup experiment data folder.
     exp_name = create_exp_name(args)
     exp_path = DATA_FOLDER_PATH + exp_name

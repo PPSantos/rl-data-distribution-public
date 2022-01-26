@@ -32,8 +32,9 @@ class QLearning(object):
                     self.replay_buffer.add(state, action, r_t1, s_t1, False)
 
         Q = np.zeros((self.env.num_states, self.env.num_actions))
+        Q_old = np.copy(Q)
 
-        for _ in tqdm(range(learning_steps)):
+        for step in tqdm(range(learning_steps)):
 
             # Update.
             states, actions, rewards, next_states, _ = self.replay_buffer.sample(self.batch_size)
@@ -45,6 +46,10 @@ class QLearning(object):
                 Q[state][action] += self.alpha * \
                         (reward + self.gamma * np.max(Q[next_state,:]) - Q[state][action])
 
+            if step % 1_000 == 0:
+                print(np.sum(np.abs(Q-Q_old)))
+                Q_old = np.copy(Q)
+
         data = {}
         data['Q_vals'] = Q
         return data
@@ -52,18 +57,8 @@ class QLearning(object):
 
     def train_online(self):
 
-        # Prefill replay buffer.
-        print('Pre-filling replay buffer.')
-        for _ in range(10):
-            for state in range(self.env.num_states):
-                for action in range(self.env.num_actions):
-                    self.env.reset()
-                    self.env.set_state(state)
-                    s_t1, r_t1, done, _ = self.env.step(action)
-                    s_t1 = self.env.get_state()
-                    self.replay_buffer.add(state, action, r_t1, s_t1, False)
-
         Q = np.zeros((self.env.num_states, self.env.num_actions))
+        Q_old = np.copy(Q)
 
         episode_rewards = []
         for episode in tqdm(range(self.num_episodes)):
@@ -108,6 +103,10 @@ class QLearning(object):
                 s_t = s_t1
 
             episode_rewards.append(episode_cumulative_reward)
+
+            if episode % 1_000 == 0:
+                print(np.sum(np.abs(Q-Q_old)))
+                Q_old = np.copy(Q)
 
         data = {}
         data['Q_vals'] = Q
