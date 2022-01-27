@@ -23,7 +23,7 @@ VAL_ITER_DATA = {
     'gridEnv1': 'gridEnv1_val_iter_2022-01-17-15-07-56',
     'gridEnv2': 'gridEnv2_val_iter_2022-01-23-19-56-06',
     'multiPathEnv': 'multiPathEnv_val_iter_2022-01-23-18-46-25',
-    'mountaincar': 'mountaincar_q_learning_2022-01-26-19-17-28',
+    'mountaincar': 'mountaincar_q_learning_2022-01-27-18-57-05',
 }
 
 RUN_ARGS = {

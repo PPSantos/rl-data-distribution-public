@@ -10,18 +10,19 @@ from algos.q_learning import QLearning
 DEFAULT_ARGS = {
     'env_name': 'mountaincar',
 
-    'gamma': 0.95, # discount factor.
+    'gamma': 0.99, # discount factor.
+
+    'learning_steps': 400_000, # number of learning steps.
 
     # learning rate:
     'alpha_init': 0.1,
     'alpha_final': 0.001,
-    'alpha_steps': 200_000, # in number of learning steps.
+    'alpha_steps': 400_000, # in number of learning steps.
 
     # Replay buffer parameters.
-    'replay_buffer_size': 500_000,
+    'replay_buffer_size': 200_000,
     'replay_buffer_batch_size': 128,
 
-    'learning_steps': 200_000, # offline learning number of learning steps.
 }
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
