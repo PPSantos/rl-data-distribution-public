@@ -36,13 +36,14 @@ def _read_dataset(env, dataset_path: str):
         action = np.int(transition[1])
         reward = np.float(transition[2])
         next_observation = np.array(transition[3])
+        done = transition[4]
         transition = Transition(observation_shape=observation.shape,
                                 action_size=env.num_actions,
                                 observation=observation,
                                 action=action,
                                 reward=reward,
                                 next_observation=next_observation,
-                                terminal=0.0)
+                                terminal=done)
 
         transitions.append(transition)
 

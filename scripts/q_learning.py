@@ -9,20 +9,19 @@ from algos.q_learning import QLearning
 
 DEFAULT_ARGS = {
     'env_name': 'mountaincar',
-    'gamma': 0.9, # discount factor.
-    'alpha': 0.1, # learning rate.
 
-    # Eps-greedy exploration parameters.
-    'expl_eps_init': 1.0,
-    'expl_eps_final': 0.0,
-    'expl_eps_episodes': 18_000,
-    'num_episodes': 20_000,
+    'gamma': 0.95, # discount factor.
+
+    # learning rate:
+    'alpha_init': 0.1,
+    'alpha_final': 0.001,
+    'alpha_steps': 200_000, # in number of learning steps.
 
     # Replay buffer parameters.
-    'replay_buffer_size': 50_000,
+    'replay_buffer_size': 500_000,
     'replay_buffer_batch_size': 128,
 
-    'learning_steps': 100_000, # train_offline number of learning steps
+    'learning_steps': 200_000, # offline learning number of learning steps.
 }
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'

@@ -20,12 +20,10 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data
 
 ###########################################################################
 VAL_ITER_DATA = {
-    # 'mdp1': 'mdp1_val_iter_2021-08-27-17-49-23',
     'gridEnv1': 'gridEnv1_val_iter_2022-01-17-15-07-56',
     'gridEnv2': 'gridEnv2_val_iter_2022-01-23-19-56-06',
     'multiPathEnv': 'multiPathEnv_val_iter_2022-01-23-18-46-25',
-    'mountaincar': 'mountaincar_q_learning_2022-01-26-10-19-43',
-    # 'pendulum': 'pendulum_val_iter_2021-05-24-11-48-50',
+    'mountaincar': 'mountaincar_q_learning_2022-01-26-19-17-28',
 }
 
 RUN_ARGS = {
@@ -35,18 +33,18 @@ RUN_ARGS = {
         'dataset_type': 'dirichlet',
 
         # Number of dataset transitions.
-        'dataset_size': 50_000,
+        'dataset_size': 100_000,
 
         # Whether to force coverage over all (s,a) pairs, i.e.,
         # the sampling distribution always verifies p(s,a) > 0.
-        'force_full_coverage': False,
+        'force_full_coverage': True,
 
         'dirichlet_dataset_args': {
             'dirichlet_alpha_coef': 100.0,
         },
 
         'eps_greedy_dataset_args': {
-            'epsilon': 0.0,
+            'epsilon': 0.1,
         },
 
         'boltzmann_dataset_args': {
@@ -59,8 +57,8 @@ RUN_ARGS = {
         'num_processors': 2,
         'num_threads_per_proc': 4, # if None then uses default settings.
         'algo': 'offline_dqn',
-        'gamma': 0.9, # discount factor.
-        'num_epochs': 200, # number of epochs to train.
+        'gamma': 0.95, # discount factor.
+        'num_epochs': 400, # number of epochs to train.
 
         # Period at which checkpoints are saved.
         # (in number of epochs)
@@ -72,7 +70,7 @@ RUN_ARGS = {
             'batch_size': 100,
             'target_update_interval': 1_000,
             'learning_rate': 1e-03,
-            'hidden_layers': [20,40,20],
+            'hidden_layers': [32,64,32],
         },
 
         'offline_cql_args': {

@@ -78,9 +78,9 @@ def _add_missing_transitions(env, env_grid_spec, transitions, sa_counts):
 
         # Sample next state, observation and reward.
         env.set_state(state)
-        next_observation, reward, _, _ = env.step(action)
+        next_observation, reward, done, _ = env.step(action)
 
-        transitions.append((observation, action, reward, next_observation))
+        transitions.append((observation, action, reward, next_observation, done))
 
         sa_counts[state,action] += 1
 
@@ -119,7 +119,7 @@ def _dataset_from_sampling_dist(env, env_grid_spec, sampling_dist: np.ndarray,
         env.set_state(state)
         next_observation, reward, done, info = env.step(action)
 
-        transitions.append((observation, action, reward, next_observation))
+        transitions.append((observation, action, reward, next_observation, done))
 
         env.reset()
 
@@ -171,7 +171,7 @@ def _dataset_from_policy(env, env_grid_spec, policy,
             sa_counts[state, action] += 1
 
             transitions.append((observation, action,
-                                reward, next_observation))
+                                reward, next_observation, done))
 
             state = next_state
             observation = next_observation
@@ -187,7 +187,7 @@ def _dataset_from_policy(env, env_grid_spec, policy,
     dataset_dist, sa_counts = _calculate_dataset_dist_from_counts(
                         env, env_grid_spec, sa_counts)
 
-    # print('Average policy reward:', np.mean(episode_rewards))
+    print('Average policy reward:', np.mean(episode_rewards))
 
     dataset_info = {}
     dataset_info['episode_rewards'] = episode_rewards
