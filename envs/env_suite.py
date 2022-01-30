@@ -1,6 +1,6 @@
 import numpy as np
 
-from gym.envs.classic_control import MountainCarEnv
+from gym.envs.classic_control import MountainCarEnv, CartPoleEnv
 from gym.wrappers.time_limit import TimeLimit
 
 from envs import grid_env, grid_spec, multipath
@@ -29,7 +29,7 @@ GRID_ENVS = {
 
 
 # Environments suite.
-ENV_KEYS = ['gridEnv1', 'gridEnv2', 'multiPathEnv', 'mountaincar']
+ENV_KEYS = ['gridEnv1', 'gridEnv2', 'multiPathEnv', 'mountaincar', 'cartpole']
 def get_env(name):
 
     if name in ('gridEnv1', 'gridEnv2'):
@@ -46,6 +46,11 @@ def get_env(name):
 
     elif name == 'mountaincar':
         env = env_discretizer.get_env(MountainCarEnv)(dim_bins=50)
+        env = TimeLimit(env, max_episode_steps=200)
+        return env, None
+
+    elif name == 'cartpole':
+        env = env_discretizer.get_env(CartPoleEnv)(dim_bins=50)
         env = TimeLimit(env, max_episode_steps=200)
         return env, None
 

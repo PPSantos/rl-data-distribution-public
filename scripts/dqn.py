@@ -2,11 +2,13 @@ import os
 import glob
 import json
 import pathlib
+from time import time
 
 import gym
 import numpy as np
 
 from d3rlpy.algos.dqn import DQN
+from d3rlpy.algos.dqn import DoubleDQN
 from d3rlpy.metrics.scorer import evaluate_on_environment
 from d3rlpy.models.encoders import VectorEncoderFactory
 from d3rlpy.online.buffers import ReplayBuffer
@@ -23,18 +25,18 @@ DEFAULT_ARGS = {
     'num_rollouts': 5,
 
     'n_steps': 1_000_000,
-    'steps_per_epoch': 25_000,
+    'steps_per_epoch': 5_000,
 
-    'start_epsilon': 0.5,
-    'end_epsilon': 0.01,
+    'start_epsilon': 0.05,
+    'end_epsilon': 0.05,
     'duration_epsilon': 1_000_000,
 
     # DQN algorithm arguments.
     'dqn_args': {
         'gamma': 0.99, # discount factor.
-        #'learning_rate': 1e-03,
+        'learning_rate': 1e-03,
         'batch_size': 100,
-        #'target_update_interval': 1_000,
+        'target_update_interval': 1_000,
         'hidden_layers': [32,64,32],
     },
 
@@ -72,7 +74,7 @@ def train(args):
     encoder_factory = VectorEncoderFactory(
                 hidden_units=args['dqn_args']['hidden_layers'],
                 activation='relu')
-    dqn = DQN(**args['dqn_args'], use_gpu=False,
+    dqn = DoubleDQN(**args['dqn_args'], use_gpu=False,
             encoder_factory=encoder_factory)
 
     buffer = ReplayBuffer(**args['replay_buffer_args'], env=env)
@@ -93,7 +95,7 @@ def train(args):
                 logdir=exp_path,
                 save_metrics=True,
                 tensorboard_dir=f"{exp_path}/tb-logs/",
-                update_interval=5)
+                update_interval=2)
 
     # Use checkpoints to calculate custom evaluation metrics.
     chkpt_files = glob.glob(f"{exp_path}/0/*.pt")
@@ -117,7 +119,7 @@ def train(args):
         # Load checkpoint.
         dqn.load_model(chkpt_f)
         
-        # Store rollouts mean reward.
+        # Store rollouts mean reward
         data['rollouts_rewards'].append(evaluate_scorer(dqn))
 
         # Store Q-values.
