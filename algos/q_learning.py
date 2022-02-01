@@ -56,7 +56,7 @@ class QLearning(object):
             if step % 1_000 == 0:
                 print('Alpha:', alpha)
                 print('Q tab error:', np.sum(np.abs(Q-Q_old)))
-                self.execute_rollout(Q)
+                self._execute_rollout(Q)
                 Q_old = np.copy(Q)
 
         data = {}
@@ -64,7 +64,7 @@ class QLearning(object):
         print(Q)
         return data
 
-    def execute_rollout(self, Q_vals):
+    def _execute_rollout(self, Q_vals):
 
         s_t = self.env.reset()
         s_t = self.env.get_state()

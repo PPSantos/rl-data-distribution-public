@@ -140,11 +140,13 @@ class GridEnv(gym.Env):
         ns, r = self.step_stateless(self.__state, a)
         self.__state = ns
         done = False
+        info = {}
         self._timestep += 1
         if self._timestep >= self.max_timesteps:
+            info["TimeLimit.truncated"] = True
             done = True
-        return ns, r, done, {}
-        
+        return ns, r, done, info
+
     def reset(self):
         start_idxs = np.array(np.where(self.gs.spec == START)).T
         start_idx = start_idxs[np.random.randint(0, start_idxs.shape[0])]

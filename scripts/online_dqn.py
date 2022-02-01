@@ -24,12 +24,12 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data
 
 DEFAULT_TRAIN_ARGS = {
 
-    'num_processors': 1,
-    'num_runs': 1,
+    'num_processors': 4,
+    'num_runs': 4,
 
     'env_name': 'mountaincar',
 
-    'num_steps': 10_000,
+    'num_steps': 200_000,
     'num_rollouts': 5,
 
     'dqn_args': {
@@ -37,17 +37,17 @@ DEFAULT_TRAIN_ARGS = {
         'prefetch_size': 1,
         'target_update_period': 1_000,
         'samples_per_insert': 100.0,
-        'min_replay_size': 100,
-        'max_replay_size': 500_000,
+        'min_replay_size': 10_000,
+        'max_replay_size': 200_000,
         'n_step': 1,
-        'epsilon_init': 0.05,
-        'epsilon_final': 0.0,
-        'epsilon_schedule_timesteps': 500_000,
+        'epsilon_init': 0.2,
+        'epsilon_final': 0.01,
+        'epsilon_schedule_timesteps': 200_000,
         'learning_rate': 1e-03,
-        'discount': 0.99,
+        'discount': 0.9,
         'max_gradient_norm': None,
         'checkpoint': True,
-        'checkpoint_interval': 2500,
+        'checkpoint_interval': 5_000,
         'hidden_layers': [32,64,32],
     }
 }
