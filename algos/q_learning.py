@@ -13,8 +13,7 @@ class QLearning(object):
         self.alpha_steps = qlearning_args['alpha_steps']
         self.gamma = qlearning_args['gamma']
 
-        self.replay_buffer = NumpyReplayBuffer(size=qlearning_args['replay_buffer_size'],
-                                                statistics_table_shape=(self.env.num_states,self.env.num_actions))
+        self.replay_buffer = NumpyReplayBuffer(size=qlearning_args['replay_buffer_size'])
         self.batch_size = qlearning_args['replay_buffer_batch_size']
 
     def train_offline(self, learning_steps):
@@ -26,9 +25,9 @@ class QLearning(object):
                 for action in range(self.env.num_actions):
                     self.env.reset()
                     self.env.set_state(state)
-                    s_t1, r_t1, done, _ = self.env.step(action)
+                    s_t1, r_t1, done, info = self.env.step(action)
                     s_t1 = self.env.get_state()
-                    self.replay_buffer.add(state, action, r_t1, s_t1, done)
+                    self.replay_buffer.add(state, action, r_t1, s_t1, done, info)
 
         Q = np.zeros((self.env.num_states, self.env.num_actions))
         Q_old = np.copy(Q)
@@ -40,18 +39,19 @@ class QLearning(object):
             alpha = self.alpha_init + fraction * (self.alpha_final - self.alpha_init)
 
             # Update.
-            states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.batch_size)
+            states, actions, rewards, next_states, dones, infos = self.replay_buffer.sample(self.batch_size)
 
             for i in range(self.batch_size):
-                state, action, reward, next_state, done = \
-                    states[i], actions[i], rewards[i], next_states[i], dones[i]
+                state, action, reward, next_state, done, info = \
+                    states[i], actions[i], rewards[i], next_states[i], dones[i], infos[i]
 
+                is_truncated = info.get('TimeLimit.truncated', False)
                 # Q-learning update.
-                if not done:
+                if done and (not is_truncated):
+                    Q[state][action] += alpha * (reward - Q[state][action])
+                else:
                     Q[state][action] += alpha * \
                             (reward + self.gamma * np.max(Q[next_state,:]) - Q[state][action])
-                else:
-                    Q[state][action] += alpha * (reward - Q[state][action])
 
             if step % 1_000 == 0:
                 print('Alpha:', alpha)
@@ -61,7 +61,7 @@ class QLearning(object):
 
         data = {}
         data['Q_vals'] = Q
-        print(Q)
+
         return data
 
     def _execute_rollout(self, Q_vals):

@@ -8,9 +8,10 @@ from utils.strings import create_exp_name
 from algos.q_learning import QLearning
 
 DEFAULT_ARGS = {
+
     'env_name': 'mountaincar',
 
-    'gamma': 0.99, # discount factor.
+    'gamma': 0.9, # discount factor.
 
     'learning_steps': 400_000, # number of learning steps.
 
