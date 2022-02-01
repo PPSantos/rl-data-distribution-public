@@ -1,18 +1,3 @@
-# python3
-# Copyright 2018 DeepMind Technologies Limited. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """DQN agent implementation."""
 
 import copy
@@ -26,13 +11,12 @@ from acme.agents import agent
 from acme.agents.tf import actors
 from acme.tf import utils as tf2_utils
 from acme.utils import loggers
-from jax import checkpoint
 import reverb
 import trfl
 import sonnet as snt
 
 from utils import tf2_layers, tf2_savers
-from algos.dqn_acme_learning import DQNLearner
+from algos.dqn.learning import DQNLearner
 
 
 class DQN(agent.Agent):
@@ -90,6 +74,9 @@ class DQN(agent.Agent):
             discount: discount to use for TD updates.
             logger: logger object to be used by learner.
             max_gradient_norm: used for gradient clipping.
+            checkpoint: whether to save checkpoint.
+            checkpoint_interval.
+            save_directory.
         """
 
         # Create a replay server to add data to. This uses no limiter behavior in

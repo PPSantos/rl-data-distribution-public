@@ -24,7 +24,7 @@ PLOTS_FOLDER_PATH_1 = '/home/pedrosantos/git/rl-data-distribution/analysis/plots
 PLOTS_FOLDER_PATH_2 = '/home/pedrosantos/git/rl-data-distribution/analysis/plots/ilu_server/'
 ###########################################################################
 
-ENVS = ['gridEnv1', 'gridEnv2', 'multiPathEnv']
+ENVS = ['gridEnv1', 'gridEnv2', 'multiPathEnv', 'mountaincar']
 ALGORITHMS = ['offline_dqn', 'offline_cql']
 DATASET_TYPES = ['dirichlet', 'eps-greedy', 'boltzmann']
 ALGO_COLORS= {'offline_dqn': '#d62728', 'offline_cql': '#1f77b4'} # COLORS = ['#ff7f0e', '#2ca02c', '#9467bd']

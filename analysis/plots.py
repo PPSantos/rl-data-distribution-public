@@ -159,7 +159,7 @@ def main(exp_id, val_iter_exp):
     data = {}
 
     # steps field.
-    data['steps'] = exp_data[0]['steps'] # [(Steps)]
+    data['steps'] = np.array([e['steps'] for e in exp_data]) # [(Steps)]
 
     # Q_vals field.
     data['Q_vals'] = np.array([e['Q_vals'] for e in exp_data]) # [R,(Steps),S,A]
@@ -177,7 +177,7 @@ def main(exp_id, val_iter_exp):
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
 
     for (i, run_rollouts) in enumerate(data['rollouts_rewards']): # run_rollouts = [(Steps)]
-        X = data['steps'] # [(Steps)]
+        X = data['steps'][i] # [(Steps)]
         Y = run_rollouts
 
         plt.plot(X, Y, label=f'Run {i}')
@@ -239,7 +239,7 @@ def main(exp_id, val_iter_exp):
     for (i, run_Q_vals) in enumerate(data['Q_vals']): # run_Q_vals = [(Steps),S,A]
         errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
         Y = np.sum(errors, axis=(1,2)) # [(Steps)]
-        X = data['steps']
+        X = data['steps'][i]
 
         plt.plot(X, Y, label=f'Run {i}')
 
@@ -277,7 +277,7 @@ def main(exp_id, val_iter_exp):
 
         errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
         Y = np.mean(errors, axis=(1,2)) # [(Steps)]
-        X = data['steps']
+        X = data['steps'][i]
         # Y_std = np.std(errors, axis=(1,2))
 
         # CI calculation.
@@ -299,7 +299,7 @@ def main(exp_id, val_iter_exp):
         errors = errors[x,y,maximizing_actions] # [(Steps),S]
 
         Y = np.mean(errors, axis=1) # [(Steps)]
-        X = data['steps']
+        X = data['steps'][i]
         # CI calculation.
         # X_CI = np.arange(0, len(Y), 100)
         # CI_bootstrap = [calculate_CI_bootstrap(Y[x], errors[x,:]) for x in X_CI]
@@ -338,7 +338,7 @@ def main(exp_id, val_iter_exp):
         errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
         errors = errors.reshape(errors.shape[0], -1) # [(Steps),S*A]
 
-        X = data['steps']
+        X = data['steps'][i]
         violin = ax.violinplot(errors.tolist(), positions=X,
                                 showextrema=True, widths=350)
 
@@ -375,7 +375,7 @@ def main(exp_id, val_iter_exp):
         x, y = np.indices(maximizing_actions.shape)
         errors = errors[x,y,maximizing_actions] # [(Steps),S]
 
-        X = data['steps']
+        X = data['steps'][i]
         violin = ax.violinplot(errors.tolist(), positions=X,
                                 showextrema=True, widths=350)
 

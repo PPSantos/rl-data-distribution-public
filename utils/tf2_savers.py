@@ -43,7 +43,7 @@ class Saver:
         self._checkpoint.write(path)
 
     def load(self, path):
-        self._checkpoint.read(path)
+        self._checkpoint.restore(path)
 
 
 class SaveableAdapter(tf.train.experimental.PythonState):

@@ -7,34 +7,31 @@ import time
 import numpy as np
 import multiprocessing as mp
 
-import acme
 import sonnet as snt
-import gym
-from acme.wrappers import gym_wrapper
-from acme import wrappers
 from acme import specs
-
 from acme.utils import loggers
 
-from algos.dqn_acme import DQN
+from algos.dqn.agent import DQN
 from utils.strings import create_exp_name
 from utils.json_utils import NumpyEncoder
+from utils.tf2_layers import create_MLP
+from envs.utils import wrap_env, run_rollout
+from envs.environment_loop import EnvironmentLoop
 from envs import env_suite
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 
 
 DEFAULT_TRAIN_ARGS = {
+
     'num_processors': 1,
     'num_runs': 1,
 
     'env_name': 'mountaincar',
 
     'num_steps': 10_000,
-
     'num_rollouts': 5,
 
-    'hidden_layers': [32,64,32],
     'dqn_args': {
         'batch_size': 100,
         'prefetch_size': 1,
@@ -48,36 +45,13 @@ DEFAULT_TRAIN_ARGS = {
         'epsilon_schedule_timesteps': 500_000,
         'learning_rate': 1e-03,
         'discount': 0.99,
+        'max_gradient_norm': None,
         'checkpoint': True,
-        'checkpoint_interval': 5_000,
+        'checkpoint_interval': 2500,
+        'hidden_layers': [32,64,32],
     }
 }
 
-def _make_network(env_spec ,
-                  hidden_layers = [10,10]):
-    layers = hidden_layers + [env_spec.actions.num_values]
-    print('network layers:', layers)
-    network = snt.Sequential([
-        snt.nets.MLP(layers, activate_final=False),
-    ])
-    return network
-
-def wrap_env(env):
-    return wrappers.wrap_all(env, [
-        wrappers.GymWrapper,
-        wrappers.SinglePrecisionWrapper,
-    ])
-
-def _run_rollout(env, agent):
-    cumulative_reward = 0.0
-    timestep = env.reset()
-
-    while not timestep.last():
-        action = agent.deterministic_action(timestep.observation)
-        timestep = env.step(action)
-        cumulative_reward += timestep.reward
-
-    return cumulative_reward
 
 def train_run(run_args):
 
@@ -85,24 +59,12 @@ def train_run(run_args):
     time.sleep(time_delay)
 
     env, _ = env_suite.get_env(args['env_name'])
-    #env = gym.make('MountainCar-v0')
-    env = gym_wrapper.GymWrapper(env)
-    env = wrappers.SinglePrecisionWrapper(env)
-
+    env = wrap_env(env)
     env_spec = specs.make_environment_spec(env)
 
-    # print('actions:\n', env_spec.actions, '\n')
-    # print('observations:\n', env_spec.observations, '\n')
-    # print('rewards:\n', env_spec.rewards, '\n')
-    # print('discounts:\n', env_spec.discounts, '\n')
-
-    network = _make_network(env_spec, args['hidden_layers'])
-
-    agent_logger = loggers.TerminalLogger(label='agent_logger',
-                        time_delta=10., print_fn=print)
     dqn_args = args['dqn_args']
+    network = create_MLP(env_spec, dqn_args['hidden_layers'])
     agent = DQN(env_spec, network,
-        logger=agent_logger,
         batch_size=dqn_args['batch_size'],
         prefetch_size=dqn_args['prefetch_size'],
         target_update_period=dqn_args['target_update_period'],
@@ -115,26 +77,29 @@ def train_run(run_args):
         epsilon_schedule_timesteps=dqn_args['epsilon_schedule_timesteps'],
         learning_rate=dqn_args['learning_rate'],
         discount=dqn_args['discount'],
+        logger=loggers.TerminalLogger(label='agent_logger',
+                        time_delta=10., print_fn=print),
+        max_gradient_norm=None,
         checkpoint=dqn_args['checkpoint'],
         checkpoint_interval=dqn_args['checkpoint_interval'],
         save_directory=args['exp_path'] + f'/{time_delay}'
     )
 
-    logger = loggers.TerminalLogger(label='env_logger', 
-                            time_delta=2., print_fn=print)
-    env_loop = acme.EnvironmentLoop(env, agent, logger=logger)
-    print('Started training')
+    env_loop = EnvironmentLoop(env, agent,
+            logger=loggers.TerminalLogger(label='env_logger', 
+                            time_delta=2., print_fn=print))
+    print('Started training.')
     env_loop.run(num_steps=args['num_steps'])
-    print('Finished training')
+    print('Finished training.')
 
     # Use checkpoints to calculate custom evaluation metrics.
     chkpt_files = glob.glob(f"{args['exp_path']}/{time_delay}/*.index")
-    print(chkpt_files)
 
     steps = [os.path.split(p)[1].split('.')[0] for p in chkpt_files]
     steps = [int(p.split('_')[1]) for p in steps]
-    chkpt_files = [x for _, x in sorted(zip(steps, chkpt_files))]
+    chkpt_files = [os.path.splitext(x)[0] for _, x in sorted(zip(steps, chkpt_files))]
     steps = sorted(steps)
+    print('chkpt_files:', chkpt_files)
 
     data = {}
     data['steps'] = steps
@@ -148,7 +113,7 @@ def train_run(run_args):
         agent.load(chkpt_f)
 
         # Store rollouts mean reward.
-        data['rollouts_rewards'].append(np.mean([_run_rollout(env, agent)
+        data['rollouts_rewards'].append(np.mean([run_rollout(env, agent)
                                 for _ in range(args['num_rollouts'])]))
 
         # Store Q-values.

@@ -143,7 +143,7 @@ class GridEnv(gym.Env):
         self._timestep += 1
         if self._timestep >= self.max_timesteps:
             done = True
-        return ns, r, done, None
+        return ns, r, done, {}
         
     def reset(self):
         start_idxs = np.array(np.where(self.gs.spec == START)).T

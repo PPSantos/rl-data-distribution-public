@@ -7,6 +7,14 @@ from typing import Callable, Optional, Union
 TensorTransformation = Union[snt.Module, Callable[[types.NestedTensor],
                                                 tf.Tensor]]
 
+def create_MLP(env_spec,
+            hidden_layers = [10,10]):
+    layers = hidden_layers + [env_spec.actions.num_values]
+    network = snt.Sequential([
+        snt.nets.MLP(layers, activate_final=False),
+    ])
+    return network
+
 class GaussianNoiseExploration(snt.Module):
     """ Sonnet module for adding gaussian noise (exploration). """
 
