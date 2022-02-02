@@ -6,6 +6,8 @@ import tarfile
 import scipy
 
 import matplotlib
+
+from scripts.run import ORACLE_Q_VALS_DATA
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -26,7 +28,7 @@ from envs import env_suite
 ########################## SCRIPT ARGUMENTS #########################
 #####################################################################
 ENV_NAME = 'pendulum'
-VAL_ITER_DATA = 'pendulum_val_iter_2021-05-24-11-48-50'
+ORACLE_Q_VALS_DATA = 'pendulum_val_iter_2021-05-24-11-48-50'
 EXPS_DATA = [
     {'id': 'pendulum_offline_dqn_2021-09-30-08-18-18.tar.gz', 'label_1': '6.6', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 6.6$'},
     #{'id': 'pendulum_offline_dqn_2021-10-09-00-50-27.tar.gz', 'label_1': '7.3', 'label_2': r'$\mathbb{E}[\mathcal{H}(\mu)] = 7.3$'},
@@ -115,14 +117,14 @@ def main():
     os.makedirs(PLOTS_FOLDER_PATH, exist_ok=True)
 
     # Load optimal policy/Q-values.
-    val_iter_path = DATA_FOLDER_PATH + VAL_ITER_DATA
-    print(f"Opening experiment {VAL_ITER_DATA}")
+    val_iter_path = DATA_FOLDER_PATH + ORACLE_Q_VALS_DATA
+    print(f"Opening experiment {ORACLE_Q_VALS_DATA}")
     with open(val_iter_path + "/train_data.json", 'r') as f:
-        val_iter_data = json.load(f)
-        val_iter_data = json.loads(val_iter_data)
-        val_iter_data = val_iter_data[0]
+        oracle_q_vals_data = json.load(f)
+        oracle_q_vals_data = json.loads(oracle_q_vals_data)
+        oracle_q_vals_data = oracle_q_vals_data[0]
     f.close()
-    val_iter_data['Q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
+    oracle_q_vals_data['Q_vals'] = np.array(oracle_q_vals_data['Q_vals']) # [S,A]
 
     # Load and parse data.
     data = {}
@@ -212,7 +214,7 @@ def main():
     q_vals_processed_data = {}
     for exp in EXPS_DATA:
         exp_data = data[exp['id']]
-        errors = np.abs(val_iter_data['Q_vals'] - exp_data['Q_vals']) # [R,E,S,A]
+        errors = np.abs(oracle_q_vals_data['Q_vals'] - exp_data['Q_vals']) # [R,E,S,A]
         errors = np.mean(errors, axis=(2,3)) # [R,E]
         q_vals_processed_data[exp['id']] = errors
 

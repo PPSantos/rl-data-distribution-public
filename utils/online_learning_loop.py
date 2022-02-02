@@ -1,19 +1,4 @@
-# python3
-# Copyright 2018 DeepMind Technologies Limited. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-"""A simple agent-environment training loop."""
+"""A simple online agent-environment training loop."""
 
 import operator
 import time
@@ -131,9 +116,7 @@ class EnvironmentLoop(core.Worker):
     """Perform the run loop.
 
     Run the environment loop either for `num_episodes` episodes or for at
-    least `num_steps` steps (the last episode is always run until completion,
-    so the total number of steps may be slightly more than `num_steps`).
-    At least one of these two arguments has to be None.
+    least `num_steps` steps. At least one of these two arguments has to be None.
 
     Upon termination of an episode a new episode will be started. If the number
     of episodes and the number of steps are not given then this will interact

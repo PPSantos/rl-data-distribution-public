@@ -1,4 +1,4 @@
-"""DQN agent implementation."""
+"""Online DQN agent implementation."""
 
 import copy
 from typing import Optional
@@ -24,8 +24,7 @@ class DQN(agent.Agent):
 
     This implements a single-process DQN agent. This is a simple Q-learning
     algorithm that inserts N-step transitions into a replay buffer, and
-    periodically updates its policy by sampling these transitions using
-    prioritization.
+    periodically updates its policy by sampling these transitions.
 
     """
     def __init__(
@@ -167,4 +166,4 @@ class DQN(agent.Agent):
     #     self._saver.save(p)
 
     def load(self, p: str):
-        self._saver.load(p)
+        self._saver.restore(p)

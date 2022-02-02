@@ -42,7 +42,7 @@ class Saver:
     def save(self, path):
         self._checkpoint.write(path)
 
-    def load(self, path):
+    def restore(self, path):
         self._checkpoint.restore(path)
 
 

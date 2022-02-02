@@ -1,7 +1,11 @@
+import os
 import json
 import pathlib
 import numpy as np
 import scipy.stats
+import collections
+
+import tensorflow as tf
 
 from utils.json_utils import NumpyEncoder
 from envs import env_suite, grid_spec
@@ -15,7 +19,7 @@ DEFAULT_DATASET_ARGS = {
     # Environment name.
     'env_name': 'gridEnv1',
 
-    # Dataset type (dirichlet, eps-greedy, or boltzmann).
+    # Dataset type ('dirichlet', 'eps-greedy', or 'boltzmann').
     'dataset_type': 'boltzmann',
 
     # Number of dataset transitions.
@@ -25,21 +29,41 @@ DEFAULT_DATASET_ARGS = {
     # the sampling distribution always verifies p(s,a) > 0.
     'force_full_coverage': False,
 
-    # type=dirichlet args.
+    # dataset_type=dirichlet args.
     'dirichlet_dataset_args': {
-        'dirichlet_alpha_coef': 5.0,
+        'dirichlet_alpha_coef': 100.0, # [0.0, 100.0]
     },
 
-    # type=eps-greedy args.
+    # dataset_type=eps-greedy args.
     'eps_greedy_dataset_args': {
-        'epsilon': 0.0,
+        'epsilon': 0.0, # [0.0, 1.0]
     },
 
-    # type=boltzmann args.
+    # dataset_type=boltzmann args.
     'boltzmann_dataset_args': {
-        'temperature': 0.0,
+        'temperature': 0.0, # [-10.0, 10.0]
     },
 }
+
+def _dict_to_namedtuple(typename, data):
+    return collections.namedtuple(typename, data.keys())(
+        *(_dict_to_namedtuple(k, v) if isinstance(v, dict) else v
+            for k, v in data.items())
+    )
+
+def _add_transition(dataset, transition):
+
+    # Unpack transition.
+    obs, action, reward, next_obs, done, info = transition
+
+    # The discount is 0.0 if done is True and the episode was not truncated.
+    # Otherwise the discount is 1.0 (default value).
+    discount = float(not(done and (not info.get('TimeLimit.truncated', False))))
+    dataset['data']['observation'].append(np.array(obs, dtype=np.float32))
+    dataset['data']['action'].append(np.array(action, dtype=np.int32))
+    dataset['data']['reward'].append(np.array(reward, dtype=np.float32))
+    dataset['data']['discount'].append(np.array(discount, dtype=np.float32))
+    dataset['data']['next_observation'].append(np.array(next_obs, dtype=np.float32))
 
 def _calculate_dataset_dist_from_counts(env, env_grid_spec, sa_counts):
 
@@ -50,7 +74,7 @@ def _calculate_dataset_dist_from_counts(env, env_grid_spec, sa_counts):
                 xy = env_grid_spec.idx_to_xy(state)
                 tile_type = env_grid_spec.get_value(xy, xy=True)
                 if tile_type == grid_spec.WALL:
-                    sa_counts[state,action] = np.nan
+                    sa_counts[state, action] = np.nan
 
     sa_counts = sa_counts.flatten() # [S*A]
     sa_counts = sa_counts[np.logical_not(np.isnan(sa_counts))] # remove nans
@@ -58,7 +82,7 @@ def _calculate_dataset_dist_from_counts(env, env_grid_spec, sa_counts):
 
     return dataset_dist, sa_counts
 
-def _add_missing_transitions(env, env_grid_spec, transitions, sa_counts):
+def _add_missing_transitions(env, env_grid_spec, dataset, sa_counts):
 
     env.reset()
 
@@ -78,18 +102,20 @@ def _add_missing_transitions(env, env_grid_spec, transitions, sa_counts):
 
         # Sample next state, observation and reward.
         env.set_state(state)
-        next_observation, reward, done, _ = env.step(action)
+        next_observation, reward, done, info = env.step(action)
 
-        transitions.append((observation, action, reward, next_observation, done))
+        transition = (observation, action, reward, next_observation, done, info)
+        _add_transition(dataset, transition)
 
-        sa_counts[state,action] += 1
+        sa_counts[state, action] += 1
 
         env.reset()
 
 def _dataset_from_sampling_dist(env, env_grid_spec, sampling_dist: np.ndarray,
                 dataset_size: int, force_full_coverage: bool):
 
-    transitions = []
+    dataset = {'data': { 'observation': [], 'action': [], 'reward': [],
+                'discount': [], 'next_observation': [],}, 'info': {}}
 
     mesh = np.array(np.meshgrid(np.arange(env.num_states),
                                 np.arange(env.num_actions)))
@@ -119,29 +145,35 @@ def _dataset_from_sampling_dist(env, env_grid_spec, sampling_dist: np.ndarray,
         env.set_state(state)
         next_observation, reward, done, info = env.step(action)
 
-        transitions.append((observation, action, reward, next_observation, done))
+        transition = (observation, action, reward, next_observation, done, info)
+        _add_transition(dataset, transition)
 
         env.reset()
 
     if force_full_coverage:
         # Correct dataset such that we have coverage over all (state, action) pairs.
         _add_missing_transitions(env, env_grid_spec,
-                transitions=transitions, sa_counts=sa_counts)
+                dataset=dataset, sa_counts=sa_counts)
 
     dataset_dist, sa_counts = _calculate_dataset_dist_from_counts(
                             env, env_grid_spec, sa_counts)
 
+    # Create tf.data.Dataset.
+    dataset = tf.data.Dataset.from_tensor_slices(_dict_to_namedtuple('Dataset', dataset))
+
+    # Store dataset info.
     dataset_info = {}
     dataset_info['dataset_dist'] = dataset_dist
     dataset_info['dataset_sa_counts'] = sa_counts
     dataset_info['dataset_entropy'] = scipy.stats.entropy(dataset_dist)
 
-    return transitions, dataset_info
+    return dataset, dataset_info
 
 def _dataset_from_policy(env, env_grid_spec, policy,
                             dataset_size: int, force_full_coverage: bool):
 
-    transitions = []
+    dataset = {'data': { 'observation': [], 'action': [], 'reward': [],
+                'discount': [], 'next_observation': [],}, 'info': {}}
 
     # Rollout policy.
     episode_rewards = []
@@ -163,15 +195,15 @@ def _dataset_from_policy(env, env_grid_spec, policy,
             action = policy(state)
 
             # Env step.
-            next_observation, reward, done, _ = env.step(action)
+            next_observation, reward, done, info = env.step(action)
             next_state = env.get_state()
 
             # Log data.
             episode_cumulative_reward += reward
             sa_counts[state, action] += 1
 
-            transitions.append((observation, action,
-                                reward, next_observation, done))
+            transition = (observation, action, reward, next_observation, done, info)
+            _add_transition(dataset, transition)
 
             state = next_state
             observation = next_observation
@@ -182,10 +214,13 @@ def _dataset_from_policy(env, env_grid_spec, policy,
     if force_full_coverage:
         # Correct dataset such that we have coverage over all (state, action) pairs.
         _add_missing_transitions(env, env_grid_spec,
-                transitions=transitions, sa_counts=sa_counts)
+                dataset=dataset, sa_counts=sa_counts)
 
     dataset_dist, sa_counts = _calculate_dataset_dist_from_counts(
                         env, env_grid_spec, sa_counts)
+
+    # Create tf.data.Dataset.
+    dataset = tf.data.Dataset.from_tensor_slices(_dict_to_namedtuple('Dataset', dataset))
 
     print('Average policy reward:', np.mean(episode_rewards))
 
@@ -195,7 +230,7 @@ def _dataset_from_policy(env, env_grid_spec, policy,
     dataset_info['dataset_dist'] = dataset_dist
     dataset_info['dataset_entropy'] = scipy.stats.entropy(dataset_dist)
 
-    return transitions, dataset_info
+    return dataset, dataset_info
 
 
 def main(args=None):
@@ -222,38 +257,23 @@ def main(args=None):
                                     dataset_size=args['dataset_size'],
                                     force_full_coverage=args['force_full_coverage'])
 
-    elif args['dataset_type'] == 'eps-greedy':
+    elif args['dataset_type'] in ('eps-greedy', 'boltzmann'):
 
-        val_iter_path = DATA_FOLDER_PATH + args['val_iter_path']
-        print(f"Opening experiment {args['val_iter_path']}")
-        with open(val_iter_path + "/train_data.json", 'r') as f:
-            val_iter_data = json.load(f)
-            val_iter_data = json.loads(val_iter_data)
-            val_iter_data = val_iter_data
+        oracle_q_vals_path = DATA_FOLDER_PATH + args['oracle_q_vals_path']
+        print(f"Opening experiment {args['oracle_q_vals_path']}")
+        with open(oracle_q_vals_path + "/train_data.json", 'r') as f:
+            oracle_q_vals_data = json.load(f)
+            oracle_q_vals_data = json.loads(oracle_q_vals_data)
+            oracle_q_vals_data = oracle_q_vals_data
         f.close()
-        optimal_q_vals = np.array(val_iter_data['Q_vals']) # [S,A]
+        optimal_q_vals = np.array(oracle_q_vals_data['Q_vals']) # [S,A]
 
-        policy = build_eps_greedy_policy(optimal_q_vals,
-                epsilon=args['eps_greedy_dataset_args']['epsilon'])
-
-        dataset, dataset_info = _dataset_from_policy(env, env_grid_spec,
-                                    policy=policy,
-                                    dataset_size=args['dataset_size'],
-                                    force_full_coverage=args['force_full_coverage'])
-
-    elif args['dataset_type'] == 'boltzmann':
-
-        val_iter_path = DATA_FOLDER_PATH + args['val_iter_path']
-        print(f"Opening experiment {args['val_iter_path']}")
-        with open(val_iter_path + "/train_data.json", 'r') as f:
-            val_iter_data = json.load(f)
-            val_iter_data = json.loads(val_iter_data)
-            val_iter_data = val_iter_data
-        f.close()
-        optimal_q_vals = np.array(val_iter_data['Q_vals']) # [S,A]
-
-        policy = build_boltzmann_policy(optimal_q_vals,
-                temperature=args['boltzmann_dataset_args']['temperature'])
+        if args['dataset_type'] == 'eps-greedy':
+            policy = build_eps_greedy_policy(optimal_q_vals,
+                    epsilon=args['eps_greedy_dataset_args']['epsilon'])
+        else:
+            policy = build_boltzmann_policy(optimal_q_vals,
+                    temperature=args['boltzmann_dataset_args']['temperature'])
 
         dataset, dataset_info = _dataset_from_policy(env, env_grid_spec,
                                     policy=policy,
@@ -263,13 +283,12 @@ def main(args=None):
     else:
         raise ValueError('Unknown dataset type.')
 
-    # Store dataset.
-    dataset_path = args['exp_path'] + "/dataset.json"
-    print(f'Storing dataset to {dataset_path}.')
-    f = open(dataset_path, "w")
-    dumped = json.dumps(dataset, cls=NumpyEncoder)
-    json.dump(dumped, f)
-    f.close()
+    # Store tf.dataset.
+    print('Dataset info:\n', dataset_info)
+    dataset_dir = args['exp_path'] + "/dataset/"
+    os.makedirs(dataset_dir, exist_ok=True)
+    print(f'Storing dataset to {dataset_dir}')
+    tf.data.experimental.save(dataset, dataset_dir)
 
     # Store dataset info.
     f = open(args['exp_path'] + "/dataset_info.json", "w")
@@ -277,4 +296,4 @@ def main(args=None):
     json.dump(dumped, f)
     f.close()
 
-    return dataset_path, dataset_info
+    return dataset_dir, dataset_info

@@ -1,5 +1,5 @@
 from analysis.plots import main as plots
-from scripts.run import VAL_ITER_DATA
+from scripts.run import ORACLE_Q_VALS_DATA
 
 ENV_NAME = 'gridEnv1'
 EXP_IDS = [
@@ -14,4 +14,4 @@ EXP_IDS = [
 if __name__ == "__main__":
 
     for exp_id in EXP_IDS:
-        plots(exp_id=exp_id+'.tar.gz', val_iter_exp=VAL_ITER_DATA[ENV_NAME])
+        plots(exp_id=exp_id+'.tar.gz', val_iter_exp=ORACLE_Q_VALS_DATA[ENV_NAME])

@@ -121,11 +121,11 @@ def main(exp_id, val_iter_exp):
     val_iter_path = DATA_FOLDER_PATH + val_iter_exp
     print(f"Opening experiment {val_iter_exp}")
     with open(val_iter_path + "/train_data.json", 'r') as f:
-        val_iter_data = json.load(f)
-        val_iter_data = json.loads(val_iter_data)
-        val_iter_data = val_iter_data
+        oracle_q_vals_data = json.load(f)
+        oracle_q_vals_data = json.loads(oracle_q_vals_data)
+        oracle_q_vals_data = oracle_q_vals_data
     f.close()
-    val_iter_data['Q_vals'] = np.array(val_iter_data['Q_vals']) # [S,A]
+    oracle_q_vals_data['Q_vals'] = np.array(oracle_q_vals_data['Q_vals']) # [S,A]
 
     # Open data.
     print(f"Opening experiment {exp_id}")
@@ -237,7 +237,7 @@ def main(exp_id, val_iter_exp):
     fig.set_size_inches(FIGURE_X, FIGURE_Y)
     
     for (i, run_Q_vals) in enumerate(data['Q_vals']): # run_Q_vals = [(Steps),S,A]
-        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
+        errors = np.abs(oracle_q_vals_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
         Y = np.sum(errors, axis=(1,2)) # [(Steps)]
         X = data['steps'][i]
 
@@ -254,11 +254,11 @@ def main(exp_id, val_iter_exp):
     """
         Scalar q-values metrics.
     """
-    errors = np.abs(val_iter_data['Q_vals'] - data['Q_vals']) # [R,(Steps),S,A]
+    errors = np.abs(oracle_q_vals_data['Q_vals'] - data['Q_vals']) # [R,(Steps),S,A]
     errors = np.sum(errors, axis=(2,3)) # [R,(Steps)]
     scalar_metrics['qvals_summed_error'] = np.mean(errors[:,-1])
 
-    errors = np.abs(val_iter_data['Q_vals'] - data['Q_vals']) # [R,(Steps),S,A]
+    errors = np.abs(oracle_q_vals_data['Q_vals'] - data['Q_vals']) # [R,(Steps),S,A]
     errors = np.mean(errors, axis=(2,3)) # [R,(Steps)]
     scalar_metrics['qvals_avg_error'] = np.mean(errors[:,-1])
 
@@ -275,7 +275,7 @@ def main(exp_id, val_iter_exp):
     i = 0
     for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [(Steps),S,A]
 
-        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
+        errors = np.abs(oracle_q_vals_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
         Y = np.mean(errors, axis=(1,2)) # [(Steps)]
         X = data['steps'][i]
         # Y_std = np.std(errors, axis=(1,2))
@@ -293,7 +293,7 @@ def main(exp_id, val_iter_exp):
         # ax.fill_between(X, Y-Y_std, Y+Y_std, color=p[0].get_color(), alpha=0.15)
 
         # Max Q-values.
-        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
+        errors = np.abs(oracle_q_vals_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
         maximizing_actions = np.argmax(run_Q_vals, axis=2) # [(Steps),S]
         x, y = np.indices(maximizing_actions.shape)
         errors = errors[x,y,maximizing_actions] # [(Steps),S]
@@ -335,7 +335,7 @@ def main(exp_id, val_iter_exp):
     i = 0
     for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [(Steps),S,A]
 
-        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
+        errors = np.abs(oracle_q_vals_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
         errors = errors.reshape(errors.shape[0], -1) # [(Steps),S*A]
 
         X = data['steps'][i]
@@ -370,7 +370,7 @@ def main(exp_id, val_iter_exp):
     i = 0
     for (ax, run_Q_vals) in zip(axs.flat, data['Q_vals']): # run_Q_vals = [(Steps),S,A]
 
-        errors = np.abs(val_iter_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
+        errors = np.abs(oracle_q_vals_data['Q_vals'] - run_Q_vals) # [(Steps),S,A]
         maximizing_actions = np.argmax(run_Q_vals, axis=2) # [(Steps),S]
         x, y = np.indices(maximizing_actions.shape)
         errors = errors[x,y,maximizing_actions] # [(Steps),S]
@@ -420,7 +420,7 @@ def main(exp_id, val_iter_exp):
                     l = ax.plot(X, Y, label=f'Action {action}')
 
                     # Plot true Q-values.
-                    ax.hlines(val_iter_data['Q_vals'][state_to_plot,action],
+                    ax.hlines(oracle_q_vals_data['Q_vals'][state_to_plot,action],
                             xmin=0, xmax=max(data['steps']), linestyles='--', color=l[0].get_color())
 
                 #ax.set_ylim(y_axis_range)

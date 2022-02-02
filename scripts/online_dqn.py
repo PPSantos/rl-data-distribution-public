@@ -7,7 +7,6 @@ import time
 import numpy as np
 import multiprocessing as mp
 
-import sonnet as snt
 from acme import specs
 from acme.utils import loggers
 
@@ -16,7 +15,7 @@ from utils.strings import create_exp_name
 from utils.json_utils import NumpyEncoder
 from utils.tf2_layers import create_MLP
 from envs.utils import wrap_env, run_rollout
-from envs.environment_loop import EnvironmentLoop
+from utils.online_learning_loop import EnvironmentLoop
 from envs import env_suite
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
@@ -92,7 +91,7 @@ def train_run(run_args):
     env_loop.run(num_steps=args['num_steps'])
     print('Finished training.')
 
-    # Use checkpoints to calculate custom evaluation metrics.
+    # Use checkpoints to calculate evaluation metrics.
     chkpt_files = glob.glob(f"{args['exp_path']}/{time_delay}/*.index")
 
     steps = [os.path.split(p)[1].split('.')[0] for p in chkpt_files]
@@ -166,5 +165,5 @@ if __name__ == '__main__':
     exp_id = train(args=DEFAULT_TRAIN_ARGS)
 
     from analysis.plots import main as plots
-    from scripts.run import VAL_ITER_DATA
-    plots(exp_id=exp_id, val_iter_exp=VAL_ITER_DATA[DEFAULT_TRAIN_ARGS['env_name']])
+    from scripts.run import ORACLE_Q_VALS_DATA
+    plots(exp_id=exp_id, val_iter_exp=ORACLE_Q_VALS_DATA[DEFAULT_TRAIN_ARGS['env_name']])

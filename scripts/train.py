@@ -4,50 +4,26 @@ import json
 import time
 import numpy as np
 import pathlib
-from typing import List
 import multiprocessing as mp
+import multiprocessing.context as ctx
+ctx._force_start_method('spawn')
 
-import torch
+from tqdm import tqdm
+import tensorflow as tf
+from acme import specs
+from acme.utils import loggers
 
 from envs import env_suite, grid_spec
 from utils.json_utils import NumpyEncoder
+from utils import tf2_layers
+from envs.utils import wrap_env, run_rollout
 
 # Import algorithms.
-from d3rlpy.algos import DQN, DiscreteCQL
-from d3rlpy.metrics.scorer import evaluate_on_environment
-from d3rlpy.models.encoders import VectorEncoderFactory
-from d3rlpy.dataset import Transition
+from algos.dqn.offline_agent import OfflineDQN
 
 
 DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data/'
 
-
-def _read_dataset(env, dataset_path: str):
-
-    with open(dataset_path, 'r') as f:
-        dataset = json.load(f)
-        dataset = json.loads(dataset)
-    f.close()
-
-    transitions : List[Transition] = []
-
-    for transition in dataset:
-        observation = np.array(transition[0])
-        action = np.int(transition[1])
-        reward = np.float(transition[2])
-        next_observation = np.array(transition[3])
-        done = transition[4]
-        transition = Transition(observation_shape=observation.shape,
-                                action_size=env.num_actions,
-                                observation=observation,
-                                action=action,
-                                reward=reward,
-                                next_observation=next_observation,
-                                terminal=done)
-
-        transitions.append(transition)
-
-    return transitions
 
 def train_run(run_args):
 
@@ -55,59 +31,63 @@ def train_run(run_args):
 
     time.sleep(time_delay)
 
-    # Set number of threads.
-    if args['num_threads_per_proc']:
-        torch.set_num_threads(args['num_threads_per_proc'])
-
-    # Set seeds.
-    torch.manual_seed(time_delay)
+    # Set random seeds.
+    tf.random.set_seed(time_delay)
     np.random.seed(time_delay)
 
     # Load environment.
     env, env_grid_spec = env_suite.get_env(args['env_name'])
+    env = wrap_env(env)
+    env_spec = specs.make_environment_spec(env)
 
-    # Read dataset.
-    dataset = _read_dataset(env, args['dataset_path'])
+    # Read and prepare dataset.
+    batch_size = args[args['algo']+'_args']['batch_size']
+    dataset = tf.data.experimental.load(args['dataset_dir'])
+    dataset = dataset.repeat().shuffle(len(dataset)).batch(batch_size,
+                                                drop_remainder=True)
+    dataset = dataset.prefetch(2)
 
-    # Load algorithm.
+    # Load algorithm (learner).
     if args['algo'] == 'offline_dqn':
-        encoder_factory = VectorEncoderFactory(
-                    hidden_units=args['offline_dqn_args']['hidden_layers'],
-                    activation='relu')
-        args['offline_dqn_args']['gamma'] = args['gamma']
-        algo = DQN(**args['offline_dqn_args'], use_gpu=False,
-                encoder_factory=encoder_factory)
+        network = tf2_layers.create_MLP(env_spec,
+            args['offline_dqn_args']['hidden_layers'])
+        offline_agent = OfflineDQN(
+            env_spec=env_spec,
+            network=network,
+            dataset=dataset,
+            target_update_period=args['offline_dqn_args']['target_update_period'],
+            learning_rate=args['offline_dqn_args']['learning_rate'],
+            discount=args['gamma'],
+            logger=loggers.TerminalLogger(label='agent_logger',
+                        time_delta=5., print_fn=print),
+            max_gradient_norm=args['offline_dqn_args']['max_gradient_norm'],
+            checkpoint=True,
+            checkpoint_interval=args['checkpoint_interval'],
+            save_directory=args['exp_path'] + f'/{time_delay}',
+        )
+
     elif args['algo'] == 'offline_cql':
-        encoder_factory = VectorEncoderFactory(
-                    hidden_units=args['offline_cql_args']['hidden_layers'],
-                    activation='relu')
-        args['offline_cql_args']['gamma'] = args['gamma']
-        algo = DiscreteCQL(**args['offline_cql_args'], use_gpu=False,
-                encoder_factory=encoder_factory)
+        raise ValueError('Not implemented.')
     else:
         raise ValueError('Unknown algorithm.')
 
     # Train.
-    algo.build_with_env(env)
-    algo.fit(dataset,
-            n_epochs=args['num_epochs'],
-            save_metrics=True,
-            save_interval=args['save_interval'],
-            experiment_name=f"{time_delay}",
-            with_timestamp=False,
-            logdir=args['exp_path'],
-            tensorboard_dir=f"{args['exp_path']}/tb-logs/")
+    print('Started training.')
+    for step in tqdm(range(args['num_steps'])):
+        offline_agent.step()
+        if step % args['checkpoint_interval'] == 0:
+            # Execute evaluation rollout.
+            print('Rollout reward:', run_rollout(env, offline_agent))
+    print('Finished training.')
 
-    # Use checkpoints to calculate custom evaluation metrics.
-    chkpt_files = glob.glob(f"{args['exp_path']}/{time_delay}/*.pt")
+    # Use checkpoints to calculate evaluation metrics.
+    chkpt_files = glob.glob(f"{args['exp_path']}/{time_delay}/*.index")
 
     steps = [os.path.split(p)[1].split('.')[0] for p in chkpt_files]
     steps = [int(p.split('_')[1]) for p in steps]
-    chkpt_files = [x for _, x in sorted(zip(steps, chkpt_files))]
+    chkpt_files = [os.path.splitext(x)[0] for _, x in sorted(zip(steps, chkpt_files))]
     steps = sorted(steps)
-
-    evaluate_scorer = evaluate_on_environment(env,
-                    n_trials=args['num_rollouts'], epsilon=0.0)
+    print('chkpt_files:', chkpt_files)
 
     data = {}
     data['steps'] = steps
@@ -118,31 +98,27 @@ def train_run(run_args):
     for i, chkpt_f in enumerate(chkpt_files):
 
         # Load checkpoint.
-        algo.load_model(chkpt_f)
+        offline_agent.load(chkpt_f)
         
         # Store rollouts mean reward.
-        data['rollouts_rewards'].append(evaluate_scorer(algo))
+        data['rollouts_rewards'].append(np.mean([run_rollout(env, offline_agent)
+                                for _ in range(args['num_rollouts'])]))
 
         # Store Q-values.
-        estimated_Q_vals = np.zeros((env.num_states, env.num_actions))
         for state in range(env.num_states):
             if env_grid_spec:
                 xy = env_grid_spec.idx_to_xy(state)
                 tile_type = env_grid_spec.get_value(xy, xy=True)
                 if tile_type == grid_spec.WALL:
-                    estimated_Q_vals[state,:] = 0.0
+                    data['Q_vals'][i,state,:] = 0.0
                 else:
                     obs = env.get_observation(state)
-                    for a in range(env.num_actions):
-                        estimated_Q_vals[state,a] = \
-                            algo.predict_value([obs], [a])[0]
+                    data['Q_vals'][i,state,:] = offline_agent.get_Q_vals(
+                        np.array(obs, dtype=np.float32))
             else:
                 obs = env.get_observation(state)
-                for a in range(env.num_actions):
-                    estimated_Q_vals[state,a] = \
-                        algo.predict_value([obs], [a])[0]
-
-        data['Q_vals'][i,:,:] = estimated_Q_vals
+                data['Q_vals'][i,state,:] = offline_agent.get_Q_vals(
+                    np.array(obs, dtype=np.float32))
 
     return data
 
@@ -150,7 +126,6 @@ def train_run(run_args):
 def train(args):
 
     print('\nRunning scripts/train.py.')
-    #print(args)
 
     # Adjust the number of processors if necessary.
     if args['num_processors'] > mp.cpu_count():
