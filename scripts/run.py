@@ -18,16 +18,16 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data
 
 ###########################################################################
 ORACLE_Q_VALS_DATA = {
-    'gridEnv1': 'gridEnv1_val_iter_2022-01-17-15-07-56',
+    'gridEnv1': 'gridEnv1_q_learning_2022-02-02-19-07-14',
     'gridEnv2': 'gridEnv2_val_iter_2022-01-23-19-56-06',
     'multiPathEnv': 'multiPathEnv_val_iter_2022-01-23-18-46-25',
-    'mountaincar': 'mountaincar_q_learning_2022-01-27-18-57-05',
+    'mountaincar': 'mountaincar_q_learning_2022-02-02-19-31-29',
 }
 
 RUN_ARGS = {
 
     # Environment name.
-    'env_name': 'gridEnv1',
+    'env_name': 'mountaincar',
 
     # scripts/dataset.py arguments.
     'dataset_args': {
@@ -36,7 +36,7 @@ RUN_ARGS = {
         'dataset_type': 'dirichlet',
 
         # Number of dataset transitions.
-        'dataset_size': 100_000,
+        'dataset_size': 200_000,
 
         # Whether to force coverage over all (s,a) pairs, i.e.,
         # the sampling distribution always verifies p(s,a) > 0.
@@ -59,14 +59,14 @@ RUN_ARGS = {
     },
 
     # scripts/train.py arguments.
-    'train_args':  {
+    'train_args': {
 
         'num_runs': 4,
-        'num_processors': 2,
+        'num_processors': 4,
         'algo': 'offline_dqn',
         'num_steps': 200_000, # number of learning steps (num. batch updates).
-        'gamma': 0.9, # discount factor.
-        'checkpoint_interval': 250, # period at which checkpoints are saved.
+        'gamma': 0.99, # discount factor.
+        'checkpoint_interval': 5_000, # period at which checkpoints are saved.
         'num_rollouts': 5, # number of rollouts to execute per checkpoint.
 
         # Offline DQN algorithm arguments.
@@ -75,7 +75,7 @@ RUN_ARGS = {
             'target_update_period': 1_000,
             'learning_rate': 1e-03,
             'max_gradient_norm': None,
-            'hidden_layers': [32,64,32],
+            'hidden_layers': [64,128,64],
         },
 
         # Offline CQL algorithm arguments.

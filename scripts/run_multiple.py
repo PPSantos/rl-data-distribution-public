@@ -4,11 +4,13 @@ from scripts.run import RUN_ARGS
 from scripts.run import main as run
 
 ###########################################################################
-ENVS = ['gridEnv2',]
+ENVS = ['mountaincar',]
 
 ###########################################################################
 
 if __name__ == "__main__":
+
+    exp_ids = []
 
     """
         DQN.
@@ -18,7 +20,6 @@ if __name__ == "__main__":
     run_args['dataset_args']['dataset_type'] = 'dirichlet'
     run_args['train_args']['algo'] = 'offline_dqn'
 
-    exp_ids = []
     for env in ENVS:
 
         # Setup train args.
