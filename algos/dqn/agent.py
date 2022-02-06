@@ -1,5 +1,6 @@
-"""Online DQN agent implementation."""
-
+"""
+    Online DQN agent implementation.
+"""
 import copy
 from typing import Optional
 

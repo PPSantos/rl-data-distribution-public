@@ -1,5 +1,5 @@
 """
-    Offline DQN agent implementation.
+    Offline CQL agent implementation.
 """
 import copy
 from typing import Optional
@@ -14,11 +14,12 @@ from acme.tf import utils as tf2_utils
 from acme.utils import loggers
 
 from utils import tf2_savers
-from algos.dqn.learning import DQNLearner
+from algos.cql.learning import CQLLearner
 
-class OfflineDQN(object):
+
+class OfflineCQL(object):
     """
-        Offline DQN agent.
+        Offline CQL agent.
     """
     def __init__(
         self,
@@ -28,6 +29,7 @@ class OfflineDQN(object):
         target_update_period: int = 100,
         learning_rate: float = 1e-3,
         discount: float = 0.99,
+        alpha: float = 1e-03,
         logger: Optional[loggers.Logger] = None,
         max_gradient_norm: Optional[float] = None,
         checkpoint: bool = True,
@@ -44,6 +46,7 @@ class OfflineDQN(object):
                 the target networks.
             learning_rate: learning rate for the q-network update.
             discount: discount to use for TD updates.
+            alpha: CQL reguralizer coefficient.
             logger: logger object to be used by learner.
             max_gradient_norm: used for gradient clipping.
             checkpoint: whether to save checkpoint.
@@ -65,11 +68,12 @@ class OfflineDQN(object):
         self._q_vals_actor = actors.FeedForwardActor(network)
 
         # Create learner.
-        self._learner = DQNLearner(
+        self._learner = CQLLearner(
             network=network,
             target_network=target_network,
             discount=discount,
             learning_rate=learning_rate,
+            alpha=alpha,
             target_update_period=target_update_period,
             dataset=dataset,
             max_gradient_norm=max_gradient_norm,

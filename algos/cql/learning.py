@@ -1,5 +1,5 @@
 """
-    DQN learner implementation.
+    CQL learner implementation.
 """
 import time
 from typing import Dict, List, Optional
@@ -12,30 +12,32 @@ import tensorflow as tf
 import acme
 from acme import types
 from acme.tf import losses
+from acme.tf import savers as tf2_savers
 from acme.tf import utils as tf2_utils
 from acme.utils import counting
 from acme.utils import loggers
 
 from utils import tf2_savers
 
-class DQNLearner(acme.Learner, tf2_savers.TFSaveable):
-    """DQN learner.
+class CQLLearner(acme.Learner, tf2_savers.TFSaveable):
+    """CQL learner.
 
-    This is the learning component of a DQN agent. It takes a dataset as input
-    and implements update functionality to learn from this dataset.
+    This is the learning component of a CQL agent. It takes a dataset as input
+    and implements update functionality to learn from this dataset. It colapses
+    to a regular DQN when alpha = 0.
     """
-
     def __init__(
         self,
         network: snt.Module,
         target_network: snt.Module,
         discount: float,
         learning_rate: float,
+        alpha: float,
         target_update_period: int,
         dataset: tf.data.Dataset,
         huber_loss_parameter: float = 1.,
-        counter: Optional[counting.Counter] = None,
-        logger: Optional[loggers.Logger] = None,
+        counter: counting.Counter = None,
+        logger: loggers.Logger = None,
         checkpoint: bool = True,
         checkpoint_interval: int = 5_000,
         save_directory: str = '~/acme',
@@ -48,6 +50,7 @@ class DQNLearner(acme.Learner, tf2_savers.TFSaveable):
             target_network: the target Q critic (which lags behind the online net).
             discount: discount to use for TD updates.
             learning_rate: learning rate for the q-network update.
+            alpha: CQL reguralizer penalty.
             target_update_period: number of learner steps to perform before updating
             the target networks.
             dataset: dataset to learn from, whether fixed or from a replay buffer (see
@@ -82,6 +85,7 @@ class DQNLearner(acme.Learner, tf2_savers.TFSaveable):
         self._max_gradient_norm = tf.convert_to_tensor(max_gradient_norm)
         self._checkpoint_interval = checkpoint_interval
         self._save_directory = save_directory
+        self._alpha = tf.constant(alpha, dtype=tf.float32)
 
         # Learner state.
         self._variables: List[List[tf.Tensor]] = [network.trainable_variables]
@@ -89,6 +93,8 @@ class DQNLearner(acme.Learner, tf2_savers.TFSaveable):
 
         # Internalise logging/counting objects.
         self._counter = counter or counting.Counter()
+        self._counter.increment(learner_steps=0)
+
         self._logger = logger or loggers.TerminalLogger('learner', time_delta=1.)
 
         # Create a checkpointer object.
@@ -104,6 +110,7 @@ class DQNLearner(acme.Learner, tf2_savers.TFSaveable):
 
     @tf.function
     def _step(self) -> Dict[str, tf.Tensor]:
+        """Do a step of SGD."""
 
         inputs = next(self._iterator)
         transitions: types.Transition = inputs.data
@@ -124,10 +131,17 @@ class DQNLearner(acme.Learner, tf2_savers.TFSaveable):
             _, extra = trfl.double_qlearning(q_tm1, transitions.action, r_t, d_t,
                                             q_t_value, q_t_selector)
             loss = losses.huber(extra.td_error, self._huber_loss_parameter)
-            loss = tf.reduce_mean(loss, axis=[0]) # []
+
+            # Compute CQL reguralizer loss.
+            push_up = trfl.indexing_ops.batched_index(q_tm1, transitions.action) # Q-value under behavioural policy.
+            push_down = tf.reduce_logsumexp(q_tm1, axis=1) # soft-maximum of the Q-function.
+
+            # Compute global loss.
+            cql_loss = loss + self._alpha * (push_down - push_up)
+            cql_loss = tf.reduce_mean(cql_loss, axis=0)
 
         # Do a step of SGD.
-        gradients = tape.gradient(loss, self._network.trainable_variables)
+        gradients = tape.gradient(cql_loss, self._network.trainable_variables)
         gradients, _ = tf.clip_by_global_norm(gradients, self._max_gradient_norm)
         self._optimizer.apply(gradients, self._network.trainable_variables)
 
@@ -140,9 +154,14 @@ class DQNLearner(acme.Learner, tf2_savers.TFSaveable):
 
         # Report loss & statistics for logging.
         fetches = {
-            'loss': loss,
+            'critic_loss': tf.reduce_mean(loss, axis=0),
+            'q_variance': tf.reduce_mean(tf.math.reduce_variance(q_tm1, axis=1), axis=0),
+            'q_average': tf.reduce_mean(q_tm1),
+            'push_up': tf.reduce_mean(push_up, axis=0),
+            'push_down': tf.reduce_mean(push_down, axis=0),
+            'regularizer': tf.reduce_mean(push_down - push_up, axis=0),
+            'cql_loss': cql_loss,
         }
-
         return fetches
 
     def step(self):

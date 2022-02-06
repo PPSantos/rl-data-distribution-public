@@ -63,7 +63,7 @@ RUN_ARGS = {
 
         'num_runs': 4,
         'num_processors': 4,
-        'algo': 'offline_dqn',
+        'algo': 'offline_cql',
         'num_steps': 200_000, # number of learning steps (num. batch updates).
         'gamma': 0.99, # discount factor.
         'checkpoint_interval': 5_000, # period at which checkpoints are saved.
@@ -79,13 +79,16 @@ RUN_ARGS = {
         },
 
         # Offline CQL algorithm arguments.
-        # 'offline_cql_args': {
-        #     'batch_size': 100,
-        #     'target_update_period': 1_000,
-        #     'learning_rate': 1e-03,
-        #     'max_gradient_norm': None,
-        #     'hidden_layers': [32,64,32],
-        # }
+        'offline_cql_args': {
+            'batch_size': 100,
+            'target_update_period': 1_000,
+            'learning_rate': 1e-03,
+            'max_gradient_norm': None,
+            'hidden_layers': [64,128,64],
+            'alpha': 1e-01,
+            # 'empirical_policy_hidden_layers': [64,128,64],
+            # 'empirical_policy_num_learning_steps': 50_000,
+        }
 
     },
 }
