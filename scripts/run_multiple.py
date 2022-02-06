@@ -4,7 +4,7 @@ from scripts.run import RUN_ARGS
 from scripts.run import main as run
 
 ###########################################################################
-ENVS = ['mountaincar',]
+ENVS = ['gridEnv1', 'gridEnv2']
 
 ###########################################################################
 
@@ -14,6 +14,7 @@ if __name__ == "__main__":
 
     """
         DQN.
+    """
     """
     # Dirichlet dataset: vary alpha dirichlet parameter.
     run_args = RUN_ARGS
@@ -120,7 +121,7 @@ if __name__ == "__main__":
             exp_id = run(run_args)
             exp_ids.append(exp_id)
 
-            print('Exp. ids:', exp_ids)
+            print('Exp. ids:', exp_ids) """
 
 
     """

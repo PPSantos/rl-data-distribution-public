@@ -27,7 +27,7 @@ ORACLE_Q_VALS_DATA = {
 RUN_ARGS = {
 
     # Environment name.
-    'env_name': 'mountaincar',
+    'env_name': 'gridEnv1',
 
     # scripts/dataset.py arguments.
     'dataset_args': {
@@ -36,11 +36,11 @@ RUN_ARGS = {
         'dataset_type': 'dirichlet',
 
         # Number of dataset transitions.
-        'dataset_size': 200_000,
+        'dataset_size': 50_000,
 
         # Whether to force coverage over all (s,a) pairs, i.e.,
         # the sampling distribution always verifies p(s,a) > 0.
-        'force_full_coverage': True,
+        'force_full_coverage': False,
 
         # dataset_type=dirichlet args.
         'dirichlet_dataset_args': {
@@ -64,8 +64,8 @@ RUN_ARGS = {
         'num_runs': 4,
         'num_processors': 4,
         'algo': 'offline_cql',
-        'num_steps': 200_000, # number of learning steps (num. batch updates).
-        'gamma': 0.99, # discount factor.
+        'num_steps': 100_000, # number of learning steps (num. batch updates).
+        'gamma': 0.9, # discount factor.
         'checkpoint_interval': 5_000, # period at which checkpoints are saved.
         'num_rollouts': 5, # number of rollouts to execute per checkpoint.
 
@@ -84,8 +84,8 @@ RUN_ARGS = {
             'target_update_period': 1_000,
             'learning_rate': 1e-03,
             'max_gradient_norm': None,
-            'hidden_layers': [64,128,64],
-            'alpha': 1e-01,
+            'hidden_layers': [20,40,20],
+            'alpha': 1.0,
             # 'empirical_policy_hidden_layers': [64,128,64],
             # 'empirical_policy_num_learning_steps': 50_000,
         }
