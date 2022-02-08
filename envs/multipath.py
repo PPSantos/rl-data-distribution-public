@@ -76,10 +76,12 @@ class MultiPathEnv(gym.Env):
         ns, r = self.step_stateless(self.__state, a)
         self.__state = ns
         done = False
+        info = {}
         self._timestep += 1
         if self._timestep >= self.max_timesteps:
+            info["TimeLimit.truncated"] = True
             done = True
-        return ns, r, done, None
+        return ns, r, done, info
         
     def reset(self):
         start_state = 0
