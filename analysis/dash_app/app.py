@@ -27,7 +27,7 @@ PLOTS_FOLDER_PATH_2 = '/home/pedrosantos/git/rl-data-distribution/analysis/plots
 ENVS = ['gridEnv1', 'gridEnv2', 'multiPathEnv', 'mountaincar']
 ALGORITHMS = ['offline_dqn', 'offline_cql']
 DATASET_TYPES = ['dirichlet', 'eps-greedy', 'boltzmann']
-ALGO_COLORS= {'offline_dqn': '#d62728', 'offline_cql': '#1f77b4'} # COLORS = ['#ff7f0e', '#2ca02c', '#9467bd']
+ALGO_COLORS= {'offline_dqn': '#ef553b', 'offline_cql': '#636efa'} # '#4fcc96'
 
 app = dash.Dash(__name__,
                 meta_tags=[
@@ -112,6 +112,14 @@ runs_picker = html.Div(
                                         multi=True,
                                         style={'color': '#3b505e'},
                                         className="dropdown-box-third",
+                                    ),
+                                    dcc.Checklist(
+                                        id='dataset-coverage-picker',
+                                        options=[{'label': 'force_coverage=False', 'value': False},
+                                                {'label': 'force_coverage=True', 'value': True}],
+                                        value=[False, True],
+                                        inline=True,
+                                        inputStyle={"margin-right": "5px", "margin-left": "20px"},
                                     )
                             ]
                         ),
@@ -189,11 +197,13 @@ app.layout = html.Div(
         Input("env-picker", "value"),
         Input("algorithm-picker", "value"),
         Input("dataset-picker", "value"),
+        Input("dataset-coverage-picker", "value"),
         Input("graph1-x-axis-picker", "value"),
         Input("graph1-y-axis-picker", "value"),
     ],
 )
-def callback_graph1(env, algorithms, dataset_types, x_axis, y_axis):
+def callback_graph1(env, algorithms, dataset_types,
+            dataset_force_coverage_types, x_axis, y_axis):
 
     if x_axis == "dataset_entropy":
         x_axis_lbl = "Dataset entropy"
@@ -228,20 +238,32 @@ def callback_graph1(env, algorithms, dataset_types, x_axis, y_axis):
 
         for dataset_type in dataset_types:
 
-            filtered_df = DATA.loc[(DATA['env_id']==env) & (DATA['algo_id']==algo)
-                        & (DATA['dataset_type_id']==dataset_type)]
+            for force_coverage_type in dataset_force_coverage_types:
 
-            algo_data_Y.extend(filtered_df[y_axis])
-            algo_data_X.extend(filtered_df[x_axis])
-            hover_text.extend(filtered_df['info_text'])
-            exp_ids.extend(filtered_df['id'])
+                filtered_df = DATA.loc[
+                                (DATA['env_id']==env) &
+                                (DATA['algo_id']==algo) &
+                                (DATA['dataset_type_id']==dataset_type) &
+                                (DATA['force_dataset_coverage']==force_coverage_type)
+                            ]
+
+                algo_data_Y.extend(filtered_df[y_axis])
+                algo_data_X.extend(filtered_df[x_axis])
+                hover_text.extend(filtered_df['info_text'])
+                exp_ids.extend(filtered_df['id'])
 
         traces.append(go.Scatter(
             x=algo_data_X,
             y=algo_data_Y,
             customdata=exp_ids,
             showlegend=True,
-            marker_color=ALGO_COLORS[algo],
+            marker=dict(
+                color=ALGO_COLORS[algo],
+                size=7,
+                line=dict(width=1.5,
+                    color='DarkSlateGrey'
+                ),
+            ),
             mode='markers',
             name=algo,
             hovertext=hover_text,
