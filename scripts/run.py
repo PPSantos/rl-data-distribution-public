@@ -22,12 +22,13 @@ ORACLE_Q_VALS_DATA = {
     'gridEnv2': 'gridEnv2_val_iter_2022-01-23-19-56-06',
     'multiPathEnv': 'multiPathEnv_val_iter_2022-01-23-18-46-25',
     'mountaincar': 'mountaincar_q_learning_2022-02-02-19-31-29',
+    'pendulum': 'pendulum_q_learning_2022-02-09-15-59-02',
 }
 
 RUN_ARGS = {
 
     # Environment name.
-    'env_name': 'gridEnv1',
+    'env_name': 'pendulum',
 
     # scripts/dataset.py arguments.
     'dataset_args': {
@@ -36,7 +37,7 @@ RUN_ARGS = {
         'dataset_type': 'dirichlet',
 
         # Number of dataset transitions.
-        'dataset_size': 50_000,
+        'dataset_size': 200_000,
 
         # Whether to force coverage over all (s,a) pairs, i.e.,
         # the sampling distribution always verifies p(s,a) > 0.
@@ -63,8 +64,8 @@ RUN_ARGS = {
 
         'num_runs': 4,
         'num_processors': 4,
-        'algo': 'offline_cql',
-        'num_steps': 100_000, # number of learning steps (num. batch updates).
+        'algo': 'offline_dqn',
+        'num_steps': 200_000, # number of learning steps (num. batch updates).
         'gamma': 0.9, # discount factor.
         'checkpoint_interval': 5_000, # period at which checkpoints are saved.
         'num_rollouts': 5, # number of rollouts to execute per checkpoint.
@@ -84,10 +85,8 @@ RUN_ARGS = {
             'target_update_period': 1_000,
             'learning_rate': 1e-03,
             'max_gradient_norm': None,
-            'hidden_layers': [20,40,20],
+            'hidden_layers': [64,128,64],
             'alpha': 1.0,
-            # 'empirical_policy_hidden_layers': [64,128,64],
-            # 'empirical_policy_num_learning_steps': 50_000,
         }
 
     },

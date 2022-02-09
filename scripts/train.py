@@ -69,47 +69,6 @@ def train_run(run_args):
 
     elif args['algo'] == 'offline_cql':
 
-        """ # Calculate empirical policy.
-        empirical_policy_network = tf2_layers.create_MLP(env_spec,
-            args['offline_cql_args']['empirical_policy_hidden_layers'])
-        tf2_utils.create_variables(empirical_policy_network, [env_spec.observations])
-        bc_learner = BCLearner(network=empirical_policy_network,
-                            learning_rate=1e-04,
-                            dataset=dataset,
-                            logger=loggers.TerminalLogger(label='bc_logger',
-                                time_delta=2., print_fn=print),
-                            checkpoint=False)
-
-        evaluator_network = snt.Sequential([
-            empirical_policy_network,
-            lambda q: trfl.epsilon_greedy(q, epsilon=0.0).sample(),
-        ])
-        # Create the actor which defines how we take actions.
-        evaluation_network = actors.FeedForwardActor(evaluator_network)
-        eval_loop = acme.EnvironmentLoop(
-            environment=env,
-            actor=evaluation_network,
-            logger=loggers.TerminalLogger('bc-evaluation', time_delta=2., print_fn=print))
-
-        print('Fitting empirical policy network to dataset.')
-        for step in tqdm(range(args['offline_cql_args']['empirical_policy_num_learning_steps'])):
-            bc_learner.step()
-            if step % 500 == 0:
-                eval_loop.run(10)
-
-        softmax_network = snt.Sequential([
-            empirical_policy_network,
-            lambda v: tf.nn.softmax(v),
-        ])
-
-        test_actor = actors.FeedForwardActor(softmax_network)
-        state = env.get_observation(0)
-        print(test_actor.select_action(np.array(state, dtype=np.float32)))
-        state = env.get_observation(15)
-        print(test_actor.select_action(np.array(state, dtype=np.float32)))
-        state = env.get_observation(67)
-        print(test_actor.select_action(np.array(state, dtype=np.float32))) """
-
         network = tf2_layers.create_MLP(env_spec,
             args['offline_cql_args']['hidden_layers'])
         offline_agent = OfflineCQL(

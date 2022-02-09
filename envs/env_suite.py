@@ -3,7 +3,7 @@ import numpy as np
 from gym.envs.classic_control import MountainCarEnv, CartPoleEnv
 from gym.wrappers.time_limit import TimeLimit
 
-from envs import grid_env, grid_spec, multipath
+from envs import grid_env, grid_spec, multipath, pendulum
 from envs import env_discretizer
 
 
@@ -29,7 +29,7 @@ GRID_ENVS = {
 
 
 # Environments suite.
-ENV_KEYS = ['gridEnv1', 'gridEnv2', 'multiPathEnv', 'mountaincar', 'cartpole']
+ENV_KEYS = ['gridEnv1', 'gridEnv2', 'multiPathEnv', 'mountaincar', 'pendulum', 'cartpole']
 def get_env(name):
 
     if name in ('gridEnv1', 'gridEnv2'):
@@ -49,7 +49,13 @@ def get_env(name):
         env = TimeLimit(env, max_episode_steps=200)
         return env, None
 
+    elif name == 'pendulum':
+        env = env_discretizer.get_env(pendulum.PendulumEnv)(dim_bins=50)
+        env = TimeLimit(env, max_episode_steps=200)
+        return env, None
+
     elif name == 'cartpole':
+        raise NotImplementedError
         env = env_discretizer.get_env(CartPoleEnv)(dim_bins=50)
         env = TimeLimit(env, max_episode_steps=200)
         return env, None

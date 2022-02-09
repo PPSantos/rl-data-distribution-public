@@ -20,9 +20,6 @@ def get_env(env):
                 self.bins_size.append((self.observation_space.high[s_dim] - \
                                     self.observation_space.low[s_dim]) / dim_bins)
 
-            #print(self.bins)
-            #print(self.bins_size)
-
         def _get_continuous_state(self, state):
             continuous_state = ()
             remainder = state

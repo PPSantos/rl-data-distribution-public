@@ -9,7 +9,7 @@ from algos.q_learning import QLearning
 
 DEFAULT_ARGS = {
 
-    'env_name': 'mountaincar',
+    'env_name': 'pendulum',
 
     'gamma': 0.9, # discount factor.
 
