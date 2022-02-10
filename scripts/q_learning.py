@@ -11,7 +11,7 @@ DEFAULT_ARGS = {
 
     'env_name': 'pendulum',
 
-    'gamma': 0.9, # discount factor.
+    'gamma': 0.99, # discount factor.
 
     'learning_steps': 400_000, # number of learning steps.
 
