@@ -95,8 +95,8 @@ EXP_IDS = [
 # pendulum
 ###############
 # DQN. (ACME branch data).
-# Dirichlet. (deprecated data).
-# 'pendulum_offline_dqn_2022-02-10-02-15-32', 'pendulum_offline_dqn_2022-02-10-02-31-33', 'pendulum_offline_dqn_2022-02-10-02-47-23', 'pendulum_offline_dqn_2022-02-10-03-03-20', 'pendulum_offline_dqn_2022-02-10-03-19-07', 'pendulum_offline_dqn_2022-02-10-03-34-56', 'pendulum_offline_dqn_2022-02-10-03-50-49', 'pendulum_offline_dqn_2022-02-10-04-06-44', 'pendulum_offline_dqn_2022-02-10-04-22-44', 'pendulum_offline_dqn_2022-02-10-04-38-43', 'pendulum_offline_dqn_2022-02-10-04-54-40', 'pendulum_offline_dqn_2022-02-10-05-10-35', 'pendulum_offline_dqn_2022-02-10-05-26-26', 'pendulum_offline_dqn_2022-02-10-05-42-21',
+# Dirichlet.
+'pendulum_offline_dqn_2022-02-11-00-59-47', 'pendulum_offline_dqn_2022-02-11-01-14-50', 'pendulum_offline_dqn_2022-02-11-01-29-50', 'pendulum_offline_dqn_2022-02-11-01-44-52', 'pendulum_offline_dqn_2022-02-11-01-59-54', 'pendulum_offline_dqn_2022-02-11-02-14-56', 'pendulum_offline_dqn_2022-02-11-02-30-50', 'pendulum_offline_dqn_2022-02-11-02-45-52', 'pendulum_offline_dqn_2022-02-11-03-00-49', 'pendulum_offline_dqn_2022-02-11-03-15-52', 'pendulum_offline_dqn_2022-02-11-03-30-54', 'pendulum_offline_dqn_2022-02-11-03-45-53', 'pendulum_offline_dqn_2022-02-11-04-00-52', 'pendulum_offline_dqn_2022-02-11-04-15-52',
 # Eps-greedy.
 
 # Boltzmann.

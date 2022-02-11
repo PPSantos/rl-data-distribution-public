@@ -21,7 +21,7 @@ DEFAULT_ARGS = {
     'alpha_steps': 400_000, # in number of learning steps.
 
     # Replay buffer parameters.
-    'replay_buffer_size': 200_000,
+    'replay_buffer_size': 500_000,
     'replay_buffer_batch_size': 128,
 
 }

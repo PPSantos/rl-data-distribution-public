@@ -4,7 +4,7 @@ from scripts.run import RUN_ARGS
 from scripts.run import main as run
 
 ###########################################################################
-ENVS = ['gridEnv1', 'gridEnv2']
+ENVS = ['pendulum']
 
 ###########################################################################
 
@@ -50,7 +50,7 @@ if __name__ == "__main__":
             exp_id = run(run_args)
             exp_ids.append(exp_id)
 
-            print('Exp. ids:', exp_ids)
+            print('Exp. ids:', exp_ids) """
 
     # Epsilon-greedy dataset: vary epsilon parameter.
     run_args = RUN_ARGS
@@ -121,8 +121,9 @@ if __name__ == "__main__":
             exp_id = run(run_args)
             exp_ids.append(exp_id)
 
-            print('Exp. ids:', exp_ids) """
+            print('Exp. ids:', exp_ids)
 
+    exit()
 
     """
         CQL.

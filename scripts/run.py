@@ -18,11 +18,11 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data
 
 ###########################################################################
 ORACLE_Q_VALS_DATA = {
-    'gridEnv1': 'gridEnv1_q_learning_2022-02-02-19-07-14',
-    'gridEnv2': 'gridEnv2_val_iter_2022-01-23-19-56-06',
-    'multiPathEnv': 'multiPathEnv_val_iter_2022-01-23-18-46-25',
-    'mountaincar': 'mountaincar_q_learning_2022-02-02-19-31-29',
-    'pendulum': 'pendulum_q_learning_2022-02-09-15-59-02',
+    'gridEnv1': 'gridEnv1_q_learning_2022-02-02-19-07-14', # gamma = 0.9
+    'gridEnv2': 'gridEnv2_val_iter_2022-01-23-19-56-06', # gamma = 0.9
+    'multiPathEnv': 'multiPathEnv_val_iter_2022-01-23-18-46-25', # gamma = 0.9
+    'mountaincar': 'mountaincar_q_learning_2022-02-02-19-31-29', # gamma = 0.99
+    'pendulum': 'pendulum_q_learning_2022-02-11-00-22-09', # gamma = 0.99
 }
 
 RUN_ARGS = {
@@ -66,7 +66,7 @@ RUN_ARGS = {
         'num_processors': 4,
         'algo': 'offline_dqn',
         'num_steps': 200_000, # number of learning steps (num. batch updates).
-        'gamma': 0.9, # discount factor.
+        'gamma': 0.99, # discount factor.
         'checkpoint_interval': 5_000, # period at which checkpoints are saved.
         'num_rollouts': 5, # number of rollouts to execute per checkpoint.
 
