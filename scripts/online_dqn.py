@@ -26,10 +26,14 @@ DEFAULT_TRAIN_ARGS = {
     'num_processors': 4,
     'num_runs': 4,
 
-    'env_name': 'mountaincar',
+    'env_name': 'cartpole',
 
     'num_steps': 200_000,
     'num_rollouts': 5,
+
+    # Whether to store environment observations
+    # and display histogram plot.
+    'compute_observations_histograms': True,
 
     'dqn_args': {
         'batch_size': 100,
@@ -47,7 +51,7 @@ DEFAULT_TRAIN_ARGS = {
         'max_gradient_norm': None,
         'checkpoint': True,
         'checkpoint_interval': 5_000,
-        'hidden_layers': [32,64,32],
+        'hidden_layers': [64,128,64],
     }
 }
 
@@ -85,11 +89,28 @@ def train_run(run_args):
     )
 
     env_loop = EnvironmentLoop(env, agent,
+            store_observations=args['compute_observations_histograms'],
             logger=loggers.TerminalLogger(label='env_logger', 
                             time_delta=2., print_fn=print))
     print('Started training.')
     env_loop.run(num_steps=args['num_steps'])
     print('Finished training.')
+
+    if args['compute_observations_histograms']:
+        import matplotlib.pyplot as plt
+
+        # Get environment observations.
+        observations = env_loop.get_observations()
+
+        # Plot histogtrams for each observation dimension.
+        for obs_dim in range(observations.shape[1]):
+            obs_dim_min = min(observations[:,obs_dim])
+            obs_dim_max = max(observations[:,obs_dim])
+            print(f'dim_obs={obs_dim}, min={obs_dim_min}, max={obs_dim_max}')
+            plt.hist(observations[:,obs_dim], bins=50)
+            plt.ylabel('Count')
+            plt.xlabel(f'obs_dim={obs_dim}')
+            plt.show()
 
     # Use checkpoints to calculate evaluation metrics.
     chkpt_files = glob.glob(f"{args['exp_path']}/{time_delay}/*.index")

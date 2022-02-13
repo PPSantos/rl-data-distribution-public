@@ -42,6 +42,7 @@ class EnvironmentLoop(core.Worker):
       counter: Optional[counting.Counter] = None,
       logger: Optional[loggers.Logger] = None,
       should_update: bool = True,
+      store_observations: bool = False,
       label: str = 'environment_loop',
   ):
     # Internalize agent and environment.
@@ -50,6 +51,10 @@ class EnvironmentLoop(core.Worker):
     self._counter = counter or counting.Counter()
     self._logger = logger or loggers.make_default_logger(label)
     self._should_update = should_update
+    self._store_observations = store_observations
+    
+    if self._store_observations:
+      self._observations = []
 
   def run_episode(self, max_steps) -> loggers.LoggingData:
     """Run one episode.
@@ -76,6 +81,10 @@ class EnvironmentLoop(core.Worker):
 
     # Run an episode.
     while (not timestep.last()) and episode_steps < max_steps :
+
+      if self._store_observations:
+        self._observations.append(timestep.observation)
+
       # Generate an action from the agent's policy and step the environment.
       action = self._actor.select_action(timestep.observation)
       timestep = self._environment.step(action)
@@ -146,6 +155,9 @@ class EnvironmentLoop(core.Worker):
         # Log the given episode results.
         self._logger.write(result)
 
+  def get_observations(self):
+    if self._observations:
+      return np.array(self._observations)
 
 def _generate_zeros_from_spec(spec: specs.Array) -> np.ndarray:
   return np.zeros(spec.shape, spec.dtype)

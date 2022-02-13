@@ -1,9 +1,9 @@
 import numpy as np
 
-from gym.envs.classic_control import MountainCarEnv, CartPoleEnv
+from gym.envs.classic_control import MountainCarEnv
 from gym.wrappers.time_limit import TimeLimit
 
-from envs import grid_env, grid_spec, multipath, pendulum
+from envs import grid_env, grid_spec, multipath, pendulum, cartpole
 from envs import env_discretizer
 
 
@@ -55,8 +55,7 @@ def get_env(name):
         return env, None
 
     elif name == 'cartpole':
-        raise NotImplementedError
-        env = env_discretizer.get_env(CartPoleEnv)(dim_bins=50)
+        env = env_discretizer.get_env(cartpole.CartPoleEnv)(dim_bins=50)
         env = TimeLimit(env, max_episode_steps=200)
         return env, None
 
