@@ -142,7 +142,9 @@ graph1_section = html.Div(
                                     dcc.Dropdown(
                                         id='graph1-x-axis-picker',
                                         options=[{'label': 'Dataset entropy', 'value': 'dataset_entropy'},
-                                                {'label':'Dataset coverage', 'value': 'dataset_coverage'}],
+                                                {'label':'Dataset coverage', 'value': 'dataset_coverage'},
+                                                {'label':'KL dist', 'value': 'kl_dist'},
+                                                {'label':'Chi dist', 'value': 'chi_dist'}],
                                         value='dataset_entropy',
                                         multi=False,
                                         style={'color': '#3b505e'},
@@ -209,6 +211,10 @@ def callback_graph1(env, algorithms, dataset_types,
         x_axis_lbl = "Dataset entropy"
     elif x_axis == "dataset_coverage":
         x_axis_lbl = "Dataset coverage"
+    elif x_axis == "kl_dist":
+        x_axis_lbl = "KL distance"
+    elif x_axis == "chi_dist":
+        x_axis_lbl = "Chi-square distance"
     else:
         raise ValueError("Unknown X-axis type.")
 

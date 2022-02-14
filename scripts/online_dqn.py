@@ -47,7 +47,7 @@ DEFAULT_TRAIN_ARGS = {
         'epsilon_final': 0.01,
         'epsilon_schedule_timesteps': 200_000,
         'learning_rate': 1e-03,
-        'discount': 0.9,
+        'discount': 0.99,
         'max_gradient_norm': None,
         'checkpoint': True,
         'checkpoint_interval': 5_000,

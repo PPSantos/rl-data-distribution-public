@@ -5,6 +5,7 @@ import tarfile
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 # Path to folder containing data files.
 DATA_FOLDER_PATH_1 = str(pathlib.Path(__file__).parent.parent.parent.absolute()) + '/data/'
@@ -13,6 +14,15 @@ PLOTS_FOLDER_PATH_1 = str(pathlib.Path(__file__).parent.parent.parent.absolute()
 # Path to folder containing data files (second folder).
 DATA_FOLDER_PATH_2 = str(pathlib.Path(__file__).parent.parent.parent.absolute()) + '/data/ilu_server/'
 PLOTS_FOLDER_PATH_2 = str(pathlib.Path(__file__).parent.parent.parent.absolute()) + '/analysis/plots/ilu_server/'
+
+# Sampling dists. induced by optimal policies of the MDP.
+OPTIMAL_SAMPLING_DISTS = {
+    'gridEnv1': 'gridEnv1_sampling_dist_2022-02-14-01-09-51',
+    'gridEnv2': 'gridEnv2_sampling_dist_2022-02-14-01-27-08',
+    'multiPathEnv': 'multiPathEnv_sampling_dist_2022-02-14-01-28-41',
+    'mountaincar': 'mountaincar_sampling_dist_2022-02-14-01-29-14',
+    'pendulum': 'pendulum_sampling_dist_2022-02-14-01-30-17',
+}
 
 EXP_IDS = [
 ###############
@@ -113,8 +123,23 @@ EXP_IDS = [
 ]
 
 
+def chi_div(x, y):
+    y = y + 1e-06
+    return np.dot(y, (x/y)**2 - 1)
+
 def data_to_csv(exp_ids):
+
     print('Parsing data to csv file.')
+
+    # Open sampling dists from optimal policies.
+    opt_sampling_dists = {}
+    for env_id, sampling_dist_id in OPTIMAL_SAMPLING_DISTS.items():
+        optimal_dist_path = DATA_FOLDER_PATH_1 + sampling_dist_id + '/data.json'
+        with open(optimal_dist_path, 'r') as f:
+            data = json.load(f)
+            d = np.array(json.loads(data)['sampling_dists'])
+        f.close()
+        opt_sampling_dists[env_id] = d
 
     df_rows = []
 
@@ -185,6 +210,11 @@ def data_to_csv(exp_ids):
 
         info_text = f"Exp-id: {row_data['id']}<br>Environment: {row_data['env_id']}<br>Algorithm: {row_data['algo_id']}<br>Dataset type: {row_data['dataset_type_id']}{dataset_type_arg}<br>Dataset coverage: {row_data['dataset_coverage']:.2f}<br>Dataset entropy: {row_data['dataset_entropy']:.2f}<br>Q-values avg error: {row_data['qvals_avg_error']:.2f}<br>Q-values summed error: {row_data['qvals_summed_error']:.2f}<br>Rollouts rewards: {row_data['rollouts_rewards_final']:.2f}"
         row_data['info_text'] = info_text
+
+        row_data['kl_dist'] = np.min([stats.entropy(optimal_dist, np.array(dataset_info['dataset_dist']) + 1e-06)
+                        for optimal_dist in opt_sampling_dists[args['env_name']]])
+        row_data['chi_dist'] = np.min([chi_div(optimal_dist, np.array(dataset_info['dataset_dist']))
+                        for optimal_dist in opt_sampling_dists[args['env_name']]])
 
         df_rows.append(row_data)
 

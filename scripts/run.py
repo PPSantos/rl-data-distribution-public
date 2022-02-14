@@ -23,6 +23,7 @@ ORACLE_Q_VALS_DATA = {
     'multiPathEnv': 'multiPathEnv_val_iter_2022-01-23-18-46-25', # gamma = 0.9
     'mountaincar': 'mountaincar_q_learning_2022-02-02-19-31-29', # gamma = 0.99
     'pendulum': 'pendulum_q_learning_2022-02-11-00-22-09', # gamma = 0.99
+    'cartpole': 'cartpole_q_learning_2022-02-13-17-59-35', # gamma = 0.99
 }
 
 RUN_ARGS = {
