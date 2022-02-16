@@ -1,5 +1,3 @@
-import numpy as np
-
 from gym.envs.classic_control import MountainCarEnv
 from gym.wrappers.time_limit import TimeLimit
 

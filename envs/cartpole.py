@@ -32,7 +32,7 @@ class CartPoleEnv(gym.Env):
                 self.x_threshold * 2,
                 5.0, # manually enforced.
                 self.theta_threshold_radians * 2,
-                5.0, # manually enforced.
+                4.0, # manually enforced.
             ],
             dtype=np.float32,
         )
