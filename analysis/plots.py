@@ -114,9 +114,6 @@ def main(exp_id, val_iter_exp):
     q_vals_folder_path = PLOTS_FOLDER_PATH + exp_id + '/Q-values'
     os.makedirs(q_vals_folder_path, exist_ok=True)
 
-    # Get args file (assumes all experiments share the same arguments).
-
-
     # Load optimal policy/Q-values.
     val_iter_path = DATA_FOLDER_PATH + val_iter_exp
     print(f"Opening experiment {val_iter_exp}")
