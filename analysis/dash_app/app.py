@@ -24,7 +24,7 @@ PLOTS_FOLDER_PATH_1 = '/home/pedrosantos/git/rl-data-distribution/analysis/plots
 PLOTS_FOLDER_PATH_2 = '/home/pedrosantos/git/rl-data-distribution/analysis/plots/ilu_server/'
 ###########################################################################
 
-ENVS = ['gridEnv1', 'gridEnv2', 'multiPathEnv', 'mountaincar', 'pendulum']
+ENVS = ['gridEnv1', 'gridEnv2', 'multiPathEnv', 'mountaincar', 'pendulum', 'cartpole']
 ALGORITHMS = ['offline_dqn', 'offline_cql']
 DATASET_TYPES = ['dirichlet', 'eps-greedy', 'boltzmann']
 ALGO_COLORS= {'offline_dqn': '#ef553b', 'offline_cql': '#636efa'} # '#4fcc96'
@@ -279,6 +279,8 @@ def callback_graph1(env, algorithms, dataset_types,
     figure = go.Figure(data=traces, layout=layout)
     if y_axis == "qvals_avg_error":
         figure.update_layout(yaxis_type="log")
+    if x_axis == "chi_dist":
+        figure.update_layout(xaxis_type="log")
 
     return figure
 

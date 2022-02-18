@@ -22,6 +22,7 @@ OPTIMAL_SAMPLING_DISTS = {
     'multiPathEnv': 'multiPathEnv_sampling_dist_2022-02-14-01-28-41',
     'mountaincar': 'mountaincar_sampling_dist_2022-02-14-01-29-14',
     'pendulum': 'pendulum_sampling_dist_2022-02-14-01-30-17',
+    'cartpole': 'cartpole_sampling_dist_2022-02-18-10-32-24', # TODO.
 }
 
 EXP_IDS = [
@@ -120,11 +121,28 @@ EXP_IDS = [
 # Boltzmann.
 'pendulum_offline_cql_2022-02-12-19-52-46', 'pendulum_offline_cql_2022-02-12-20-07-54', 'pendulum_offline_cql_2022-02-12-20-23-01', 'pendulum_offline_cql_2022-02-12-20-38-09', 'pendulum_offline_cql_2022-02-12-20-53-15', 'pendulum_offline_cql_2022-02-12-21-08-24', 'pendulum_offline_cql_2022-02-12-21-23-31', 'pendulum_offline_cql_2022-02-12-21-38-40', 'pendulum_offline_cql_2022-02-12-21-53-48', 'pendulum_offline_cql_2022-02-12-22-08-51', 'pendulum_offline_cql_2022-02-12-22-24-00', 'pendulum_offline_cql_2022-02-12-22-39-09', 'pendulum_offline_cql_2022-02-12-22-54-17', 'pendulum_offline_cql_2022-02-12-23-09-24', 'pendulum_offline_cql_2022-02-12-23-24-31', 'pendulum_offline_cql_2022-02-12-23-39-35', 'pendulum_offline_cql_2022-02-12-23-54-40', 'pendulum_offline_cql_2022-02-13-00-09-45', 'pendulum_offline_cql_2022-02-13-00-24-59', 'pendulum_offline_cql_2022-02-13-00-40-05', 'pendulum_offline_cql_2022-02-13-00-55-09', 'pendulum_offline_cql_2022-02-13-01-10-19', 'pendulum_offline_cql_2022-02-13-01-25-31', 'pendulum_offline_cql_2022-02-13-01-40-37', 'pendulum_offline_cql_2022-02-13-01-55-41', 'pendulum_offline_cql_2022-02-13-02-10-52', 'pendulum_offline_cql_2022-02-13-02-26-01', 'pendulum_offline_cql_2022-02-13-02-41-08', 'pendulum_offline_cql_2022-02-13-02-56-18', 'pendulum_offline_cql_2022-02-13-03-11-25', 'pendulum_offline_cql_2022-02-13-03-26-37', 'pendulum_offline_cql_2022-02-13-03-41-45', 'pendulum_offline_cql_2022-02-13-03-56-50', 'pendulum_offline_cql_2022-02-13-04-12-01', 'pendulum_offline_cql_2022-02-13-04-27-10', 'pendulum_offline_cql_2022-02-13-04-42-22', 'pendulum_offline_cql_2022-02-13-04-57-27', 'pendulum_offline_cql_2022-02-13-05-12-30', 'pendulum_offline_cql_2022-02-13-05-28-00', 'pendulum_offline_cql_2022-02-13-05-43-11', 'pendulum_offline_cql_2022-02-13-05-58-19', 'pendulum_offline_cql_2022-02-13-06-13-49',
 
+###############
+# cartpole
+###############
+# DQN. (ACME branch data).
+# Dirichlet.
+
+# Eps-greedy.
+'cartpole_offline_dqn_2022-02-16-16-01-33', 'cartpole_offline_dqn_2022-02-16-17-58-01', 'cartpole_offline_dqn_2022-02-16-19-45-28', 'cartpole_offline_dqn_2022-02-16-21-34-11', 'cartpole_offline_dqn_2022-02-16-23-23-08', 'cartpole_offline_dqn_2022-02-17-01-12-50', 'cartpole_offline_dqn_2022-02-17-03-02-21', 'cartpole_offline_dqn_2022-02-17-04-51-51', 'cartpole_offline_dqn_2022-02-17-06-41-31', 'cartpole_offline_dqn_2022-02-17-08-30-47', 'cartpole_offline_dqn_2022-02-17-10-20-13', 'cartpole_offline_dqn_2022-02-17-12-09-40', 'cartpole_offline_dqn_2022-02-17-13-58-47', 'cartpole_offline_dqn_2022-02-17-15-49-09', 'cartpole_offline_dqn_2022-02-17-17-39-24', 'cartpole_offline_dqn_2022-02-17-19-29-07', 'cartpole_offline_dqn_2022-02-17-21-19-39', 'cartpole_offline_dqn_2022-02-17-23-11-09', 'cartpole_offline_dqn_2022-02-18-01-02-05', 'cartpole_offline_dqn_2022-02-18-02-52-03', 'cartpole_offline_dqn_2022-02-18-04-42-03', 'cartpole_offline_dqn_2022-02-18-06-32-16',
+# Boltzmann.
+
+# CQL. (ACME branch data).
+# Dirichlet.
+
+# Eps-greedy.
+
+# Boltzmann.
+
 ]
 
 
 def chi_div(x, y):
-    y = y + 1e-06
+    y = y + 1e-04
     return np.dot(y, (x/y)**2 - 1)
 
 def data_to_csv(exp_ids):

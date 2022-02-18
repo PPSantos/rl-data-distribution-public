@@ -104,26 +104,23 @@ def main():
                         (DATA['env_id']==env_id) &
                         (DATA['algo_id']=='offline_dqn') &
                         (DATA['dataset_type_id'].isin(['eps-greedy', 'boltzmann'])) &
-                        (DATA['force_dataset_coverage']==False)
+                        (DATA['force_dataset_coverage']==True)
                     ]
-
         Y = filtered_df['rollouts_rewards_final'].to_numpy()
         Y_normalized = (Y - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id])
-        X = filtered_df['dataset_entropy'].to_numpy()
-        X_normalized = X / MAX_ENTROPY[env_id]
-        filtered_df['normalized_dataset_entropy'] = X_normalized
         filtered_df['normalized_rollouts_rewards_final'] = Y_normalized
 
-        bins = np.linspace(min(filtered_df['normalized_dataset_entropy']),
-                    max(filtered_df['normalized_dataset_entropy']), 7)
-        bins_group = pd.cut(filtered_df['normalized_dataset_entropy'], bins)
-        grouped = filtered_df.groupby(bins_group)['normalized_rollouts_rewards_final'].agg(['mean', 'count', 'std'])
+        X = filtered_df['kl_dist']
 
         # Points.
         ax = axs[axs_idxs[env_id][0],axs_idxs[env_id][1]]
-        p_1 = ax.scatter(X_normalized, Y_normalized, alpha=0.25)
+        p_1 = ax.scatter(X, Y_normalized, alpha=0.25)
 
         # Lines.
+        bins = np.linspace(min(filtered_df['kl_dist']),
+                    max(filtered_df['kl_dist']), 7)
+        bins_group = pd.cut(filtered_df['kl_dist'], bins)
+        grouped = filtered_df.groupby(bins_group)['normalized_rollouts_rewards_final'].agg(['mean', 'count'])
         grouped = grouped.to_numpy()
         Y = grouped[:,0]
         mask = np.isfinite(Y)
@@ -139,26 +136,23 @@ def main():
                         (DATA['env_id']==env_id) &
                         (DATA['algo_id']=='offline_cql') &
                         (DATA['dataset_type_id'].isin(['eps-greedy', 'boltzmann'])) &
-                        (DATA['force_dataset_coverage']==False)
+                        (DATA['force_dataset_coverage']==True)
                     ]
-
         Y = filtered_df['rollouts_rewards_final'].to_numpy()
         Y_normalized = (Y - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id])
-        X = filtered_df['dataset_entropy'].to_numpy()
-        X_normalized = X / MAX_ENTROPY[env_id]
-        filtered_df['normalized_dataset_entropy'] = X_normalized
         filtered_df['normalized_rollouts_rewards_final'] = Y_normalized
 
-        bins = np.linspace(min(filtered_df['normalized_dataset_entropy']),
-                    max(filtered_df['normalized_dataset_entropy']), 7)
-        bins_group = pd.cut(filtered_df['normalized_dataset_entropy'], bins)
-        grouped = filtered_df.groupby(bins_group)['normalized_rollouts_rewards_final'].agg(['mean', 'count', 'std'])
+        X = filtered_df['kl_dist']
 
         # Points.
         ax = axs[axs_idxs[env_id][0],axs_idxs[env_id][1]]
-        p_2 = ax.scatter(X_normalized, Y_normalized, alpha=0.25)
+        p_2 = ax.scatter(X, Y_normalized, alpha=0.25)
 
         # Lines.
+        bins = np.linspace(min(filtered_df['kl_dist']),
+                    max(filtered_df['kl_dist']), 7)
+        bins_group = pd.cut(filtered_df['kl_dist'], bins)
+        grouped = filtered_df.groupby(bins_group)['normalized_rollouts_rewards_final'].agg(['mean', 'count'])
         grouped = grouped.to_numpy()
         Y = grouped[:,0]
         mask = np.isfinite(Y)
@@ -167,21 +161,17 @@ def main():
         bins_to_plot = bins_to_plot[mask]
         p_2, = ax.plot(bins_to_plot, Y, zorder=1)
 
-        ax.set_ylabel('Norm. reward')
-        ax.set_xlabel(r'$\mathcal{H}(\mu) / \mathcal{H}(\mathcal{U})$')
-
-        ax.set_xlim(-0.05, 1.05)
-        ax.set_ylim(-0.05, 1.05)
+        if env_id in ['gridEnv1', 'pendulum']:
+            ax.set_ylabel('Norm. reward')
+        if env_id in ['mountaincar', 'pendulum', 'cartpole']:
+            ax.set_xlabel(r'$\min_{\pi^*}\mathcal{D}_f(d_{\pi^*}||\mu$)')
 
         ax.set_title(env_lbl)
 
-    for ax in axs.flat:
-        ax.label_outer()
-
     fig.legend((p_1, p_2), ('DQN', 'CQL'), bbox_to_anchor=(0.5, 0., 0.2, 0.025), ncol=2)
 
-    plt.savefig(f'{output_folder}/entropy_plot.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.savefig(f'{output_folder}/entropy_plot.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'{output_folder}/distance_plot.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig(f'{output_folder}/distance_plot.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
 
 if __name__ == '__main__':
     main()

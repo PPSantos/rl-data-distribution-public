@@ -18,12 +18,13 @@ from envs import env_suite
 
 
 #################################################################
-ENV_NAME = 'pendulum'
+ENV_NAME = 'cartpole'
 # QVALS_EXP_ID = 'gridEnv1_offline_dqn_2022-02-06-02-14-43'
 # QVALS_EXP_ID = 'gridEnv2_offline_dqn_2022-01-22-15-38-44'
 # QVALS_EXP_ID = 'multiPathEnv_offline_dqn_2022-01-24-03-06-12'
 # QVALS_EXP_ID = 'mountaincar_offline_dqn_2022-02-04-00-08-15'
-QVALS_EXP_ID = 'pendulum_offline_dqn_2022-02-11-02-30-50'
+# QVALS_EXP_ID = 'pendulum_offline_dqn_2022-02-11-02-30-50'
+QVALS_EXP_ID = 'cartpole_offline_dqn_2022-02-17-21-19-39' # TODO.
 EPSILON = 0.0
 #################################################################
 
