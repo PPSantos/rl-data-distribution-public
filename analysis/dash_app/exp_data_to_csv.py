@@ -22,7 +22,7 @@ OPTIMAL_SAMPLING_DISTS = {
     'multiPathEnv': 'multiPathEnv_sampling_dist_2022-02-14-01-28-41',
     'mountaincar': 'mountaincar_sampling_dist_2022-02-14-01-29-14',
     'pendulum': 'pendulum_sampling_dist_2022-02-14-01-30-17',
-    'cartpole': 'cartpole_sampling_dist_2022-02-18-10-32-24', # TODO.
+    'cartpole': 'cartpole_sampling_dist_2022-02-24-12-11-20',
 }
 
 EXP_IDS = [
@@ -126,18 +126,19 @@ EXP_IDS = [
 ###############
 # DQN. (ACME branch data).
 # Dirichlet.
-
+# TODO.
 # Eps-greedy.
 'cartpole_offline_dqn_2022-02-16-16-01-33', 'cartpole_offline_dqn_2022-02-16-17-58-01', 'cartpole_offline_dqn_2022-02-16-19-45-28', 'cartpole_offline_dqn_2022-02-16-21-34-11', 'cartpole_offline_dqn_2022-02-16-23-23-08', 'cartpole_offline_dqn_2022-02-17-01-12-50', 'cartpole_offline_dqn_2022-02-17-03-02-21', 'cartpole_offline_dqn_2022-02-17-04-51-51', 'cartpole_offline_dqn_2022-02-17-06-41-31', 'cartpole_offline_dqn_2022-02-17-08-30-47', 'cartpole_offline_dqn_2022-02-17-10-20-13', 'cartpole_offline_dqn_2022-02-17-12-09-40', 'cartpole_offline_dqn_2022-02-17-13-58-47', 'cartpole_offline_dqn_2022-02-17-15-49-09', 'cartpole_offline_dqn_2022-02-17-17-39-24', 'cartpole_offline_dqn_2022-02-17-19-29-07', 'cartpole_offline_dqn_2022-02-17-21-19-39', 'cartpole_offline_dqn_2022-02-17-23-11-09', 'cartpole_offline_dqn_2022-02-18-01-02-05', 'cartpole_offline_dqn_2022-02-18-02-52-03', 'cartpole_offline_dqn_2022-02-18-04-42-03', 'cartpole_offline_dqn_2022-02-18-06-32-16',
 # Boltzmann.
+'cartpole_offline_dqn_2022-02-19-20-33-04', 'cartpole_offline_dqn_2022-02-19-21-44-59', 'cartpole_offline_dqn_2022-02-19-22-56-50', 'cartpole_offline_dqn_2022-02-20-00-08-27', 'cartpole_offline_dqn_2022-02-20-01-19-56', 'cartpole_offline_dqn_2022-02-20-02-32-01', 'cartpole_offline_dqn_2022-02-20-03-43-37', 'cartpole_offline_dqn_2022-02-20-04-55-41', 'cartpole_offline_dqn_2022-02-20-06-07-20', 'cartpole_offline_dqn_2022-02-20-07-19-16', 'cartpole_offline_dqn_2022-02-20-08-31-04', 'cartpole_offline_dqn_2022-02-20-09-42-50', 'cartpole_offline_dqn_2022-02-20-10-54-10', 'cartpole_offline_dqn_2022-02-20-12-05-15', 'cartpole_offline_dqn_2022-02-20-13-16-05', 'cartpole_offline_dqn_2022-02-20-14-27-03', 'cartpole_offline_dqn_2022-02-20-15-38-00', 'cartpole_offline_dqn_2022-02-20-16-49-10', 'cartpole_offline_dqn_2022-02-20-18-00-17', 'cartpole_offline_dqn_2022-02-20-19-11-28', 'cartpole_offline_dqn_2022-02-20-20-22-18', 'cartpole_offline_dqn_2022-02-20-21-33-12', 'cartpole_offline_dqn_2022-02-20-22-45-50', 'cartpole_offline_dqn_2022-02-20-23-59-00', 'cartpole_offline_dqn_2022-02-21-01-11-28', 'cartpole_offline_dqn_2022-02-21-02-23-39', 'cartpole_offline_dqn_2022-02-21-03-35-58', 'cartpole_offline_dqn_2022-02-21-04-48-23', 'cartpole_offline_dqn_2022-02-21-06-01-15', 'cartpole_offline_dqn_2022-02-21-07-13-27', 'cartpole_offline_dqn_2022-02-21-08-25-45', 'cartpole_offline_dqn_2022-02-21-09-38-15', 'cartpole_offline_dqn_2022-02-21-10-50-31', 'cartpole_offline_dqn_2022-02-21-12-03-19', 'cartpole_offline_dqn_2022-02-21-13-16-05', 'cartpole_offline_dqn_2022-02-21-14-28-57', 'cartpole_offline_dqn_2022-02-21-15-41-37', 'cartpole_offline_dqn_2022-02-21-16-54-09', 'cartpole_offline_dqn_2022-02-21-18-06-48', 'cartpole_offline_dqn_2022-02-21-19-19-53', 'cartpole_offline_dqn_2022-02-21-20-32-26', 'cartpole_offline_dqn_2022-02-21-21-45-13',
 
 # CQL. (ACME branch data).
 # Dirichlet.
-
+# TODO.
 # Eps-greedy.
-
+'cartpole_offline_cql_2022-02-18-11-10-36', 'cartpole_offline_cql_2022-02-18-12-23-47', 'cartpole_offline_cql_2022-02-18-13-45-08', 'cartpole_offline_cql_2022-02-18-14-58-32', 'cartpole_offline_cql_2022-02-18-16-11-01', 'cartpole_offline_cql_2022-02-18-17-23-45', 'cartpole_offline_cql_2022-02-18-18-36-43', 'cartpole_offline_cql_2022-02-18-19-49-50', 'cartpole_offline_cql_2022-02-18-21-02-29', 'cartpole_offline_cql_2022-02-18-22-15-09', 'cartpole_offline_cql_2022-02-18-23-27-58', 'cartpole_offline_cql_2022-02-19-00-40-30', 'cartpole_offline_cql_2022-02-19-01-53-29', 'cartpole_offline_cql_2022-02-19-03-06-23', 'cartpole_offline_cql_2022-02-19-04-19-14', 'cartpole_offline_cql_2022-02-19-05-32-29', 'cartpole_offline_cql_2022-02-19-06-45-40', 'cartpole_offline_cql_2022-02-19-07-58-48', 'cartpole_offline_cql_2022-02-19-09-11-53', 'cartpole_offline_cql_2022-02-19-10-24-51', 'cartpole_offline_cql_2022-02-19-11-37-50', 'cartpole_offline_cql_2022-02-19-12-50-34',
 # Boltzmann.
-
+'cartpole_offline_cql_2022-02-22-00-40-20', 'cartpole_offline_cql_2022-02-22-01-53-23', 'cartpole_offline_cql_2022-02-22-03-06-59', 'cartpole_offline_cql_2022-02-22-04-19-47', 'cartpole_offline_cql_2022-02-22-05-33-01', 'cartpole_offline_cql_2022-02-22-06-45-51', 'cartpole_offline_cql_2022-02-22-07-58-49', 'cartpole_offline_cql_2022-02-22-09-12-02', 'cartpole_offline_cql_2022-02-22-10-25-22', 'cartpole_offline_cql_2022-02-22-11-38-45', 'cartpole_offline_cql_2022-02-22-12-51-55', 'cartpole_offline_cql_2022-02-22-14-05-01', 'cartpole_offline_cql_2022-02-22-15-18-09', 'cartpole_offline_cql_2022-02-22-16-31-02', 'cartpole_offline_cql_2022-02-22-17-44-09', 'cartpole_offline_cql_2022-02-22-18-57-40', 'cartpole_offline_cql_2022-02-22-20-11-07', 'cartpole_offline_cql_2022-02-22-21-24-05', 'cartpole_offline_cql_2022-02-22-22-37-30', 'cartpole_offline_cql_2022-02-22-23-50-40', 'cartpole_offline_cql_2022-02-23-01-03-59', 'cartpole_offline_cql_2022-02-23-02-17-05', 'cartpole_offline_cql_2022-02-23-03-30-14', 'cartpole_offline_cql_2022-02-23-04-43-34', 'cartpole_offline_cql_2022-02-23-05-56-48', 'cartpole_offline_cql_2022-02-23-07-10-11', 'cartpole_offline_cql_2022-02-23-08-23-41', 'cartpole_offline_cql_2022-02-23-09-37-18', 'cartpole_offline_cql_2022-02-23-10-51-14', 'cartpole_offline_cql_2022-02-23-12-05-09', 'cartpole_offline_cql_2022-02-23-13-18-58', 'cartpole_offline_cql_2022-02-23-14-32-36', 'cartpole_offline_cql_2022-02-23-15-46-15', 'cartpole_offline_cql_2022-02-23-16-59-49', 'cartpole_offline_cql_2022-02-23-18-13-43', 'cartpole_offline_cql_2022-02-23-19-27-15', 'cartpole_offline_cql_2022-02-23-20-39-39', 'cartpole_offline_cql_2022-02-23-21-54-28', 'cartpole_offline_cql_2022-02-23-23-07-50', 'cartpole_offline_cql_2022-02-24-00-21-17', 'cartpole_offline_cql_2022-02-24-01-34-43', 'cartpole_offline_cql_2022-02-24-02-48-17',
 ]
 
 
@@ -226,13 +227,13 @@ def data_to_csv(exp_ids):
         num_non_zeros = (dataset_sa_counts != 0).sum()
         row_data['dataset_coverage'] = num_non_zeros / len(dataset_sa_counts)
 
-        info_text = f"Exp-id: {row_data['id']}<br>Environment: {row_data['env_id']}<br>Algorithm: {row_data['algo_id']}<br>Dataset type: {row_data['dataset_type_id']}{dataset_type_arg}<br>Dataset coverage: {row_data['dataset_coverage']:.2f}<br>Dataset entropy: {row_data['dataset_entropy']:.2f}<br>Q-values avg error: {row_data['qvals_avg_error']:.2f}<br>Q-values summed error: {row_data['qvals_summed_error']:.2f}<br>Rollouts rewards: {row_data['rollouts_rewards_final']:.2f}"
-        row_data['info_text'] = info_text
-
         row_data['kl_dist'] = np.min([stats.entropy(optimal_dist, np.array(dataset_info['dataset_dist']) + 1e-06)
                         for optimal_dist in opt_sampling_dists[args['env_name']]])
         row_data['chi_dist'] = np.min([chi_div(optimal_dist, np.array(dataset_info['dataset_dist']))
                         for optimal_dist in opt_sampling_dists[args['env_name']]])
+
+        info_text = f"Exp-id: {row_data['id']}<br>Environment: {row_data['env_id']}<br>Algorithm: {row_data['algo_id']}<br>Dataset type: {row_data['dataset_type_id']}{dataset_type_arg}<br>Dataset coverage: {row_data['dataset_coverage']:.2f}<br>Dataset entropy: {row_data['dataset_entropy']:.2f}<br>Q-values avg error: {row_data['qvals_avg_error']:.2f}<br>Q-values summed error: {row_data['qvals_summed_error']:.2f}<br>Rollouts rewards: {row_data['rollouts_rewards_final']:.2f}<br>KL-dist: {row_data['kl_dist']:.2f}"
+        row_data['info_text'] = info_text
 
         df_rows.append(row_data)
 

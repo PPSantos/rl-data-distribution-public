@@ -1,19 +1,12 @@
 import os
-import json
-import tarfile
 import numpy as np 
 import pandas as pd
-import scipy
-from scipy.spatial import distance
 import pathlib
-from datetime import datetime
 
 import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib
 plt.style.use('ggplot')
-
-from statsmodels.nonparametric.smoothers_lowess import lowess
 
 #################################################################
 ENVS_LABELS = {
@@ -104,7 +97,7 @@ def main():
                         (DATA['env_id']==env_id) &
                         (DATA['algo_id']=='offline_dqn') &
                         (DATA['dataset_type_id'].isin(['eps-greedy', 'boltzmann'])) &
-                        (DATA['force_dataset_coverage']==True)
+                        (DATA['force_dataset_coverage']==False)
                     ]
         Y = filtered_df['rollouts_rewards_final'].to_numpy()
         Y_normalized = (Y - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id])
@@ -136,7 +129,7 @@ def main():
                         (DATA['env_id']==env_id) &
                         (DATA['algo_id']=='offline_cql') &
                         (DATA['dataset_type_id'].isin(['eps-greedy', 'boltzmann'])) &
-                        (DATA['force_dataset_coverage']==True)
+                        (DATA['force_dataset_coverage']==False)
                     ]
         Y = filtered_df['rollouts_rewards_final'].to_numpy()
         Y_normalized = (Y - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id])

@@ -1,5 +1,4 @@
 import os
-import pathlib
 
 from PIL import Image
 
@@ -54,13 +53,11 @@ page_layout = []
 top_row_layout = html.Div(
             [
                 html.H2(
-                    "RL Data Distribution",
-                    id="title",
-                    className="eight columns",
-                    style={"margin-left": "3%"},
+                    "Understanding the impact of data distribution on Q-learning with function approximation",
+                    className="twelve columns",
                 ),
             ],
-            className="banner row",
+            className="row title-row",
         )
 page_layout.append(top_row_layout)
 
@@ -141,10 +138,12 @@ graph1_section = html.Div(
                                     html.P("X-axis:"),
                                     dcc.Dropdown(
                                         id='graph1-x-axis-picker',
-                                        options=[{'label': 'Dataset entropy', 'value': 'dataset_entropy'},
-                                                {'label':'Dataset coverage', 'value': 'dataset_coverage'},
-                                                {'label':'KL dist', 'value': 'kl_dist'},
-                                                {'label':'Chi dist', 'value': 'chi_dist'}],
+                                        options=[
+                                                    {'label': 'Dataset entropy', 'value': 'dataset_entropy'},
+                                                    {'label':'Dataset coverage', 'value': 'dataset_coverage'},
+                                                    {'label':'KL dist', 'value': 'kl_dist'},
+                                                    # {'label':'Chi dist', 'value': 'chi_dist'}
+                                                ],
                                         value='dataset_entropy',
                                         multi=False,
                                         style={'color': '#3b505e'},
@@ -213,8 +212,8 @@ def callback_graph1(env, algorithms, dataset_types,
         x_axis_lbl = "Dataset coverage"
     elif x_axis == "kl_dist":
         x_axis_lbl = "KL distance"
-    elif x_axis == "chi_dist":
-        x_axis_lbl = "Chi-square distance"
+    # elif x_axis == "chi_dist":
+    #     x_axis_lbl = "Chi-square distance"
     else:
         raise ValueError("Unknown X-axis type.")
 
@@ -279,8 +278,8 @@ def callback_graph1(env, algorithms, dataset_types,
     figure = go.Figure(data=traces, layout=layout)
     if y_axis == "qvals_avg_error":
         figure.update_layout(yaxis_type="log")
-    if x_axis == "chi_dist":
-        figure.update_layout(xaxis_type="log")
+    # if x_axis == "chi_dist":
+    #     figure.update_layout(xaxis_type="log")
 
     return figure
 

@@ -24,7 +24,7 @@ ENV_NAME = 'cartpole'
 # QVALS_EXP_ID = 'multiPathEnv_offline_dqn_2022-01-24-03-06-12'
 # QVALS_EXP_ID = 'mountaincar_offline_dqn_2022-02-04-00-08-15'
 # QVALS_EXP_ID = 'pendulum_offline_dqn_2022-02-11-02-30-50'
-QVALS_EXP_ID = 'cartpole_offline_dqn_2022-02-17-21-19-39' # TODO.
+QVALS_EXP_ID = 'cartpole_offline_cql_2022-02-19-05-32-29'
 EPSILON = 0.0
 #################################################################
 

@@ -53,19 +53,17 @@
   background-color: #f8f9fa;
 }
 
+.title-row {
+  color: #ffff;
+  background-color: #486488;
+  font-size: 1.0rem;
+  padding: 20px;
+}
 
 
 @media only screen and (max-width: 1000px) {
   .container {
     padding: 20px;
-  }
-
-  #title {
-    width: 45%;
-    font-size: 2.4rem;
-    font-weight: 400;
-    margin-top: 30px;
-    margin-left: 7% !important;
   }
 
   #learn-more-button {
@@ -251,14 +249,6 @@
     padding: 20px;
   }
 
-  #title {
-    width: 45%;
-    font-size: 1.8rem;
-    font-weight: 400;
-    margin-top: 30px;
-    margin-left: 7% !important;
-  }
-
   #learn-more-button {
     width: 75px;
     height: 30px;
@@ -430,13 +420,6 @@
 }
 
 @media (max-width: 375px) {
-  #title {
-    width: 150px;
-    font-size: 1.5rem !important;
-    font-weight: 400;
-    margin-top: 30px;
-    margin-left: 8% !important;
-  }
 
   #learn-more-button {
     width: 75px;
@@ -617,13 +600,6 @@
 
 
 @media (max-width: 320px) {
-  #title {
-    width: 150px;
-    font-size: 1.4rem !important;
-    font-weight: 400;
-    margin-top: 30px;
-    margin-left: 8% !important;
-  }
 
   #learn-more-button {
     width: 60px;

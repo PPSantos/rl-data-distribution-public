@@ -4,10 +4,7 @@ import json
 import tarfile
 import numpy as np 
 import pandas as pd
-import scipy
-from scipy.spatial import distance
 import pathlib
-from datetime import datetime
 
 import matplotlib.pyplot as plt
 import seaborn as sns
