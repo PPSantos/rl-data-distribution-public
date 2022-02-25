@@ -15,14 +15,16 @@ ENVS_LABELS = {
     'multiPathEnv': 'Multi-path',
     'pendulum': 'Pendulum',
     'mountaincar': 'Mountain car',
+    'cartpole': 'Cartpole',
 }
 
 MAX_ENTROPY = {
-    'gridEnv1': 5.8,
-    'gridEnv2': 5.6,
-    'multiPathEnv': 4.9,
-    'pendulum': 9.4,
-    'mountaincar': 8.9,
+    'gridEnv1': 5.77, # num (s,a) pairs: 8*8*5
+    'gridEnv2': 5.56, # num (s,a) pairs: (8*8-12)*5
+    'multiPathEnv': 4.9, # num (s,a) pairs: (5*5+2)*5
+    'pendulum': 9.43, # num (s,a) pairs: 50*50*5
+    'mountaincar': 8.93, # num (s,a) pairs: 50*50*3
+    'cartpole': 12.67, # num (s,a) pairs: 20^4*2
 }
 
 MINIMUM_REWARD = {
@@ -31,6 +33,7 @@ MINIMUM_REWARD = {
     'multiPathEnv': 0.0,
     'pendulum': -100.0,
     'mountaincar': -200.0,
+    'cartpole': 0.0,
 }
 MAXIMUM_REWARD = {
     'gridEnv1': 36.0,
@@ -38,6 +41,7 @@ MAXIMUM_REWARD = {
     'multiPathEnv': 15.0,
     'pendulum': -8.5, 
     'mountaincar': -93.0,
+    'cartpole': 200.0,
 }
 
 # Absolute path to folder containing experiments data.
@@ -96,8 +100,8 @@ def main():
         filtered_df = DATA.loc[
                         (DATA['env_id']==env_id) &
                         (DATA['algo_id']=='offline_dqn') &
-                        (DATA['dataset_type_id'].isin(['eps-greedy', 'boltzmann'])) &
-                        (DATA['force_dataset_coverage']==False)
+                        (DATA['dataset_type_id'].isin(['eps-greedy', 'boltzmann'])) #&
+                        # (DATA['force_dataset_coverage']==False)
                     ]
 
         Y = filtered_df['rollouts_rewards_final'].to_numpy()
@@ -131,8 +135,8 @@ def main():
         filtered_df = DATA.loc[
                         (DATA['env_id']==env_id) &
                         (DATA['algo_id']=='offline_cql') &
-                        (DATA['dataset_type_id'].isin(['eps-greedy', 'boltzmann'])) &
-                        (DATA['force_dataset_coverage']==False)
+                        (DATA['dataset_type_id'].isin(['eps-greedy', 'boltzmann'])) # &
+                        # (DATA['force_dataset_coverage']==False)
                     ]
 
         Y = filtered_df['rollouts_rewards_final'].to_numpy()

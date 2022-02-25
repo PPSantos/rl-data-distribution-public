@@ -15,14 +15,7 @@ ENVS_LABELS = {
     'multiPathEnv': 'Multi-path',
     'pendulum': 'Pendulum',
     'mountaincar': 'Mountain car',
-}
-
-MAX_ENTROPY = {
-    'gridEnv1': 5.8,
-    'gridEnv2': 5.6,
-    'multiPathEnv': 4.9,
-    'pendulum': 9.4,
-    'mountaincar': 8.9,
+    'cartpole': 'Cartpole',
 }
 
 MINIMUM_REWARD = {
@@ -31,6 +24,7 @@ MINIMUM_REWARD = {
     'multiPathEnv': 0.0,
     'pendulum': -100.0,
     'mountaincar': -200.0,
+    'cartpole': 0.0,
 }
 MAXIMUM_REWARD = {
     'gridEnv1': 36.0,
@@ -38,6 +32,7 @@ MAXIMUM_REWARD = {
     'multiPathEnv': 15.0,
     'pendulum': -8.5, 
     'mountaincar': -93.0,
+    'cartpole': 200.0,
 }
 
 # Absolute path to folder containing experiments data.
@@ -97,7 +92,7 @@ def main():
                         (DATA['env_id']==env_id) &
                         (DATA['algo_id']=='offline_dqn') &
                         (DATA['dataset_type_id'].isin(['eps-greedy', 'boltzmann'])) &
-                        (DATA['force_dataset_coverage']==False)
+                        (DATA['force_dataset_coverage']==True)
                     ]
         Y = filtered_df['rollouts_rewards_final'].to_numpy()
         Y_normalized = (Y - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id])
@@ -129,7 +124,7 @@ def main():
                         (DATA['env_id']==env_id) &
                         (DATA['algo_id']=='offline_cql') &
                         (DATA['dataset_type_id'].isin(['eps-greedy', 'boltzmann'])) &
-                        (DATA['force_dataset_coverage']==False)
+                        (DATA['force_dataset_coverage']==True)
                     ]
         Y = filtered_df['rollouts_rewards_final'].to_numpy()
         Y_normalized = (Y - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id])

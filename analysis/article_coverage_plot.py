@@ -22,6 +22,7 @@ ENVS_LABELS = {
     'multiPathEnv': 'Multi-path',
     'pendulum': 'Pendulum',
     'mountaincar': 'Mountain car',
+    'cartpole': 'Cartpole',
 }
 
 MINIMUM_REWARD = {
@@ -30,6 +31,7 @@ MINIMUM_REWARD = {
     'multiPathEnv': 0.0,
     'pendulum': -100.0,
     'mountaincar': -200.0,
+    'cartpole': 0.0,
 }
 MAXIMUM_REWARD = {
     'gridEnv1': 36.0,
@@ -37,6 +39,7 @@ MAXIMUM_REWARD = {
     'multiPathEnv': 15.0,
     'pendulum': -8.5, 
     'mountaincar': -93.0,
+    'cartpole': 200.0,
 }
 
 # Absolute path to folder containing experiments data.
@@ -99,18 +102,21 @@ def main():
                         (DATA['force_dataset_coverage']==True)
                     ]
 
-        Y = filtered_df['rollouts_rewards_final'].to_numpy()
-        Y_normalized = (Y - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id])
-        filtered_df['normalized_rollouts_rewards_final'] = Y_normalized
-        filtered_df['epsilon'] = filtered_df.apply(lambda row : get_epsilon(row['info_text']), axis=1)
-
         # X-axis: epsilon values.
+        filtered_df['epsilon'] = filtered_df.apply(lambda row : get_epsilon(row['info_text']), axis=1)
         X = filtered_df['epsilon'].to_numpy()
 
-        # Y-axis: normalized mean reward + std.
-        stds = []
+        # Y-axis: normalized rollouts reward.
+        # Y = filtered_df['rollouts_rewards_final'].to_numpy()
+        # Y_normalized = (Y - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id])
+        # filtered_df['normalized_rollouts_rewards_final'] = Y_normalized
+        # Y = filtered_df['normalized_rollouts_rewards_final'].to_numpy()
+
         means = []
-        for exp_id in filtered_df['id'].to_numpy():
+        stds = []
+        X_points = []
+        Y_points = []
+        for epsilon, exp_id in zip(X, filtered_df['id'].to_numpy()):
 
             # Load train data.
             print('Opening exp_id', exp_id)
@@ -126,13 +132,22 @@ def main():
             stds.append(np.std(data['rollouts_rewards'][:,-1]))
             means.append(np.mean(data['rollouts_rewards'][:,-1]))
 
+            X_points.extend([epsilon]*data['rollouts_rewards'].shape[0])
+            Y_points.extend(data['rollouts_rewards'][:,-1])
+
+        # Normalize rewards.
         Y = (np.array(means) - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id]) 
-        Y_std = (np.array(stds) - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id]) 
+        Y_points = (np.array(Y_points) - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id]) 
+        # Y_std = (np.array(stds) - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id]) 
 
         # Plot.
         ax = axs[axs_idxs[env_id][0],axs_idxs[env_id][1]]
-        p_1, = ax.plot(X, Y, alpha=0.8)
+        p_1, = ax.plot(X, Y, alpha=0.8, zorder=10)
 
+        # Points.
+        ax.scatter(X_points, Y_points, alpha=0.25)
+
+        # Std/CI.
         # ax.fill_between(X, min(Y), max(Y),
         #                 color=p_1[0].get_color(), alpha=0.15)
 
@@ -146,19 +161,53 @@ def main():
                         (DATA['force_dataset_coverage']==True)
                     ]
 
-        Y = filtered_df['rollouts_rewards_final'].to_numpy()
-        Y_normalized = (Y - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id])
-        filtered_df['normalized_rollouts_rewards_final'] = Y_normalized
-
+        # X-axis: epsilon values.
         filtered_df['epsilon'] = filtered_df.apply(lambda row : get_epsilon(row['info_text']), axis = 1)
-
         X = filtered_df['epsilon'].to_numpy()
-        Y = filtered_df['normalized_rollouts_rewards_final'].to_numpy()
+
+        # Y-axis: normalized rollouts reward.
+        # Y-axis: normalized mean reward + std.
+        # Y = filtered_df['rollouts_rewards_final'].to_numpy()
+        # Y_normalized = (Y - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id])
+        # filtered_df['normalized_rollouts_rewards_final'] = Y_normalized
+        # Y = filtered_df['normalized_rollouts_rewards_final'].to_numpy()
+
+        stds = []
+        means = []
+        X_points = []
+        Y_points = []
+        for epsilon, exp_id in zip(X, filtered_df['id'].to_numpy()):
+
+            # Load train data.
+            print('Opening exp_id', exp_id)
+            exp_folder_path = DATA_FOLDER_PATH + exp_id + '.tar.gz'
+            tar = tarfile.open(exp_folder_path)
+            data_file = tar.extractfile("{0}/train_data.json".format(exp_id))
+            exp_data = json.load(data_file)
+            exp_data = json.loads(exp_data)
+
+            data = {}
+            data['rollouts_rewards'] = np.array([e['rollouts_rewards'] for e in exp_data]) # [R,(Steps)]
+
+            stds.append(np.std(data['rollouts_rewards'][:,-1]))
+            means.append(np.mean(data['rollouts_rewards'][:,-1]))
+
+            X_points.extend([epsilon]*data['rollouts_rewards'].shape[0])
+            Y_points.extend(data['rollouts_rewards'][:,-1])
+
+        # Normalize rewards.
+        Y = (np.array(means) - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id]) 
+        Y_points = (np.array(Y_points) - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id]) 
+        # Y_std = (np.array(stds) - MINIMUM_REWARD[env_id]) / (MAXIMUM_REWARD[env_id] - MINIMUM_REWARD[env_id]) 
 
         # Plot.
         ax = axs[axs_idxs[env_id][0],axs_idxs[env_id][1]]
-        p_2, = ax.plot(X, Y, alpha=0.8)
+        p_2, = ax.plot(X, Y, alpha=0.8, zorder=10)
 
+        # Points.
+        ax.scatter(X_points, Y_points, alpha=0.25)
+
+        # Axes labels.
         ax.set_ylabel('Norm. reward')
         ax.set_xlabel(r'$\epsilon$')
 
