@@ -1,4 +1,6 @@
-# RL-data-distribution
+# The impact of data distribution on Q-learning with function approximation
+
+This repository contains the code for the experimental results presented in: https://arxiv.org/abs/2111.11758
 
 ### Installation:
 1) Setup and activate virtual environment (tested with python 3.8.10)
