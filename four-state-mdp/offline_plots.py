@@ -29,7 +29,7 @@ cdict = {'red':   [[0.0,  0.0, 0.0],
                    [1.0,  1.0, 1.0]]}
 
 SHOW_PLOTS = False
-PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/bounds_plots/plots_mdp1/'
+PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
 
 
 if __name__ == '__main__':
@@ -39,8 +39,7 @@ if __name__ == '__main__':
     os.makedirs(output_folder, exist_ok=True)
 
     # (Old) 2D plot.
-    """
-    alpha = 1.2
+    """ alpha = 1.2
     w_3 = 30
 
     x_dim = 100
@@ -94,7 +93,7 @@ if __name__ == '__main__':
     # plt.savefig('{0}/grid.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0) """
 
     # code to generate 'correct_actions' plot (oracle version).
-    """ alphas = [1.25] # np.linspace(1.0, 1.0, 1001)
+    alphas = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5] # np.linspace(1.0, 1.0, 1001)
     x_dim = 101
     X = np.linspace(0.0,1.0,x_dim)
     Z = np.zeros((len(alphas), x_dim))        
@@ -144,8 +143,8 @@ if __name__ == '__main__':
     sec_ax.set_xticklabels(['1.0', '0.8', '0.6', '0.4', '0.2', '0.0'])
     sec_ax.set_xlabel('$\mu(s_2,a_1)$')
 
-    plt.savefig('{0}/2d_plot.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/2d_plot.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0) """
+    plt.savefig('{0}/plot_1.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/plot_1.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
 
     # averaged (for different alphas) plot.
     """print(X)
@@ -188,7 +187,7 @@ if __name__ == '__main__':
     print('w_3', w_3)
     print('correct_actions:', correct_actions) """
 
-    """ # One-step TD version (fixed point calculation).
+    # Code to generate the one-step TD version (fixed point calculation) correct actions plot.
     alphas = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5] # [1.25]
     x_dim = 100
     Y = np.zeros((len(alphas), x_dim))        
@@ -277,5 +276,5 @@ if __name__ == '__main__':
     sec_ax.set_xticklabels(['1.0', '0.8', '0.6', '0.4', '0.2', '0.0'])
     sec_ax.set_xlabel('$\mu(s_2,a_1)$')
 
-    plt.savefig('{0}/iterations_2.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
-    plt.savefig('{0}/iterations_2.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0) """
+    plt.savefig('{0}/plot_2.png'.format(output_folder), bbox_inches='tight', pad_inches=0)
+    plt.savefig('{0}/plot_2.pdf'.format(output_folder), bbox_inches='tight', pad_inches=0)
