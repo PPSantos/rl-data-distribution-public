@@ -45,7 +45,7 @@ MAXIMUM_REWARD = {
 }
 
 # Absolute path to folder containing experiments data.
-CSV_PATH = '/home/pedrosantos/git/rl-data-distribution/data/parsed_data.csv'
+CSV_PATH = '/home/pedrosantos/git/rl-data-distribution/data/parsed_results.csv'
 DATA = pd.read_csv(CSV_PATH)
 
 #################################################################
