@@ -1,0 +1,1 @@
+{"env_name": "mountaincar", "gamma": 0.99, "learning_steps": 400000, "alpha_init": 0.1, "alpha_final": 0.001, "alpha_steps": 400000, "replay_buffer_size": 500000, "replay_buffer_batch_size": 128, "algo": "q_learning"}

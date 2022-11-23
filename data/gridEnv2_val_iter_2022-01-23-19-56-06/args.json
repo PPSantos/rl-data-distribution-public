@@ -1,0 +1,1 @@
+{"env_name": "gridEnv2", "gamma": 0.9, "epsilon": 0.001, "algo": "val_iter"}

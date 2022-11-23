@@ -1,3 +1,10 @@
+"""
+    Script to run the following pipeline:
+        1) Generates a dataset given `dataset_args`.
+        2) Calls scripts/train.py with the generated dataset.
+        3) Computes plots and stores performance metrics.
+        4) Cleans up unnecessary files.
+"""
 import os
 import json
 import shutil

@@ -1,3 +1,8 @@
+"""
+    Script to train a given (algorithm, dataset) pair.
+    The script runs multiple training runs in parallel
+    according to the `num_runs` argument.
+"""
 import os
 import glob
 import json

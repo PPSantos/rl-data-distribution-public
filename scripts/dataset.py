@@ -1,3 +1,6 @@
+"""
+    Script to generate datasets for offline RL.
+"""
 import os
 import json
 import pathlib

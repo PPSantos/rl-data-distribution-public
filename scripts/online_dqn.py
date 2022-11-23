@@ -1,4 +1,6 @@
-
+"""
+    Standard online DQN algorithm.
+"""
 import os
 import json
 import glob

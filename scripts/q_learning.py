@@ -1,3 +1,6 @@
+"""
+    Q-learning algorithm.
+"""
 import os
 import json
 import pathlib

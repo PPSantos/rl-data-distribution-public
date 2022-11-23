@@ -1,6 +1,6 @@
 # deps
 .venv/
-data/
+#data/
 analysis/plots
 analysis/theoretical_bounds/plots
 gen_errors/plots
@@ -100,6 +100,7 @@ celerybeat-schedule
 .venv
 env/
 venv/
+venv_new/
 ENV/
 env.bak/
 venv.bak/

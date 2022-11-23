@@ -1,0 +1,1 @@
+{"env_name": "cartpole", "gamma": 0.99, "learning_steps": 800000, "alpha_init": 0.1, "alpha_final": 0.001, "alpha_steps": 800000, "replay_buffer_size": 4000000, "replay_buffer_batch_size": 128, "algo": "q_learning"}
