@@ -19,7 +19,7 @@ class ValueIteration(object):
             aux_reward_f = {}
             for action in range(self.env.num_actions):
                 aux_transition_f[action] = self.env.get_transitions(state, action) # dict of the form {next_state: prob}
-                aux_reward_f[action] = self.env.get_reward(state)
+                aux_reward_f[action] = self.env.get_reward(state, action)
             
             transition_function[state] = aux_transition_f
             reward_function[state] = aux_reward_f

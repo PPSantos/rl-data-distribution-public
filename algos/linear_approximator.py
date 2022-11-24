@@ -1,16 +1,18 @@
+"""
+    Linear function approximator for the 4-state MDP.
+"""
 import numpy as np
 from tqdm import tqdm
 
 from utils.array_functions import choice_eps_greedy
-from algos.numpy_replay_buffer import NumpyReplayBuffer
+from four_state_mdp.numpy_replay_buffer import NumpyReplayBuffer
 
 class LinearApproximator(object):
 
-    def __init__(self, env, env_grid_spec, alpha_init, alpha_final,
+    def __init__(self, env, alpha_init, alpha_final,
                 alpha_schedule_episodes, gamma,
                 expl_eps_init, expl_eps_final, expl_eps_episodes,
-                synthetic_replay_buffer, synthetic_replay_buffer_alpha,
-                replay_size, batch_size):
+                uniform_replay, replay_size, batch_size):
 
         np.random.seed()
         
@@ -22,9 +24,9 @@ class LinearApproximator(object):
         self.expl_eps_init = expl_eps_init
         self.expl_eps_final = expl_eps_final
         self.expl_eps_episodes = expl_eps_episodes
-        self.synthetic_replay_buffer = synthetic_replay_buffer
+        self.uniform_replay = uniform_replay
 
-        # Custom 'mdp_1' env. features.
+        # Custom 'four-state-MDP' env. features.
         self.num_features = 5
         self.feature_map = np.array([
                         [[1.0, 0.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0, 0.0]], # state 0.
@@ -40,14 +42,14 @@ class LinearApproximator(object):
         self.replay_size = replay_size
 
         self.sampling_dist_size = self.env.num_states * self.env.num_actions
-        self.sampling_dist = np.random.dirichlet([synthetic_replay_buffer_alpha]*self.sampling_dist_size)
+        self.sampling_dist = np.random.dirichlet([100.0]*self.sampling_dist_size)
 
-        self.env_grid_spec = env_grid_spec
 
-    def train(self, num_episodes, q_vals_period, replay_buffer_counts_period,
-            num_rollouts, rollouts_period, rollouts_envs, compute_e_vals):
+    def train(self, num_episodes, q_vals_period,
+            replay_buffer_counts_period,
+            num_rollouts, rollouts_period):
 
-        if self.synthetic_replay_buffer:
+        if self.uniform_replay:
             self._prefill_replay_buffer()
 
         episode_rewards = []
@@ -92,7 +94,7 @@ class LinearApproximator(object):
                 s_t1, r_t1, done, info = self.env.step(a_t)
 
                 # Add to replay buffer.
-                if not self.synthetic_replay_buffer:
+                if not self.uniform_replay:
                     self.replay.add(s_t, a_t, r_t1, s_t1, done)
 
                 # Weights update.
@@ -128,13 +130,7 @@ class LinearApproximator(object):
             # Execute evaluation rollouts.
             if episode % rollouts_period == 0:
                 print('Executing evaluation rollouts.')
-
-                r_rewards = []
-                for r_env in rollouts_envs:
-                    r_rewards.append([self._execute_rollout(r_env) for _ in range(num_rollouts)])
-
-                rollouts_episodes.append(episode)
-                rollouts_rewards.append(r_rewards)
+                rollouts_rewards.append([self._execute_rollout(self.env) for _ in range(num_rollouts)])
 
         data = {}
         data['episode_rewards'] = episode_rewards

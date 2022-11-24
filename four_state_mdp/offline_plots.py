@@ -29,7 +29,7 @@ cdict = {'red':   [[0.0,  0.0, 0.0],
                    [1.0,  1.0, 1.0]]}
 
 SHOW_PLOTS = False
-PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/plots/'
+PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/output_plots/'
 
 
 if __name__ == '__main__':
