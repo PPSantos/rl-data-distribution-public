@@ -15,12 +15,12 @@ import pandas as pd
 
 ###########################################################################
 # Absolute path to folder containing experiments data.
-CSV_PATH = '/home/pedrosantos/git/rl-data-distribution/data/parsed_data.csv'
+CSV_PATH = '/home/ppsantos/git/rl-data-distribution/parsed_results.csv'
 DATA = pd.read_csv(CSV_PATH)
 # Absolute path to folder containing plots files.
-PLOTS_FOLDER_PATH_1 = '/home/pedrosantos/git/rl-data-distribution/analysis/plots/'
+PLOTS_FOLDER_PATH_1 = ''
 # Absolute path to folder containing plots files (second folder).
-PLOTS_FOLDER_PATH_2 = '/home/pedrosantos/git/rl-data-distribution/analysis/plots/ilu_server/'
+PLOTS_FOLDER_PATH_2 = ''
 ###########################################################################
 
 ENVS = ['gridEnv1', 'gridEnv2', 'multiPathEnv', 'mountaincar', 'pendulum', 'cartpole']
@@ -32,7 +32,7 @@ app = dash.Dash(__name__,
                 meta_tags=[
                     {
                         'name': 'rl-data-distribution',
-                        'content': 'Understanding the impact of data distribution on Q-learning with function approximation.'
+                        'content': 'The impact of data distribution on Q-learning with function approximation.'
                     },
                     {
                         'http-equiv': 'X-UA-Compatible',

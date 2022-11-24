@@ -22,22 +22,21 @@ DATA_FOLDER_PATH = str(pathlib.Path(__file__).parent.parent.absolute()) + '/data
 PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/output_plots/'
 
 VAL_ITER_DATA = 'four_state_mdp_val_iter_2022-11-24-11-31-49' # gamma = 1.0
+# DATA = [
+#     'four_state_mdp_linear_approximator_2022-11-24-14-40-58',
+#     'four_state_mdp_linear_approximator_2022-11-24-14-58-55',
+#     'four_state_mdp_linear_approximator_2022-11-24-15-18-14',
+# ]
+# LABELS = [r'$\epsilon = 0.05$', r'$\epsilon = 1.0$', 'Uniform']
+# KEYS = ['eps_05', 'eps_1', 'unif']
+
 DATA = [
     'four_state_mdp_linear_approximator_2022-11-24-14-40-58',
-    'four_state_mdp_linear_approximator_2022-11-24-14-58-55',
-    'four_state_mdp_linear_approximator_2022-11-24-15-18-14',
+    #'four_state_mdp_linear_approximator_2022-11-24-15-39-16',
+    'four_state_mdp_linear_approximator_2022-11-24-15-52-37',
 ]
-LABELS = [r'$\epsilon = 0.05$', r'$\epsilon = 1.0$', 'Uniform']
-KEYS = ['eps_05', 'eps_1', 'unif']
-
-# VAL_ITER_DATA = 'mdp1_val_iter_2021-08-27-17-49-23'
-# DATA = [
-#     'mdp1_linear_approximator_2021-08-30-16-05-33',
-#     'mdp1_linear_approximator_2021-08-30-16-31-27',
-#     'mdp1_linear_approximator_2021-08-30-16-55-57',
-# ]
-# LABELS = [r'Replay buffer size = $\infty$', 'Replay buffer size = 50 000', 'Replay buffer size = 10 000']
-# KEYS = ['replay_infty', 'replay_50_000', 'replay_10_000']
+LABELS = [r'Replay buffer size = $\infty$', 'Replay buffer size = 10 000'] #, 'Replay buffer size = 50 000']
+KEYS = ['replay_infty', 'replay_10_000'] # , 'replay_50_000']
 
 if __name__ == "__main__":
 

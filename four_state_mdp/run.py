@@ -33,11 +33,11 @@ ARGS = {
     "alpha": 1e-04, # Learning rate.
     "gamma": 1.0, # Discount factor.
     "expl_eps_episodes": 40_000, # Exploration coefficient anneal time.
-    "expl_eps_init": 1.0, # Initial exploration coefficient.
-    "expl_eps_final": 1.0, # Final exploration coefficient.
-    "replay_size": 2_000_000, # Replay buffer size.
+    "expl_eps_init": 0.05, # Initial exploration coefficient.
+    "expl_eps_final": 0.05, # Final exploration coefficient.
+    "replay_size": 10_000, # Replay buffer size.
     "batch_size": 100, # Batch size for model updates.
-    "uniform_replay": True, # Whether to use a synthetically generated (uniform) replay buffer for training.
+    "uniform_replay": False, # Whether to use a synthetically generated (uniform) replay buffer for training.
 }
 
 
