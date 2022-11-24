@@ -15,7 +15,7 @@ ARGS = {
     "algo": "val_iter", 
 
     "gamma": 0.9, # Discount factor.
-    "epsilon": 0.01, # Threshold for 
+    "epsilon": 0.001, # Threshold for termination.
 }
 
 if __name__ == "__main__":

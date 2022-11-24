@@ -1,5 +1,5 @@
 """
-    4-state MDP experiments.
+    Four-state MDP experiments.
 """
 import os
 import json
@@ -37,7 +37,7 @@ ARGS = {
 
 
 ORACLE_Q_VALS_DATA = {
-    'mdp1': "four_state_mdp_val_iter_2022-11-24-10-28-42", # gamma = 0.9
+    'mdp1': "four_state_mdp_val_iter_2022-11-24-10-33-28", # gamma = 0.9
 }
 
 
