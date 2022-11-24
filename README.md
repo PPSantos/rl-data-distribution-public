@@ -14,7 +14,7 @@ This repository contains the code for the experimental results presented in: htt
 
 Code for the four-state MDP experiments:
 - ```four_state_mdp/offline_plots.py``` computes the plots for the (offline + oracle version) and (offline + TD Error version) versions of the experiments.
-- TODO
+- ```four_state_mdp/run.py``` contains the code used for the (online TD version + unlimited replay capacity) and (online TD version + limited replay capacity) versions of the experiments. ```four_state_mdp/plots.py``` computes the plots for both aforementioned versions.
 
 
 ## Empirically assessing the impact of the data distribution in offline RL
