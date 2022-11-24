@@ -26,5 +26,5 @@ Compiled data:
 - ``` parsed_results.csv ```: contains all the compiled data used to produce the article's plots. 
 
 Run dashboard:
- 1) Setup ```analysis/dash_app/app.py``` global path variables: ```CSV_PATH, PLOTS_FOLDER_PATH_1, PLOTS_FOLDER_PATH_2```
+ 1) Setup ```analysis/dash_app/app.py``` global ```CSV_PATH``` path variable.
  2) Run dashboard: ```python analysis/dash_app/app.py```
