@@ -23,12 +23,12 @@ PLOTS_FOLDER_PATH = str(pathlib.Path(__file__).parent.absolute()) + '/output_plo
 
 VAL_ITER_DATA = 'four_state_mdp_val_iter_2022-11-24-11-31-49' # gamma = 1.0
 DATA = [
-    #'four_state_mdp_linear_approximator_2022-11-24-11-33-20',
-    #'mdp1_linear_approximator_2021-08-28-21-28-21',
-    'four_state_mdp_linear_approximator_2022-11-24-12-19-46',
+    'four_state_mdp_linear_approximator_2022-11-24-14-40-58',
+    'four_state_mdp_linear_approximator_2022-11-24-14-58-55',
+    'four_state_mdp_linear_approximator_2022-11-24-15-18-14',
 ]
-LABELS = ['Uniform'] # [r'$\epsilon = 0.05$', r'$\epsilon = 1.0$', 'Uniform']
-KEYS = ['unif'] # ['eps_05', 'eps_1', 'unif']
+LABELS = [r'$\epsilon = 0.05$', r'$\epsilon = 1.0$', 'Uniform']
+KEYS = ['eps_05', 'eps_1', 'unif']
 
 # VAL_ITER_DATA = 'mdp1_val_iter_2021-08-27-17-49-23'
 # DATA = [
