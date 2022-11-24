@@ -1,6 +1,6 @@
 # deps
 .venv/
-#data/
+data/
 analysis/plots
 analysis/theoretical_bounds/plots
 gen_errors/plots
@@ -120,3 +120,4 @@ venv.bak/
 
 # Custom folders.
 d3rlpy
+four_state_mdp/output_plots

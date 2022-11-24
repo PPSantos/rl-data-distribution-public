@@ -14,7 +14,7 @@ ARGS = {
     "env_name": "four_state_mdp",
     "algo": "val_iter", 
 
-    "gamma": 0.9, # Discount factor.
+    "gamma": 1.0, # Discount factor.
     "epsilon": 0.001, # Threshold for termination.
 }
 

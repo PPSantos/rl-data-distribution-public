@@ -9,17 +9,14 @@ from four_state_mdp.numpy_replay_buffer import NumpyReplayBuffer
 
 class LinearApproximator(object):
 
-    def __init__(self, env, alpha_init, alpha_final,
-                alpha_schedule_episodes, gamma,
+    def __init__(self, env, alpha, gamma,
                 expl_eps_init, expl_eps_final, expl_eps_episodes,
                 uniform_replay, replay_size, batch_size):
 
         np.random.seed()
         
         self.env = env
-        self.alpha_init = alpha_init
-        self.alpha_final = alpha_final
-        self.alpha_schedule_episodes = alpha_schedule_episodes
+        self.alpha = alpha
         self.gamma = gamma
         self.expl_eps_init = expl_eps_init
         self.expl_eps_final = expl_eps_final
@@ -42,7 +39,7 @@ class LinearApproximator(object):
         self.replay_size = replay_size
 
         self.sampling_dist_size = self.env.num_states * self.env.num_actions
-        self.sampling_dist = np.random.dirichlet([100.0]*self.sampling_dist_size)
+        self.sampling_dist = np.random.dirichlet([1000.0]*self.sampling_dist_size)
 
 
     def train(self, num_episodes, q_vals_period,
@@ -78,10 +75,6 @@ class LinearApproximator(object):
             fraction = np.minimum(episode / self.expl_eps_episodes, 1.0)
             epsilon = self.expl_eps_init + fraction * (self.expl_eps_final - self.expl_eps_init)
 
-            # Calculate learning rate (alpha).
-            fraction = np.minimum(episode / self.alpha_schedule_episodes, 1.0)
-            alpha = self.alpha_init + fraction * (self.alpha_final - self.alpha_init)     
-
             done = False
             episode_cumulative_reward = 0
             while not done:
@@ -99,7 +92,7 @@ class LinearApproximator(object):
 
                 # Weights update.
                 if steps_counter > self.batch_size: # and (steps_counter % self.batch_size) == 0:
-                    self._update(alpha)
+                    self._update(self.alpha)
 
                 # Log data.
                 episode_cumulative_reward += r_t1
@@ -130,6 +123,7 @@ class LinearApproximator(object):
             # Execute evaluation rollouts.
             if episode % rollouts_period == 0:
                 print('Executing evaluation rollouts.')
+                rollouts_episodes.append(episode)
                 rollouts_rewards.append([self._execute_rollout(self.env) for _ in range(num_rollouts)])
 
         data = {}
