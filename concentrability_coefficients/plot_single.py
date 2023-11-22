@@ -11,7 +11,7 @@ plt.rc('text.latex', preamble=r'\usepackage{pifont}')
 matplotlib.rcParams.update({'font.size': 16})
 
 ENV_NAME = "gridEnv"
-EXP_ID = 'gridEnv_gamma=0.2_sto=0.0_2023-11-22_13:47:22'
+EXP_ID = 'gridEnv_gamma=0.2_sto=0.0_2023-11-22_14:53:17'
 VMIN = 0.0
 VMAX = 0.1
 
@@ -26,6 +26,7 @@ if __name__ == "__main__":
 
     # Find the exp. that achieved the lowest c value.
     c_vals = np.array([e["lowest_c_val"] for e in exp_data])
+    print('c_vals:', c_vals )
     lowest_cval_idx = np.argmin(c_vals)
     exp_data = exp_data[lowest_cval_idx]
 

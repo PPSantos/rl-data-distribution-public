@@ -257,23 +257,7 @@ def run(run_args):
     return run_data
 
 
-if __name__ == "__main__":
-
-    # Script parameters.
-    args = {}
-    args["num_runs"] = 2
-    args["num_processors"] = 2
-    args["log_interval"] = 500
-    args["gamma"] = 0.2
-    args["env"] = "gridEnv" # gridEnv or multiPathEnv.
-    args["env_stochasticity"] = 0.0 # gridEnv parameter only.
-
-    args["M"] = 30
-    args["K"] = 100_000
-    args["alpha"] = 1e-07
-    args["alpha_decay"] = 0.0
-    args["optimizer"] = "sgd"
-    args["use_softmax"] = False
+def main(args):
 
     # Adjust the number of processors if necessary.
     if args["num_processors"] > mp.cpu_count():
@@ -295,4 +279,27 @@ if __name__ == "__main__":
         exp_name += "sto=" + str(args["env_stochasticity"]) + "_"
     exp_name += str_id
     print("exp_name:", exp_name)
+
     np.save(f'data/{exp_name}.npy', data)
+
+    return exp_name
+
+if __name__ == "__main__":
+
+    # Script parameters.
+    args = {}
+    args["num_runs"] = 2
+    args["num_processors"] = 2
+    args["log_interval"] = 500
+    args["gamma"] = 0.2
+    args["env"] = "gridEnv" # gridEnv or multiPathEnv.
+    args["env_stochasticity"] = 0.0 # gridEnv parameter only.
+
+    args["M"] = 30
+    args["K"] = 100_000
+    args["alpha"] = 1e-07
+    args["alpha_decay"] = 0.0
+    args["optimizer"] = "adam"
+    args["use_softmax"] = False
+
+    main(args)
