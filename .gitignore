@@ -121,3 +121,6 @@ venv.bak/
 # Custom folders.
 d3rlpy
 four_state_mdp/output_plots
+
+concentrability_coefficients/data
+concentrability_coefficients/plots
