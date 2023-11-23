@@ -10,7 +10,7 @@ from scipy.stats import entropy
 from tqdm import tqdm
 
 
-from envs import GridEnv
+from envs import GridEnv, multi_path_mdp_get_P
 from opt import Adam
 
 def log_sum_exp(x):
@@ -222,12 +222,18 @@ def run(run_args):
                 "gamma": args["gamma"]}
         
     elif args["env"] == "multiPathEnv":
-        raise ValueError("TODO")
+        rho = np.zeros((5*5+2))
+        rho[0] = 1.0
+        mdp = {"state_space_size": 5*5+2,
+            "action_space_size": 5,
+            "P": multi_path_mdp_get_P(),
+            "R": None, # (irrelevant from the PoV of concentrability).
+            "gamma": args["gamma"]}
     else:
         raise ValueError("Unknown environment.")
     
     # Sample initial mu distribution.
-    mu_init = np.random.rand(8*8)
+    mu_init = np.random.rand(mdp["state_space_size"])
     mu_init = mu_init / np.sum(mu_init)
     print('*'*30)
     print(mu_init)
@@ -292,11 +298,11 @@ if __name__ == "__main__":
     args["num_processors"] = 2
     args["log_interval"] = 500
     args["gamma"] = 0.2
-    args["env"] = "gridEnv" # gridEnv or multiPathEnv.
+    args["env"] = "multiPathEnv" # gridEnv or multiPathEnv.
     args["env_stochasticity"] = 0.0 # gridEnv parameter only.
 
-    args["M"] = 30
-    args["K"] = 100_000
+    args["M"] = 10
+    args["K"] = 1_000
     args["alpha"] = 1e-07
     args["alpha_decay"] = 0.0
     args["optimizer"] = "adam"

@@ -11,7 +11,7 @@ plt.rc('text.latex', preamble=r'\usepackage{pifont}')
 matplotlib.rcParams.update({'font.size': 16})
 
 ENV_NAME = "gridEnv"
-EXP_ID = 'gridEnv_gamma=0.2_sto=0.0_2023-11-22_14:53:17'
+EXP_ID = 'gridEnv_gamma=0.2_sto=0.2_2023-11-22_23:03:40'
 VMIN = 0.0
 VMAX = 0.1
 
