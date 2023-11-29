@@ -14,7 +14,7 @@ This repository contains the code for the experimental results presented in: htt
 
 Code to estimate optimal data distributions from the point of view of concentrability (Sec. 3.2 of the paper):
 - ```concentrability_coefficients/opt-conc-coefs.ipynb``` jupyter notebook that runs our algorithm on a simple example MDP.
-- ```four_state_mdp/run.py``` main script to run our algorithm.
+- ```concentrability_coefficients/run.py``` main script to run our algorithm.
 
 ## Four-state MDP
 
