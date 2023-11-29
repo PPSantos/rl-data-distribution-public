@@ -10,16 +10,22 @@ This repository contains the code for the experimental results presented in: htt
 5) ``` pip install -e . ```
 9) Test installation: ``` python scripts/run.py```
 
+## Concentrability coefficients
+
+Code to estimate optimal data distributions from the point of view of concentrability (Sec. 3.2 of the paper):
+- ```concentrability_coefficients/opt-conc-coefs.ipynb``` jupyter notebook that runs our algorithm on a simple example MDP.
+- ```four_state_mdp/run.py``` main script to run our algorithm.
+
 ## Four-state MDP
 
-Code for the four-state MDP experiments:
+Code for the four-state MDP experiments (Sec. 4.1 of the paper):
 - ```four_state_mdp/offline_plots.py``` computes the plots for the (offline + oracle version) and (offline + TD Error version) versions of the experiments.
 - ```four_state_mdp/run.py``` contains the code used for the (online TD version + unlimited replay capacity) and (online TD version + limited replay capacity) versions of the experiments. ```four_state_mdp/plots.py``` computes the plots for both aforementioned versions.
 
 
 ## Empirically assessing the impact of the data distribution in offline RL
 
-Code for Sec. 5 of the paper:
+Code for Sec. 4.2 of the paper:
 - ``` scripts/run.py```: contains the main script that generates a dataset (using ```scripts/dataset.py```) and feeds it to the RL algorithm to train (using ```scripts/train.py```). Check the ``` RUN_ARGS ``` global variable in ``` scripts/run.py ``` for a description of the different dataset types and options available, as well as the different RL algorithms and respective hyperparameters.
 
 Compiled data:
