@@ -18,7 +18,7 @@ VMAX = 0.1
 VMIN_NORMALIZED = 0.5
 VMAX_NORMALIZED = 5.0
 
-EXP_IDS_ADAM = {
+""" EXP_IDS_ADAM = {
     
     # stochasticity = 0.0
     0.0: {
@@ -44,9 +44,39 @@ EXP_IDS_ADAM = {
         0.8: 'gridEnv_gamma=0.8_sto=0.4_2023-11-23_02:00:11',
     },
 
+} """
+
+# New experiments with M tuned according to gamma.
+EXP_IDS_ADAM = {
+    
+    # stochasticity = 0.0
+    0.0: {
+        0.2: 'gridEnv_gamma=0.2_sto=0.0_2023-11-23_22:32:01',
+        0.4: 'gridEnv_gamma=0.4_sto=0.0_2023-11-23_22:48:12',
+        0.6: 'gridEnv_gamma=0.6_sto=0.0_2023-11-23_23:18:25',
+        0.8: 'gridEnv_gamma=0.8_sto=0.0_2023-11-24_00:24:20',
+    },
+
+    # stochasticity = 0.2
+    0.2: {
+        0.2: 'gridEnv_gamma=0.2_sto=0.2_2023-11-23_22:33:47',
+        0.4: 'gridEnv_gamma=0.4_sto=0.2_2023-11-23_22:50:29',
+        0.6: 'gridEnv_gamma=0.6_sto=0.2_2023-11-23_23:20:19',
+        0.8: 'gridEnv_gamma=0.8_sto=0.2_2023-11-24_00:26:08',
+    },
+
+    # stochasticity = 0.4
+    0.4: {
+        0.2: 'gridEnv_gamma=0.2_sto=0.4_2023-11-23_22:34:09',
+        0.4: 'gridEnv_gamma=0.4_sto=0.4_2023-11-23_22:50:37',
+        0.6: 'gridEnv_gamma=0.6_sto=0.4_2023-11-23_23:20:37',
+        0.8: 'gridEnv_gamma=0.8_sto=0.4_2023-11-24_00:25:53',
+    },
+
 }
 
-EXP_IDS_SGD = {
+
+""" EXP_IDS_SGD = {
     # stochasticity = 0.0
     0.0: {
         0.2: 'gridEnv_gamma=0.2_sto=0.0_2023-11-23_10:09:00',
@@ -69,6 +99,34 @@ EXP_IDS_SGD = {
         0.4: 'gridEnv_gamma=0.4_sto=0.4_2023-11-23_11:02:16',
         0.6: 'gridEnv_gamma=0.6_sto=0.4_2023-11-23_11:53:42',
         0.8: 'gridEnv_gamma=0.8_sto=0.4_2023-11-23_12:45:32',
+    },
+
+} """
+
+# New experiments with M tuned according to gamma.
+EXP_IDS_SGD = {
+    # stochasticity = 0.0
+    0.0: {
+        0.2: 'gridEnv_gamma=0.2_sto=0.0_2023-11-23_18:45:01',
+        0.4: 'gridEnv_gamma=0.4_sto=0.0_2023-11-23_19:01:24',
+        0.6: 'gridEnv_gamma=0.6_sto=0.0_2023-11-23_19:31:57',
+        0.8: 'gridEnv_gamma=0.8_sto=0.0_2023-11-23_20:38:07',
+    },
+
+    # stochasticity = 0.2
+    0.2: {
+        0.2: 'gridEnv_gamma=0.2_sto=0.2_2023-11-23_18:45:50',
+        0.4: 'gridEnv_gamma=0.4_sto=0.2_2023-11-23_19:02:12',
+        0.6: 'gridEnv_gamma=0.6_sto=0.2_2023-11-23_19:32:08',
+        0.8: 'gridEnv_gamma=0.8_sto=0.2_2023-11-23_20:38:11',
+    },
+
+    # stochasticity = 0.4
+    0.4: {
+        0.2: 'gridEnv_gamma=0.2_sto=0.4_2023-11-23_18:46:01',
+        0.4: 'gridEnv_gamma=0.4_sto=0.4_2023-11-23_19:02:09',
+        0.6: 'gridEnv_gamma=0.6_sto=0.4_2023-11-23_19:32:23',
+        0.8: 'gridEnv_gamma=0.8_sto=0.4_2023-11-23_20:38:22',
     },
 
 }

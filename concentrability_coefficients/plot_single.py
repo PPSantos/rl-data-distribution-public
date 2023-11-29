@@ -10,12 +10,14 @@ matplotlib.rcParams['text.usetex'] =  True
 plt.rc('text.latex', preamble=r'\usepackage{pifont}')
 matplotlib.rcParams.update({'font.size': 16})
 
-ENV_NAME = "gridEnv"
-EXP_ID = 'gridEnv_gamma=0.2_sto=0.2_2023-11-22_23:03:40'
+ENV_NAME = "multiPathEnv"
+EXP_ID = 'multiPathEnv_gamma=0.99_2023-11-24_14:10:22'
 VMIN = 0.0
 VMAX = 0.1
 
 if __name__ == "__main__":
+
+    print('EXP ID:', EXP_ID)
 
     if not os.path.exists("plots/"):
         os.makedirs("plots/")
@@ -30,7 +32,10 @@ if __name__ == "__main__":
     lowest_cval_idx = np.argmin(c_vals)
     exp_data = exp_data[lowest_cval_idx]
 
+    print('Args:', exp_data["args"])
     print("Opt. mu entropy:", entropy(exp_data["opt_mu"]))
+    print("Min opt. mu entry:", np.min(exp_data["opt_mu"]))
+    print("Max opt. mu entry:", np.max(exp_data["opt_mu"]))
 
     # Plot c value across iterations.
     fig = plt.figure()
